@@ -42,7 +42,7 @@ export const AdminLayout = () => {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-6 border-b">
-            <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+            <h1 className="text-xl font-bold text-gray-900">Willowbrook Admin</h1>
             <Link
               to="/"
               className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"

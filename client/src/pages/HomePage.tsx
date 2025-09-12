@@ -8,10 +8,10 @@ export const HomePage = () => {
       <section className="bg-gradient-to-r from-primary-600 to-primary-700 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Design Your Perfect Clothing
+            Welcome to Willowbrook
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-primary-100">
-            Customize colors, sizes, embroidery, and more with real-time 3D preview
+            Craft your perfect clothing with our premium customization studio
           </p>
           <Link
             to="/products"
@@ -27,7 +27,7 @@ export const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Why Choose CustomWear?
+              Why Choose Willowbrook?
             </h2>
             <p className="text-lg text-gray-600">
               Professional quality meets personal style

@@ -1,7 +1,7 @@
 {
-  "name": "clothing-customizer",
+  "name": "willowbrook-clothing",
   "version": "1.0.0",
-  "description": "Scalable clothing customization web app",
+  "description": "Willowbrook Clothing - Premium custom apparel platform",
   "scripts": {
     "setup": "node setup.js",
     "auto-setup": "node auto-setup.js",
@@ -12,6 +12,9 @@
     "setup-db": "cd server && npx prisma generate && npx prisma db push",
     "seed-db": "cd server && npm run db:seed",
     "update-images": "node update-product-images.js",
+    "rebrand": "node rebrand-to-willowbrook.js",
+    "finalize-brand": "node finalize-willowbrook-branding.js",
+    "deploy:netlify": "node deploy-to-netlify.js",
     "create-admin": "cd server && npm run create-admin",
     "start": "node run-project.js",
     "fix-syntax": "node fix-syntax-error.js",

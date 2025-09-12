@@ -1,7 +1,7 @@
 {
-  "name": "clothing-customizer-server",
+  "name": "willowbrook-clothing-server",
   "version": "1.0.0",
-  "description": "Backend API for clothing customizer",
+  "description": "Backend API for Willowbrook Clothing",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

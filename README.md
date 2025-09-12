@@ -1,6 +1,6 @@
-# Clothing Customizer Web App
+# Willowbrook Clothing
 
-A scalable web application for custom clothing design with real-time preview, order management, and automated backend processing.
+A premium custom clothing platform with real-time design preview, order management, and automated backend processing.
 
 ## Features
 
