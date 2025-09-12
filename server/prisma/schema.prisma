@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders         Order[]
+  customizations Customization[]
+
+  @@map("users")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String
+  basePrice   Float
+  images      String[]
+  sizes       String[]
+  colors      String[]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  customizations Customization[]
+  orderItems     OrderItem[]
+
+  @@map("products")
+}
+
+model Customization {
+  id          String   @id @default(cuid())
+  userId      String
+  productId   String
+  size        String
+  color       String
+  embroidery  Json?
+  logoUrl     String?
+  previewUrl  String?
+  totalPrice  Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id])
+  product    Product     @relation(fields: [productId], references: [id])
+  orderItems OrderItem[]
+
+  @@map("customizations")
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  userId        String
+  status        OrderStatus @default(PENDING)
+  totalAmount   Float
+  paymentId     String?
+  shippingInfo  Json
+  trackingCode  String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id])
+  items OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id              String @id @default(cuid())
+  orderId         String
+  productId       String
+  customizationId String
+  quantity        Int
+  price           Float
+
+  order         Order         @relation(fields: [orderId], references: [id])
+  product       Product       @relation(fields: [productId], references: [id])
+  customization Customization @relation(fields: [customizationId], references: [id])
+
+  @@map("order_items")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  MANUFACTURING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}

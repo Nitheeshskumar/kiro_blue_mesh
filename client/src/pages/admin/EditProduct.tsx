@@ -1,0 +1,430 @@
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, Plus, X, Save, Trash2 } from 'lucide-react'
+import { api } from '../../lib/api'
+
+const CATEGORIES = [
+  'shirts',
+  'hoodies',
+  'sweatshirts',
+  'activewear',
+  'pants',
+  'accessories'
+]
+
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL']
+
+const PRESET_COLORS = [
+  '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
+  '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080',
+  '#FFC0CB', '#A52A2A', '#808080', '#000080', '#008000'
+]
+
+interface Product {
+  id: string
+  name: string
+  description: string
+  category: string
+  basePrice: number
+  images: string[]
+  sizes: string[]
+  colors: string[]
+  isActive: boolean
+}
+
+export const EditProduct = () => {
+  const navigate = useNavigate()
+  const { productId } = useParams<{ productId: string }>()
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [product, setProduct] = useState<Product | null>(null)
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    category: 'shirts',
+    basePrice: '',
+    images: [''],
+    sizes: ['M'],
+    colors: ['#000000'],
+    isActive: true
+  })
+
+  useEffect(() => {
+    if (productId) {
+      fetchProduct()
+    }
+  }, [productId])
+
+  const fetchProduct = async () => {
+    try {
+      const response = await api.get(`/products/${productId}`)
+      const productData = response.data
+      setProduct(productData)
+      setFormData({
+        name: productData.name,
+        description: productData.description || '',
+        category: productData.category,
+        basePrice: productData.basePrice.toString(),
+        images: productData.images.length > 0 ? productData.images : [''],
+        sizes: productData.sizes,
+        colors: productData.colors,
+        isActive: productData.isActive
+      })
+    } catch (error) {
+      console.error('Failed to fetch product:', error)
+      alert('Failed to load product. Please try again.')
+      navigate('/admin/products')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const addImageUrl = () => {
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, '']
+    }))
+  }
+
+  const removeImageUrl = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }))
+  }
+
+  const updateImageUrl = (index: number, url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.map((img, i) => i === index ? url : img)
+    }))
+  }
+
+  const toggleSize = (size: string) => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: prev.sizes.includes(size)
+        ? prev.sizes.filter(s => s !== size)
+        : [...prev.sizes, size]
+    }))
+  }
+
+  const addColor = (color: string) => {
+    if (!formData.colors.includes(color)) {
+      setFormData(prev => ({
+        ...prev,
+        colors: [...prev.colors, color]
+      }))
+    }
+  }
+
+  const removeColor = (color: string) => {
+    setFormData(prev => ({
+      ...prev,
+      colors: prev.colors.filter(c => c !== color)
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+
+    try {
+      const productData = {
+        ...formData,
+        basePrice: parseFloat(formData.basePrice),
+        images: formData.images.filter(img => img.trim() !== '')
+      }
+
+      await api.put(`/products/${productId}`, productData)
+      navigate('/admin/products')
+    } catch (error) {
+      console.error('Failed to update product:', error)
+      alert('Failed to update product. Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to deactivate this product? This action can be reversed later.')) {
+      return
+    }
+
+    try {
+      await api.delete(`/products/${productId}`)
+      navigate('/admin/products')
+    } catch (error) {
+      console.error('Failed to delete product:', error)
+      alert('Failed to delete product. Please try again.')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 max-w-4xl mx-auto">
+        <div className="animate-pulse space-y-6">
+          <div className="bg-gray-300 h-8 rounded w-1/3"></div>
+          <div className="bg-gray-300 h-64 rounded"></div>
+          <div className="bg-gray-300 h-32 rounded"></div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="p-6 max-w-4xl mx-auto text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h1>
+        <button
+          onClick={() => navigate('/admin/products')}
+          className="btn-primary"
+        >
+          Back to Products
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/admin/products')}
+            className="p-2 hover:bg-gray-100 rounded-lg"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-3xl font-bold text-gray-900">Edit Product</h1>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Status:</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.isActive}
+                onChange={(e) => handleInputChange('isActive', e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <span className="ml-3 text-sm font-medium text-gray-900">
+                {formData.isActive ? 'Active' : 'Inactive'}
+              </span>
+            </label>
+          </div>
+          
+          <button
+            onClick={handleDelete}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+          >
+            <Trash2 className="w-4 h-4" />
+            Deactivate
+          </button>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Basic Information */}
+        <div className="bg-white p-6 rounded-lg shadow-md border">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Basic Information</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Product Name *
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="e.g., Classic Cotton T-Shirt"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category *
+              </label>
+              <select
+                required
+                value={formData.category}
+                onChange={(e) => handleInputChange('category', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {CATEGORIES.map(category => (
+                  <option key={category} value={category}>
+                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Base Price ($) *
+              </label>
+              <input
+                type="number"
+                required
+                min="0"
+                step="0.01"
+                value={formData.basePrice}
+                onChange={(e) => handleInputChange('basePrice', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="25.00"
+              />
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description
+            </label>
+            <textarea
+              rows={3}
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Describe your product..."
+            />
+          </div>
+        </div>
+
+        {/* Images */}
+        <div className="bg-white p-6 rounded-lg shadow-md border">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Product Images</h2>
+          
+          <div className="space-y-3">
+            {formData.images.map((image, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <input
+                  type="url"
+                  value={image}
+                  onChange={(e) => updateImageUrl(index, e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="https://example.com/image.jpg"
+                />
+                {formData.images.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeImageUrl(index)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+            
+            <button
+              type="button"
+              onClick={addImageUrl}
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+            >
+              <Plus className="w-4 h-4" />
+              Add Another Image
+            </button>
+          </div>
+        </div>
+
+        {/* Sizes */}
+        <div className="bg-white p-6 rounded-lg shadow-md border">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Available Sizes</h2>
+          
+          <div className="grid grid-cols-4 md:grid-cols-7 gap-3">
+            {SIZES.map(size => (
+              <button
+                key={size}
+                type="button"
+                onClick={() => toggleSize(size)}
+                className={`py-2 px-3 border rounded-lg font-medium transition-colors ${
+                  formData.sizes.includes(size)
+                    ? 'border-blue-600 bg-blue-50 text-blue-600'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Colors */}
+        <div className="bg-white p-6 rounded-lg shadow-md border">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Available Colors</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-gray-600 mb-3">Selected Colors:</p>
+              <div className="flex flex-wrap gap-2">
+                {formData.colors.map(color => (
+                  <div key={color} className="relative">
+                    <div
+                      className="w-10 h-10 rounded-lg border-2 border-gray-300 cursor-pointer"
+                      style={{ backgroundColor: color }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeColor(color)}
+                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div>
+              <p className="text-sm text-gray-600 mb-3">Add Colors:</p>
+              <div className="grid grid-cols-8 md:grid-cols-15 gap-2">
+                {PRESET_COLORS.map(color => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => addColor(color)}
+                    className="w-8 h-8 rounded-lg border-2 border-gray-300 hover:border-gray-400"
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Submit */}
+        <div className="flex justify-end gap-4">
+          <button
+            type="button"
+            onClick={() => navigate('/admin/products')}
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
