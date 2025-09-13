@@ -12,7 +12,7 @@ const requiredFiles = [
   'netlify/functions/api.ts',
   'netlify/functions/package.json',
   'netlify/functions/tsconfig.json',
-  'netlify/functions/prisma/schema.prisma',
+  'netlify/functions/lib/database.ts',
   'netlify/functions/routes/auth.ts',
   'netlify/functions/routes/products.ts',
   'netlify/functions/routes/customizations.ts',
@@ -38,7 +38,6 @@ try {
   
   const requiredDeps = [
     '@netlify/functions',
-    '@prisma/client',
     'express',
     'serverless-http',
     'cors',
