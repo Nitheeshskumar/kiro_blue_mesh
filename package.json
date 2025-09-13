@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "netlify-cli": "^23.5.1",
-    "netlify-lambda": "^2.0.16"
+    "netlify-lambda": "^2.0.16",
+    "typescript": "^5.9.2"
   }
 }
