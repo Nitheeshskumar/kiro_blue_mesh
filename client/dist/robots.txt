@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Willowbrook Clothing - Custom Apparel Platform
+Sitemap: https://willowbrook-clothing.netlify.app/sitemap.xml

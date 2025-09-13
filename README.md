@@ -148,12 +148,23 @@ npm run build
 
 ## Deployment
 
-### Frontend (Vercel)
+### Netlify (Recommended - Full Stack)
+Deploy both frontend and backend as serverless functions:
+
+```bash
+npm run prepare:netlify
+```
+
+Then follow the [Netlify Deployment Guide](./NETLIFY-DEPLOYMENT.md) for complete instructions.
+
+### Alternative Deployments
+
+#### Frontend (Vercel)
 1. Connect your GitHub repository to Vercel
 2. Set build command: `cd client && npm run build`
 3. Set output directory: `client/dist`
 
-### Backend (Railway)
+#### Backend (Railway)
 1. Connect your GitHub repository to Railway
 2. Set start command: `cd server && npm start`
 3. Add environment variables in Railway dashboard

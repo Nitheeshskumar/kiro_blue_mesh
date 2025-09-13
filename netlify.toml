@@ -1,24 +1,28 @@
 [build]
-  base = "client"
   publish = "client/dist"
-  command = "npm run build"
+  command = "npm run build:netlify"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
   NPM_VERSION = "9"
 
-# Redirect all routes to index.html for SPA routing
+# Function settings
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["express", "serverless-http", "bcryptjs", "jsonwebtoken", "stripe"]
+
+# API routes to Netlify Functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# SPA routing - must come after API redirects
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-# API redirects to your backend (update with your backend URL)
-[[redirects]]
-  from = "/api/*"
-  to = "https://your-backend-url.com/api/:splat"
-  status = 200
-  force = true
 
 # Security headers
 [[headers]]
@@ -34,3 +38,11 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Function headers
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
