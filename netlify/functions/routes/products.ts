@@ -14,8 +14,7 @@ const verifyToken = async (authHeader: string | undefined) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
   
   const db = await getDatabase()
-    const user = const db = await getDatabase()
-    await db.findUserById(decoded.userId)
+  const user = await db.findUserById(decoded.userId)
   if (!user) {
     throw new Error('Invalid token')
   }
@@ -28,8 +27,7 @@ router.get('/', async (req, res) => {
   try {
     const { category } = req.query
     const db = await getDatabase()
-    const products = const db = await getDatabase()
-    await db.findProducts({ 
+    const products = await db.findProducts({ 
       isActive: true,
       ...(category && { category: category as string })
     })
@@ -46,25 +44,22 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params
     const db = await getDatabase()
-    const product = const db = await getDatabase()
-    await db.findProductById(id)
+    const product = await db.findProductById(id)
 
     if (!product) {
       return res.status(404).json({ error: 'Product not found' })
     }
 
     // Get recent customizations for this product
-    const db = await getDatabase()
-    const allCustomizations = const db = await getDatabase()
-    await db.findCustomizations()
+    const allCustomizations = await db.findCustomizations()
     const productCustomizations = allCustomizations
-      .filter(c => c.productId === id)
+      .filter((c: any) => c.productId === id)
       .slice(0, 10)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime())
 
     const productWithCustomizations = {
       ...product,
-      customizations: productCustomizations.map(c => ({
+      customizations: productCustomizations.map((c: any) => ({
         id: c.id,
         previewUrl: c.previewUrl,
         color: c.color,
@@ -94,8 +89,7 @@ router.post('/', async (req, res) => {
     }
 
     const db = await getDatabase()
-    const product = const db = await getDatabase()
-    await db.createProduct({
+    const product = await db.createProduct({
       name,
       description,
       category,
@@ -125,8 +119,7 @@ router.put('/:id', async (req, res) => {
     const { name, description, category, basePrice, images, sizes, colors, isActive } = req.body
     
     const db = await getDatabase()
-    const product = const db = await getDatabase()
-    await db.updateProduct(id, {
+    const product = await db.updateProduct(id, {
       ...(name && { name }),
       ...(description !== undefined && { description }),
       ...(category && { category }),
@@ -158,8 +151,7 @@ router.delete('/:id', async (req, res) => {
 
     const { id } = req.params
     const db = await getDatabase()
-    const product = const db = await getDatabase()
-    await db.updateProduct(id, { isActive: false })
+    const product = await db.updateProduct(id, { isActive: false })
 
     if (!product) {
       return res.status(404).json({ error: 'Product not found' })
