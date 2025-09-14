@@ -16,13 +16,31 @@ import { errorHandler } from './middleware/errorHandler'
 const app = express()
 
 // Middleware
-app.use(helmet())
+app.use(helmet({
+  contentSecurityPolicy: false
+}))
 app.use(cors({
   origin: process.env.CLIENT_URL || '*',
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }))
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))
+
+// Debug middleware to log requests
+// app.use((req, res, next) => {
+//   console.log(`${req.method} ${req.path}`, req.body)
+//   next()
+// })
+
+app.use((req, res, next) => {
+  // Remove the "/api" prefix if present
+  if (req.url.startsWith('/api')) {
+    req.url = req.url.slice(4); // removes "/api"
+  }
+  next();
+});
 
 // Routes - Note: Netlify Functions automatically handle the /.netlify/functions/api prefix
 app.use('/auth', authRoutes)
@@ -36,18 +54,39 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() })
 })
 
+// Catch-all route for debugging
+app.use('*', (req, res) => {
+  console.log('Unmatched route:', req.method, req.originalUrl, req.path)
+  res.status(404).json({ 
+    error: 'Route not found',
+    method: req.method,
+    path: req.path,
+    originalUrl: req.originalUrl
+  })
+})
+
 // Error handling
 app.use(errorHandler)
 
 // Export the serverless function
-const serverlessApp = serverless(app)
+const serverlessApp = serverless(app, {
+  binary: false
+})
 
 export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
   // Set context to not wait for empty event loop
   context.callbackWaitsForEmptyEventLoop = false
   
+  console.log('Netlify Function called:', {
+    httpMethod: event.httpMethod,
+    path: event.path,
+    headers: event.headers
+  })
+  
   try {
-    return await serverlessApp(event, context)
+    const result = await serverlessApp(event, context)
+    console.log('Function result:', result)
+    return result
   } catch (error) {
     console.error('Serverless function error:', error)
     return {
@@ -63,5 +102,3 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     }
   }
 }
-
-// No cleanup needed for lightweight database

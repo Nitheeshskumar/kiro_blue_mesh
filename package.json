@@ -17,6 +17,7 @@
     "deploy:netlify": "node deploy-to-netlify.js",
     "prepare:netlify": "node deploy-netlify.js",
     "test:netlify": "node test-netlify-setup.js",
+    "test:functions": "node test-functions-locally.js",
     "create-admin": "cd server && npm run create-admin",
     "start": "node run-project.js",
     "fix-syntax": "node fix-syntax-error.js",
