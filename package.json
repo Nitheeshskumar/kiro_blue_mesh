@@ -18,6 +18,8 @@
     "prepare:netlify": "node deploy-netlify.js",
     "test:netlify": "node test-netlify-setup.js",
     "test:functions": "node test-functions-locally.js",
+    "diagnose": "node diagnose-deployment.js",
+    "test:login": "node test-login-api.js",
     "create-admin": "cd server && npm run create-admin",
     "start": "node run-project.js",
     "fix-syntax": "node fix-syntax-error.js",

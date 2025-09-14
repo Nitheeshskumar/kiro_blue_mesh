@@ -49,7 +49,7 @@ try {
 }
 
 // Note about database
-console.log('\n💡 Using lightweight in-memory database with sample data - no external database needed!');
+console.log('\n💾 Using Neon PostgreSQL database - make sure DATABASE_URL is configured!');
 
 // Build the project
 console.log('\n🏗️  Building project...');

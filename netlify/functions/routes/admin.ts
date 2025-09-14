@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
-import { db } from '../lib/database'
+import { getDatabase } from '../lib/database'
 
 const router = Router()
 
@@ -13,6 +13,7 @@ const verifyToken = async (authHeader: string | undefined) => {
   const token = authHeader.split(' ')[1]
   const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
   
+  const db = await getDatabase()
   const user = await db.findUserById(decoded.userId)
   if (!user) {
     throw new Error('Invalid token')
@@ -38,6 +39,7 @@ const requireAdmin = async (req: any, res: any, next: any) => {
 // Get admin stats
 router.get('/stats', requireAdmin, async (req, res) => {
   try {
+    const db = await getDatabase()
     const [totalProducts, totalOrders, totalUsers, totalRevenue] = await Promise.all([
       db.countProducts({ isActive: true }),
       db.countOrders(),
@@ -65,6 +67,7 @@ router.get('/orders', requireAdmin, async (req, res) => {
     const { page = 1, limit = 20, status } = req.query
     const skip = (Number(page) - 1) * Number(limit)
 
+    const db = await getDatabase()
     const orders = await db.findOrders(
       status ? { status: status as string } : {},
       skip,
@@ -73,13 +76,13 @@ router.get('/orders', requireAdmin, async (req, res) => {
 
     // Add user info to orders
     const ordersWithUsers = await Promise.all(
-      orders.map(async (order) => {
+      orders.map(async (order: any) => {
         const user = await db.findUserById(order.userId)
         const items = await db.findOrderItems(order.id)
         
         // Add product and customization info to items
         const itemsWithDetails = await Promise.all(
-          items.map(async (item) => {
+          items.map(async (item: any) => {
             const product = await db.findProductById(item.productId)
             const customization = await db.findCustomizationById(item.customizationId)
             return {
@@ -125,11 +128,12 @@ router.get('/users', requireAdmin, async (req, res) => {
     const { page = 1, limit = 20 } = req.query
     const skip = (Number(page) - 1) * Number(limit)
 
+    const db = await getDatabase()
     const users = await db.getAllUsers(skip, Number(limit))
     
     // Add counts for each user
     const usersWithCounts = await Promise.all(
-      users.map(async (user) => {
+      users.map(async (user: any) => {
         const orderCount = await db.countOrders()
         const customizationCount = await db.countCustomizations({ userId: user.id })
         
@@ -167,15 +171,16 @@ router.get('/products', requireAdmin, async (req, res) => {
     const { page = 1, limit = 20, category } = req.query
     const skip = (Number(page) - 1) * Number(limit)
 
+    const db = await getDatabase()
     const products = await db.findProducts(
       category ? { category: category as string } : {}
     )
 
     // Add counts for each product
     const productsWithCounts = await Promise.all(
-      products.slice(skip, skip + Number(limit)).map(async (product) => {
+      products.slice(skip, skip + Number(limit)).map(async (product: any) => {
         const customizations = await db.findCustomizations()
-        const customizationCount = customizations.filter(c => c.productId === product.id).length
+        const customizationCount = customizations.filter((c: any) => c.productId === product.id).length
         
         return {
           ...product,
@@ -214,6 +219,7 @@ router.put('/users/:id/role', requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Invalid role' })
     }
 
+    const db = await getDatabase()
     const user = await db.updateUser(id, { role })
     if (!user) {
       return res.status(404).json({ error: 'User not found' })
@@ -230,6 +236,7 @@ router.put('/users/:id/role', requireAdmin, async (req, res) => {
 // Get recent activity
 router.get('/activity', requireAdmin, async (req, res) => {
   try {
+    const db = await getDatabase()
     const [recentOrders, recentUsers, recentCustomizations] = await Promise.all([
       db.findOrders({}, 0, 5),
       db.getAllUsers(0, 5),
@@ -238,7 +245,7 @@ router.get('/activity', requireAdmin, async (req, res) => {
 
     // Add user info to orders
     const ordersWithUsers = await Promise.all(
-      recentOrders.map(async (order) => {
+      recentOrders.map(async (order: any) => {
         const user = await db.findUserById(order.userId)
         return {
           ...order,
@@ -249,7 +256,7 @@ router.get('/activity', requireAdmin, async (req, res) => {
 
     // Add user and product info to customizations
     const customizationsWithDetails = await Promise.all(
-      recentCustomizations.slice(0, 5).map(async (customization) => {
+      recentCustomizations.slice(0, 5).map(async (customization: any) => {
         const user = await db.findUserById(customization.userId)
         const product = await db.findProductById(customization.productId)
         return {
@@ -260,7 +267,7 @@ router.get('/activity', requireAdmin, async (req, res) => {
       })
     )
 
-    const usersWithoutPasswords = recentUsers.map(user => {
+    const usersWithoutPasswords = recentUsers.map((user: any) => {
       const { password: _, ...userWithoutPassword } = user
       return userWithoutPassword
     })

@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
-import { db } from '../lib/database'
+import { getDatabase } from '../lib/database'
 
 const router = Router()
 
@@ -13,7 +13,9 @@ const verifyToken = async (authHeader: string | undefined) => {
   const token = authHeader.split(' ')[1]
   const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
   
-  const user = await db.findUserById(decoded.userId)
+  const db = await getDatabase()
+    const user = const db = await getDatabase()
+    await db.findUserById(decoded.userId)
   if (!user) {
     throw new Error('Invalid token')
   }
@@ -25,7 +27,9 @@ const verifyToken = async (authHeader: string | undefined) => {
 router.get('/', async (req, res) => {
   try {
     const { category } = req.query
-    const products = await db.findProducts({ 
+    const db = await getDatabase()
+    const products = const db = await getDatabase()
+    await db.findProducts({ 
       isActive: true,
       ...(category && { category: category as string })
     })
@@ -41,14 +45,18 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params
-    const product = await db.findProductById(id)
+    const db = await getDatabase()
+    const product = const db = await getDatabase()
+    await db.findProductById(id)
 
     if (!product) {
       return res.status(404).json({ error: 'Product not found' })
     }
 
     // Get recent customizations for this product
-    const allCustomizations = await db.findCustomizations()
+    const db = await getDatabase()
+    const allCustomizations = const db = await getDatabase()
+    await db.findCustomizations()
     const productCustomizations = allCustomizations
       .filter(c => c.productId === id)
       .slice(0, 10)
@@ -85,7 +93,9 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Name, category, and basePrice are required' })
     }
 
-    const product = await db.createProduct({
+    const db = await getDatabase()
+    const product = const db = await getDatabase()
+    await db.createProduct({
       name,
       description,
       category,
@@ -114,7 +124,9 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params
     const { name, description, category, basePrice, images, sizes, colors, isActive } = req.body
     
-    const product = await db.updateProduct(id, {
+    const db = await getDatabase()
+    const product = const db = await getDatabase()
+    await db.updateProduct(id, {
       ...(name && { name }),
       ...(description !== undefined && { description }),
       ...(category && { category }),
@@ -145,7 +157,9 @@ router.delete('/:id', async (req, res) => {
     }
 
     const { id } = req.params
-    const product = await db.updateProduct(id, { isActive: false })
+    const db = await getDatabase()
+    const product = const db = await getDatabase()
+    await db.updateProduct(id, { isActive: false })
 
     if (!product) {
       return res.status(404).json({ error: 'Product not found' })

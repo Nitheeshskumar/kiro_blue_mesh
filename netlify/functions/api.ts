@@ -57,7 +57,7 @@ app.get('/health', (req, res) => {
 // Catch-all route for debugging
 app.use('*', (req, res) => {
   console.log('Unmatched route:', req.method, req.originalUrl, req.path)
-  res.status(404).json({ 
+  res.status(404).json({
     error: 'Route not found',
     method: req.method,
     path: req.path,
@@ -76,15 +76,15 @@ const serverlessApp = serverless(app, {
 export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
   // Set context to not wait for empty event loop
   context.callbackWaitsForEmptyEventLoop = false
-  
+
   console.log('Netlify Function called:', {
     httpMethod: event.httpMethod,
     path: event.path,
     headers: event.headers
   })
-  
+
   try {
-    const result = await serverlessApp(event, context)
+    const result = await serverlessApp(event, context) as any
     console.log('Function result:', result)
     return result
   } catch (error) {
@@ -95,7 +95,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         error: 'Internal server error',
         message: error instanceof Error ? error.message : 'Unknown error'
       })

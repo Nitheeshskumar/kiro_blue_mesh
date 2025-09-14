@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { db } from '../lib/database'
+import { getDatabase } from '../lib/database'
 
 const router = Router()
 
@@ -14,6 +14,7 @@ const verifyToken = async (authHeader: string | undefined) => {
   const token = authHeader.split(' ')[1]
   const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
 
+  const db = await getDatabase()
   const user = await db.findUserById(decoded.userId)
   if (!user) {
     throw new Error('Invalid token')
@@ -35,6 +36,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 6 characters long' })
     }
 
+    const db = await getDatabase()
     const existingUser = await db.findUserByEmail(email)
     if (existingUser) {
       return res.status(409).json({ error: 'User already exists' })
@@ -67,6 +69,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' })
     }
 
+    const db = await getDatabase()
     const user = await db.findUserByEmail(email)
     if (!user || !await bcrypt.compare(password, user.password)) {
       return res.status(401).json({ error: 'Invalid credentials' })
@@ -86,6 +89,7 @@ router.post('/login', async (req, res) => {
 router.get('/me', async (req, res) => {
   try {
     const user = await verifyToken(req.headers.authorization)
+    const db = await getDatabase()
     const customizationCount = await db.countCustomizations({ userId: user.id })
     const orderCount = await db.countOrders()
 
@@ -114,6 +118,7 @@ router.put('/profile', async (req, res) => {
     const user = await verifyToken(req.headers.authorization)
     const { name, email } = req.body
 
+    const db = await getDatabase()
     // Check if email is already taken by another user
     if (email && email !== user.email) {
       const existingUser = await db.findUserByEmail(email)
@@ -153,6 +158,7 @@ router.put('/change-password', async (req, res) => {
       return res.status(400).json({ error: 'New password must be at least 6 characters long' })
     }
 
+    const db = await getDatabase()
     const userRecord = await db.findUserById(user.id)
     if (!userRecord || !await bcrypt.compare(currentPassword, userRecord.password)) {
       return res.status(401).json({ error: 'Current password is incorrect' })

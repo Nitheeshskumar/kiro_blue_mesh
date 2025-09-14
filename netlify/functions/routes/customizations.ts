@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
-import { db } from '../lib/database'
+import { getDatabase } from '../lib/database'
 
 const router = Router()
 
@@ -13,7 +13,9 @@ const verifyToken = async (authHeader: string | undefined) => {
   const token = authHeader.split(' ')[1]
   const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
   
-  const user = await db.findUserById(decoded.userId)
+  const db = await getDatabase()
+    const user = const db = await getDatabase()
+    await db.findUserById(decoded.userId)
   if (!user) {
     throw new Error('Invalid token')
   }
@@ -31,7 +33,9 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Product ID, size, and color are required' })
     }
 
-    const product = await db.findProductById(productId)
+    const db = await getDatabase()
+    const product = const db = await getDatabase()
+    await db.findProductById(productId)
     if (!product) {
       return res.status(404).json({ error: 'Product not found' })
     }
@@ -44,7 +48,9 @@ router.post('/', async (req, res) => {
     let previewUrl = product.images.length > 0 ? product.images[0] : 
       `https://via.placeholder.com/400x400/${color.replace('#', '')}/ffffff?text=${encodeURIComponent(size + ' ' + product.name)}`
 
-    const customization = await db.createCustomization({
+    const db = await getDatabase()
+    const customization = const db = await getDatabase()
+    await db.createCustomization({
       userId: user.id,
       productId,
       size,
@@ -76,12 +82,16 @@ router.post('/', async (req, res) => {
 router.get('/user', async (req, res) => {
   try {
     const user = await verifyToken(req.headers.authorization)
-    const customizations = await db.findCustomizations({ userId: user.id })
+    const db = await getDatabase()
+    const customizations = const db = await getDatabase()
+    await db.findCustomizations({ userId: user.id })
 
     // Add product info to each customization
     const customizationsWithProducts = await Promise.all(
       customizations.map(async (customization) => {
-        const product = await db.findProductById(customization.productId)
+        const db = await getDatabase()
+    const product = const db = await getDatabase()
+    await db.findProductById(customization.productId)
         return {
           ...customization,
           product: product ? {
@@ -106,12 +116,16 @@ router.get('/:id', async (req, res) => {
     const user = await verifyToken(req.headers.authorization)
     const { id } = req.params
     
-    const customization = await db.findCustomizationById(id)
+    const db = await getDatabase()
+    const customization = const db = await getDatabase()
+    await db.findCustomizationById(id)
     if (!customization || customization.userId !== user.id) {
       return res.status(404).json({ error: 'Customization not found' })
     }
 
-    const product = await db.findProductById(customization.productId)
+    const db = await getDatabase()
+    const product = const db = await getDatabase()
+    await db.findProductById(customization.productId)
     const customizationWithProduct = {
       ...customization,
       product: product ? {
@@ -135,12 +149,16 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params
     const { size, color, embroidery, logoUrl } = req.body
 
-    const existingCustomization = await db.findCustomizationById(id)
+    const db = await getDatabase()
+    const existingCustomization = const db = await getDatabase()
+    await db.findCustomizationById(id)
     if (!existingCustomization || existingCustomization.userId !== user.id) {
       return res.status(404).json({ error: 'Customization not found' })
     }
 
-    const product = await db.findProductById(existingCustomization.productId)
+    const db = await getDatabase()
+    const product = const db = await getDatabase()
+    await db.findProductById(existingCustomization.productId)
     if (!product) {
       return res.status(404).json({ error: 'Product not found' })
     }
@@ -155,7 +173,9 @@ router.put('/:id', async (req, res) => {
       product.images[0] : 
       `https://via.placeholder.com/400x400/${color.replace('#', '')}/ffffff?text=${encodeURIComponent(size + ' ' + product.name)}`
 
-    const customization = await db.updateCustomization(id, {
+    const db = await getDatabase()
+    const customization = const db = await getDatabase()
+    await db.updateCustomization(id, {
       ...(size && { size }),
       ...(color && { color }),
       ...(embroidery !== undefined && { embroidery }),
@@ -190,12 +210,16 @@ router.delete('/:id', async (req, res) => {
     const user = await verifyToken(req.headers.authorization)
     const { id } = req.params
 
-    const customization = await db.findCustomizationById(id)
+    const db = await getDatabase()
+    const customization = const db = await getDatabase()
+    await db.findCustomizationById(id)
     if (!customization || customization.userId !== user.id) {
       return res.status(404).json({ error: 'Customization not found' })
     }
 
-    const deleted = await db.deleteCustomization(id)
+    const db = await getDatabase()
+    const deleted = const db = await getDatabase()
+    await db.deleteCustomization(id)
     if (!deleted) {
       return res.status(500).json({ error: 'Failed to delete customization' })
     }

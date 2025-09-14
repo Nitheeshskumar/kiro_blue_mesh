@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
-import { db } from '../lib/database'
+import { getDatabase } from '../lib/database'
 
 const router = Router()
 
@@ -13,7 +13,9 @@ const verifyToken = async (authHeader: string | undefined) => {
   const token = authHeader.split(' ')[1]
   const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
   
-  const user = await db.findUserById(decoded.userId)
+  const db = await getDatabase()
+    const user = const db = await getDatabase()
+    await db.findUserById(decoded.userId)
   if (!user) {
     throw new Error('Invalid token')
   }
@@ -39,8 +41,10 @@ router.post('/', async (req, res) => {
     const orderItemsData = []
 
     // Validate items and calculate total
-    for (const item of items) {
-      const customization = await db.findCustomizationById(item.customizationId)
+    for (const db = await getDatabase()
+    const item of items) {
+      const customization = const db = await getDatabase()
+    await db.findCustomizationById(item.customizationId)
       if (!customization) {
         return res.status(404).json({ error: `Customization ${item.customizationId} not found` })
       }
@@ -61,7 +65,9 @@ router.post('/', async (req, res) => {
     }
 
     // Create order
-    const order = await db.createOrder({
+    const db = await getDatabase()
+    const order = const db = await getDatabase()
+    await db.createOrder({
       userId: user.id,
       status: 'PENDING',
       totalAmount,
@@ -69,12 +75,16 @@ router.post('/', async (req, res) => {
     })
 
     // Create order items
-    const orderItems = await db.createOrderItems(
+    const db = await getDatabase()
+    const orderItems = const db = await getDatabase()
+    await db.createOrderItems(
       orderItemsData.map(item => ({ ...item, orderId: order.id }))
     )
 
     // Get full order with items and relations
-    const fullOrder = await db.findOrderWithItems(order.id)
+    const db = await getDatabase()
+    const fullOrder = const db = await getDatabase()
+    await db.findOrderWithItems(order.id)
 
     res.status(201).json({ order: fullOrder })
   } catch (error) {
@@ -87,7 +97,9 @@ router.post('/', async (req, res) => {
 router.get('/user', async (req, res) => {
   try {
     const user = await verifyToken(req.headers.authorization)
-    const orders = await db.findUserOrders(user.id)
+    const db = await getDatabase()
+    const orders = const db = await getDatabase()
+    await db.findUserOrders(user.id)
 
     res.json(orders)
   } catch (error) {
@@ -102,7 +114,9 @@ router.get('/:id', async (req, res) => {
     const user = await verifyToken(req.headers.authorization)
     const { id } = req.params
 
-    const order = await db.findOrderWithItems(id)
+    const db = await getDatabase()
+    const order = const db = await getDatabase()
+    await db.findOrderWithItems(id)
     if (!order || order.userId !== user.id) {
       return res.status(404).json({ error: 'Order not found' })
     }
@@ -130,7 +144,9 @@ router.put('/:id/status', async (req, res) => {
       return res.status(400).json({ error: 'Invalid status' })
     }
 
-    const order = await db.updateOrder(id, { 
+    const db = await getDatabase()
+    const order = const db = await getDatabase()
+    await db.updateOrder(id, { 
       status,
       ...(trackingCode && { trackingCode })
     })
@@ -139,7 +155,9 @@ router.put('/:id/status', async (req, res) => {
       return res.status(404).json({ error: 'Order not found' })
     }
 
-    const fullOrder = await db.findOrderWithItems(id)
+    const db = await getDatabase()
+    const fullOrder = const db = await getDatabase()
+    await db.findOrderWithItems(id)
     res.json(fullOrder)
   } catch (error) {
     console.error('Update order status error:', error)
@@ -153,7 +171,9 @@ router.put('/:id/cancel', async (req, res) => {
     const user = await verifyToken(req.headers.authorization)
     const { id } = req.params
 
-    const order = await db.findOrderById(id)
+    const db = await getDatabase()
+    const order = const db = await getDatabase()
+    await db.findOrderById(id)
     if (!order || order.userId !== user.id) {
       return res.status(404).json({ error: 'Order not found' })
     }
@@ -162,12 +182,16 @@ router.put('/:id/cancel', async (req, res) => {
       return res.status(400).json({ error: 'Order cannot be cancelled at this stage' })
     }
 
-    const updatedOrder = await db.updateOrder(id, { status: 'CANCELLED' })
+    const db = await getDatabase()
+    const updatedOrder = const db = await getDatabase()
+    await db.updateOrder(id, { status: 'CANCELLED' })
     if (!updatedOrder) {
       return res.status(500).json({ error: 'Failed to cancel order' })
     }
 
-    const fullOrder = await db.findOrderWithItems(id)
+    const db = await getDatabase()
+    const fullOrder = const db = await getDatabase()
+    await db.findOrderWithItems(id)
     res.json(fullOrder)
   } catch (error) {
     console.error('Cancel order error:', error)
