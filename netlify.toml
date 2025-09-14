@@ -1,10 +1,10 @@
 [build]
   publish = "client/dist"
-  command = "npm install && npm run build:netlify"
+  command = "npm run build:netlify"
   functions = "netlify/functions"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20.12.2"
   NPM_VERSION = "9"
 
 # Function settings
