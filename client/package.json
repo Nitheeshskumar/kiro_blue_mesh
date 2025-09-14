@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "build:netlify": "npm install && npm run build"
+   "dev": "vite",
+   "build": "tsc && vite build",
+   "preview": "vite preview",
+   "build:netlify": "npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",

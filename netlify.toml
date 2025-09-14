@@ -1,7 +1,8 @@
 [build]
-  publish = "client/dist"
+  base = "client"
+  publish = "dist"
   command = "npm run build:netlify"
-  functions = "netlify/functions"
+  functions = "../netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
