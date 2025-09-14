@@ -76,13 +76,13 @@ router.get('/orders', requireAdmin, async (req, res) => {
 
     // Add user info to orders
     const ordersWithUsers = await Promise.all(
-      orders.map(async (order: any) => {
+      orders?.map(async (order: any) => {
         const user = await db.findUserById(order.userId)
         const items = await db.findOrderItems(order.id)
         
         // Add product and customization info to items
         const itemsWithDetails = await Promise.all(
-          items.map(async (item: any) => {
+          items?.map(async (item: any) => {
             const product = await db.findProductById(item.productId)
             const customization = await db.findCustomizationById(item.customizationId)
             return {
@@ -133,7 +133,7 @@ router.get('/users', requireAdmin, async (req, res) => {
     
     // Add counts for each user
     const usersWithCounts = await Promise.all(
-      users.map(async (user: any) => {
+      users?.map(async (user: any) => {
         const orderCount = await db.countOrders()
         const customizationCount = await db.countCustomizations({ userId: user.id })
         
@@ -245,7 +245,7 @@ router.get('/activity', requireAdmin, async (req, res) => {
 
     // Add user info to orders
     const ordersWithUsers = await Promise.all(
-      recentOrders.map(async (order: any) => {
+      recentOrders?.map(async (order: any) => {
         const user = await db.findUserById(order.userId)
         return {
           ...order,
@@ -267,7 +267,7 @@ router.get('/activity', requireAdmin, async (req, res) => {
       })
     )
 
-    const usersWithoutPasswords = recentUsers.map((user: any) => {
+    const usersWithoutPasswords = recentUsers?.map((user: any) => {
       const { password: _, ...userWithoutPassword } = user
       return userWithoutPassword
     })
