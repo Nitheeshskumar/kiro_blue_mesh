@@ -30,6 +30,8 @@
     "install-deps": "node install-missing-deps.js",
     "check-deps": "node check-deps.js",
     "test-setup": "node test-setup.js",
+    "fix-admin": "node fix-admin-products.js",
+    "test-api": "node test-api-connection.js",
     "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",
