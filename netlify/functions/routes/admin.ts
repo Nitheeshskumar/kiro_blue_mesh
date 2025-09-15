@@ -12,7 +12,7 @@ const verifyToken = async (authHeader: string | undefined) => {
 
   const token = authHeader.split(' ')[1]
   const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
-  
+
   const db = await getDatabase()
   const user = await db.findUserById(decoded.userId)
   if (!user) {
@@ -53,7 +53,7 @@ router.get('/stats', requireAdmin, async (req, res) => {
       (recentOrdersData || []).map(async (order: any) => {
         const user = await db.findUserById(order.userId)
         const items = await db.findOrderItems(order.id)
-        
+
         // Add product info to items
         const itemsWithProducts = await Promise.all(
           (items || []).map(async (item: any) => {
@@ -67,12 +67,12 @@ router.get('/stats', requireAdmin, async (req, res) => {
 
         return {
           ...order,
-          user: user ? { 
-            name: user.name, 
-            email: user.email 
-          } : { 
-            name: 'Unknown User', 
-            email: 'unknown@example.com' 
+          user: user ? {
+            name: user.name,
+            email: user.email
+          } : {
+            name: 'Unknown User',
+            email: 'unknown@example.com'
           },
           items: itemsWithProducts
         }
@@ -122,7 +122,7 @@ router.get('/orders', requireAdmin, async (req, res) => {
       orders?.map(async (order: any) => {
         const user = await db.findUserById(order.userId)
         const items = await db.findOrderItems(order.id)
-        
+
         // Add product and customization info to items
         const itemsWithDetails = await Promise.all(
           items?.map(async (item: any) => {
@@ -131,10 +131,10 @@ router.get('/orders', requireAdmin, async (req, res) => {
             return {
               ...item,
               product: product ? { name: product.name, images: product.images } : null,
-              customization: customization ? { 
-                size: customization.size, 
-                color: customization.color, 
-                previewUrl: customization.previewUrl 
+              customization: customization ? {
+                size: customization.size,
+                color: customization.color,
+                previewUrl: customization.previewUrl
               } : null
             }
           })
@@ -173,13 +173,13 @@ router.get('/users', requireAdmin, async (req, res) => {
 
     const db = await getDatabase()
     const users = await db.getAllUsers(skip, Number(limit))
-    
+
     // Add counts for each user
     const usersWithCounts = await Promise.all(
       users?.map(async (user: any) => {
         const orderCount = await db.countOrders()
         const customizationCount = await db.countCustomizations({ userId: user.id })
-        
+
         const { password: _, ...userWithoutPassword } = user
         return {
           ...userWithoutPassword,
@@ -224,7 +224,7 @@ router.get('/products', requireAdmin, async (req, res) => {
       products.slice(skip, skip + Number(limit)).map(async (product: any) => {
         const customizations = await db.findCustomizations()
         const customizationCount = customizations.filter((c: any) => c.productId === product.id).length
-        
+
         return {
           ...product,
           _count: {
