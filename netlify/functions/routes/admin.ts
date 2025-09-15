@@ -276,6 +276,81 @@ router.put('/users/:id/role', requireAdmin, async (req, res) => {
   }
 })
 
+// Create product (admin)
+router.post('/products', requireAdmin, async (req, res) => {
+  try {
+    const { name, description, category, basePrice, images, sizes, colors } = req.body
+
+    if (!name || !category || !basePrice) {
+      return res.status(400).json({ error: 'Name, category, and basePrice are required' })
+    }
+
+    const db = await getDatabase()
+    const product = await db.createProduct({
+      name,
+      description,
+      category,
+      basePrice: parseFloat(basePrice),
+      images: images || [],
+      sizes: sizes || [],
+      colors: colors || [],
+      isActive: true
+    })
+
+    res.status(201).json(product)
+  } catch (error) {
+    console.error('Create product error:', error)
+    res.status(500).json({ error: 'Failed to create product' })
+  }
+})
+
+// Update product (admin)
+router.put('/products/:id', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params
+    const { name, description, category, basePrice, images, sizes, colors, isActive } = req.body
+    
+    const db = await getDatabase()
+    const product = await db.updateProduct(id, {
+      ...(name && { name }),
+      ...(description !== undefined && { description }),
+      ...(category && { category }),
+      ...(basePrice && { basePrice: parseFloat(basePrice) }),
+      ...(images && { images }),
+      ...(sizes && { sizes }),
+      ...(colors && { colors }),
+      ...(isActive !== undefined && { isActive })
+    })
+
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' })
+    }
+
+    res.json(product)
+  } catch (error) {
+    console.error('Update product error:', error)
+    res.status(500).json({ error: 'Failed to update product' })
+  }
+})
+
+// Delete product (admin)
+router.delete('/products/:id', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params
+    const db = await getDatabase()
+    const product = await db.updateProduct(id, { isActive: false })
+
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' })
+    }
+
+    res.json({ message: 'Product deactivated successfully' })
+  } catch (error) {
+    console.error('Delete product error:', error)
+    res.status(500).json({ error: 'Failed to delete product' })
+  }
+})
+
 // Get recent activity
 router.get('/activity', requireAdmin, async (req, res) => {
   try {

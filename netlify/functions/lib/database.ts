@@ -258,8 +258,8 @@ export class Database {
   async createUser(data: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     const id = generateId()
     const result = await this.query(`
-      INSERT INTO users (id, email, name, password, role)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO users (id, email, name, password, role, "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
     `, [id, data.email, data.name, data.password, data.role])
     return result.rows[0]
@@ -334,8 +334,8 @@ export class Database {
   async createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
     const id = generateId()
     const result = await this.query(`
-      INSERT INTO products (id, name, description, category, "basePrice", images, sizes, colors, "isActive")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO products (id, name, description, category, "basePrice", images, sizes, colors, "isActive", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
     `, [id, data.name, data.description, data.category, data.basePrice, data.images, data.sizes, data.colors, data.isActive])
     return result.rows[0]
@@ -405,8 +405,8 @@ export class Database {
   async createCustomization(data: Omit<Customization, 'id' | 'createdAt' | 'updatedAt'>): Promise<Customization> {
     const id = generateId()
     const result = await this.query(`
-      INSERT INTO customizations (id, "userId", "productId", size, color, embroidery, "logoUrl", "previewUrl", "totalPrice")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO customizations (id, "userId", "productId", size, color, embroidery, "logoUrl", "previewUrl", "totalPrice", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
     `, [id, data.userId, data.productId, data.size, data.color, data.embroidery, data.logoUrl, data.previewUrl, data.totalPrice])
     return result.rows[0]
@@ -490,8 +490,8 @@ export class Database {
   async createOrder(data: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>): Promise<Order> {
     const id = generateId()
     const result = await this.query(`
-      INSERT INTO orders (id, "userId", status, "totalAmount", "paymentId", "shippingInfo", "trackingCode")
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO orders (id, "userId", status, "totalAmount", "paymentId", "shippingInfo", "trackingCode", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
     `, [id, data.userId, data.status, data.totalAmount, data.paymentId, data.shippingInfo, data.trackingCode])
     return result.rows[0]
