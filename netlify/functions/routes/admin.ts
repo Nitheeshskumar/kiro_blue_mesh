@@ -47,13 +47,56 @@ router.get('/stats', requireAdmin, async (req, res) => {
       db.getTotalRevenue()
     ])
 
+    // Get recent orders with user info
+    const recentOrdersData = await db.findOrders({}, 0, 5)
+    const recentOrders = await Promise.all(
+      (recentOrdersData || []).map(async (order: any) => {
+        const user = await db.findUserById(order.userId)
+        const items = await db.findOrderItems(order.id)
+        
+        // Add product info to items
+        const itemsWithProducts = await Promise.all(
+          (items || []).map(async (item: any) => {
+            const product = await db.findProductById(item.productId)
+            return {
+              ...item,
+              product: product ? { name: product.name } : { name: 'Unknown Product' }
+            }
+          })
+        )
+
+        return {
+          ...order,
+          user: user ? { 
+            name: user.name, 
+            email: user.email 
+          } : { 
+            name: 'Unknown User', 
+            email: 'unknown@example.com' 
+          },
+          items: itemsWithProducts
+        }
+      })
+    )
+
+    // Get top products (simplified - just get all products for now)
+    const allProducts = await db.findProducts({ isActive: true })
+    const topProducts = (allProducts || []).slice(0, 5).map((product: any) => ({
+      ...product,
+      _count: {
+        orderItems: 0 // Would need more complex query to get actual order counts
+      }
+    }))
+
     res.json({
       stats: {
         totalProducts,
         totalOrders,
         totalUsers,
         totalRevenue
-      }
+      },
+      recentOrders,
+      topProducts
     })
   } catch (error) {
     console.error('Get admin stats error:', error)

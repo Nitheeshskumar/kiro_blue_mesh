@@ -48,16 +48,29 @@ export const AdminDashboard = () => {
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
   const [topProducts, setTopProducts] = useState<TopProduct[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const response = await api.get('/admin/stats')
-        setStats(response.data.stats)
-        setRecentOrders(response.data.recentOrders)
-        setTopProducts(response.data.topProducts)
+        
+        // Ensure we have valid data structure
+        if (response.data) {
+          setStats(response.data.stats || null)
+          setRecentOrders(Array.isArray(response.data.recentOrders) ? response.data.recentOrders : [])
+          setTopProducts(Array.isArray(response.data.topProducts) ? response.data.topProducts : [])
+          setError(null)
+        } else {
+          throw new Error('Invalid response structure')
+        }
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error)
+        setError('Failed to load dashboard data. Please try refreshing the page.')
+        // Set safe defaults
+        setStats(null)
+        setRecentOrders([])
+        setTopProducts([])
       } finally {
         setLoading(false)
       }
@@ -76,6 +89,33 @@ export const AdminDashboard = () => {
             ))}
           </div>
           <div className="bg-gray-300 h-64 rounded-lg"></div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">
+                Error Loading Dashboard
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{error}</p>
+              </div>
+              <div className="mt-4">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -154,33 +194,39 @@ export const AdminDashboard = () => {
           </div>
           
           <div className="space-y-3">
-            {recentOrders.map(order => (
-              <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="font-medium text-gray-900">
-                    #{order.id.slice(-8)}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {order.user.name || order.user.email}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {order.items.length} item(s)
-                  </p>
+            {recentOrders && recentOrders.length > 0 ? (
+              recentOrders.map(order => (
+                <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      #{order.id.slice(-8)}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {order.user?.name || order.user?.email || 'Unknown User'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {order.items?.length || 0} item(s)
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-gray-900">
+                      ${(order.totalAmount || 0).toFixed(2)}
+                    </p>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      order.status === 'PAID' ? 'bg-green-100 text-green-800' :
+                      order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-blue-100 text-blue-800'
+                    }`}>
+                      {order.status || 'UNKNOWN'}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-gray-900">
-                    ${order.totalAmount.toFixed(2)}
-                  </p>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    order.status === 'PAID' ? 'bg-green-100 text-green-800' :
-                    order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {order.status}
-                  </span>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>No recent orders found</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -197,19 +243,25 @@ export const AdminDashboard = () => {
           </div>
           
           <div className="space-y-3">
-            {topProducts.map(product => (
-              <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="font-medium text-gray-900">{product.name}</p>
-                  <p className="text-sm text-gray-600">${product.basePrice.toFixed(2)}</p>
+            {topProducts && topProducts.length > 0 ? (
+              topProducts.map(product => (
+                <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900">{product.name || 'Unknown Product'}</p>
+                    <p className="text-sm text-gray-600">${(product.basePrice || 0).toFixed(2)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-blue-600">
+                      {product._count?.orderItems || 0} orders
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-blue-600">
-                    {product._count.orderItems} orders
-                  </p>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>No products found</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
