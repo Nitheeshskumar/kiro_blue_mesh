@@ -1,12 +1,8 @@
-import { Router, Request, Response, NextFunction } from 'express'
+import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import { getDatabase } from '../lib/database'
 
 const router = Router()
-
-interface AuthenticatedRequest extends Request {
-  user?: any
-}
 
 // Helper function to verify JWT token
 const verifyToken = async (authHeader: string | undefined) => {
@@ -27,7 +23,7 @@ const verifyToken = async (authHeader: string | undefined) => {
 }
 
 // Middleware to check admin role
-const requireAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const requireAdmin = async (req: any, res: any, next: any) => {
   try {
     const user = await verifyToken(req.headers.authorization)
     if (user.role !== 'ADMIN') {
@@ -41,7 +37,7 @@ const requireAdmin = async (req: AuthenticatedRequest, res: Response, next: Next
 }
 
 // Get admin stats
-router.get('/stats', requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/stats', requireAdmin, async (req, res) => {
   try {
     const db = await getDatabase()
     const [totalProducts, totalOrders, totalUsers, totalRevenue] = await Promise.all([
@@ -109,7 +105,7 @@ router.get('/stats', requireAdmin, async (req: AuthenticatedRequest, res: Respon
 })
 
 // Get all orders (admin)
-router.get('/orders', requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/orders', requireAdmin, async (req, res) => {
   try {
     const { page = 1, limit = 20, status } = req.query
     const skip = (Number(page) - 1) * Number(limit)
@@ -170,7 +166,7 @@ router.get('/orders', requireAdmin, async (req: AuthenticatedRequest, res: Respo
 })
 
 // Get all users (admin)
-router.get('/users', requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/users', requireAdmin, async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query
     const skip = (Number(page) - 1) * Number(limit)
@@ -213,7 +209,7 @@ router.get('/users', requireAdmin, async (req: AuthenticatedRequest, res: Respon
 })
 
 // Get all products (admin)
-router.get('/products', requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/products', requireAdmin, async (req, res) => {
   try {
     const { page = 1, limit = 20, category } = req.query
     const skip = (Number(page) - 1) * Number(limit)
@@ -257,7 +253,7 @@ router.get('/products', requireAdmin, async (req: AuthenticatedRequest, res: Res
 })
 
 // Update user role
-router.put('/users/:id/role', requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+router.put('/users/:id/role', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params
     const { role } = req.body
@@ -281,7 +277,7 @@ router.put('/users/:id/role', requireAdmin, async (req: AuthenticatedRequest, re
 })
 
 // Get recent activity
-router.get('/activity', requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/activity', requireAdmin, async (req, res) => {
   try {
     const db = await getDatabase()
     const [recentOrders, recentUsers, recentCustomizations] = await Promise.all([

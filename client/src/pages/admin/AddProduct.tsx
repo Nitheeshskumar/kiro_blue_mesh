@@ -99,10 +99,9 @@ export const AddProduct = () => {
 
       await api.post('/products', productData)
       navigate('/admin/products')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to create product:', error)
-      const errorMessage = error.response?.data?.error || error.message || 'Unknown error occurred'
-      alert(`Failed to create product: ${errorMessage}`)
+      alert('Failed to create product. Please try again.')
     } finally {
       setLoading(false)
     }

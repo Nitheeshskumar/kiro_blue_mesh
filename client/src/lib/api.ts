@@ -1,30 +1,7 @@
 import axios from 'axios'
 
-// Determine the correct API base URL
-const getApiBaseUrl = () => {
-  // If VITE_API_URL is explicitly set, use it
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL
-  }
-  
-  // In development, use the proxy (which points to localhost:5000)
-  if (import.meta.env.DEV) {
-    return '/api'
-  }
-  
-  // In production, use Netlify functions
-  return '/.netlify/functions/api'
-}
-
-const baseURL = getApiBaseUrl()
-
-// Debug logging in development
-if (import.meta.env.DEV) {
-  console.log('API Base URL:', baseURL)
-}
-
 export const api = axios.create({
-  baseURL,
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json'
   }

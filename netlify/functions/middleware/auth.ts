@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
-import { getDatabase } from '../lib/database'
+import { db } from '../lib/database'
 
 // Extend Request type to include user
 declare global {
@@ -22,7 +22,6 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     const token = authHeader.split(' ')[1]
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as any
     
-    const db = await getDatabase()
     const user = await db.findUserById(decoded.userId)
     if (!user) {
       return res.status(401).json({ error: 'Invalid token' })
