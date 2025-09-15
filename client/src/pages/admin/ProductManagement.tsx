@@ -40,8 +40,8 @@ export const ProductManagement = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await api.get('/products/admin/all')
-      setProducts(response.data)
+      const response = await api.get('/admin/products')
+      setProducts(response.data.products)
     } catch (error) {
       console.error('Failed to fetch products:', error)
     } finally {
