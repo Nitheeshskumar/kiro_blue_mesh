@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { ShoppingCart, User, LogOut, Menu, X, Star, Heart } from 'lucide-react'
+import { ShoppingCart, User, LogOut, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useCartStore } from '../stores/cartStore'
@@ -32,17 +32,16 @@ export const Navbar = () => {
               </div>
               <span className="text-xl font-bold text-gray-900 font-serif">Willowbrook</span>
             </Link>
-            
+
             <div className="hidden lg:flex space-x-8">
               {navigationItems.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`relative px-3 py-2 text-sm font-medium transition-all duration-200 group ${
-                    isActivePath(item.href)
+                  className={`relative px-3 py-2 text-sm font-medium transition-all duration-200 group ${isActivePath(item.href)
                       ? 'text-primary-600'
                       : 'text-gray-600 hover:text-gray-900'
-                  }`}
+                    }`}
                 >
                   {item.name}
                   {isActivePath(item.href) && (
@@ -97,14 +96,14 @@ export const Navbar = () => {
               </div>
             ) : (
               <div className="flex space-x-2">
-                <Link 
-                  to="/login" 
+                <Link
+                  to="/login"
                   className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200"
                 >
                   Login
                 </Link>
-                <Link 
-                  to="/register" 
+                <Link
+                  to="/register"
                   className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-sm hover:shadow-md"
                 >
                   Sign Up
@@ -131,11 +130,10 @@ export const Navbar = () => {
                   key={item.name}
                   to={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-3 py-2 text-base font-medium rounded-lg transition-all duration-200 ${
-                    isActivePath(item.href)
+                  className={`block px-3 py-2 text-base font-medium rounded-lg transition-all duration-200 ${isActivePath(item.href)
                       ? 'text-primary-600 bg-primary-50'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <div>
                     <div className="font-medium">{item.name}</div>
@@ -143,8 +141,33 @@ export const Navbar = () => {
                   </div>
                 </Link>
               ))}
-              
-              {!user && (
+
+              {user ? (
+                <div className="pt-4 border-t space-y-1">
+                  {user.role === 'ADMIN' && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block px-3 py-2 text-base font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                    >
+                      <div>
+                        <div className="font-medium">Admin Dashboard</div>
+                        <div className="text-sm text-primary-500 mt-1">Manage products and orders</div>
+                      </div>
+                    </Link>
+                  )}
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                  >
+                    <div>
+                      <div className="font-medium">Profile</div>
+                      <div className="text-sm text-gray-500 mt-1">{user.name || user.email}</div>
+                    </div>
+                  </Link>
+                </div>
+              ) : (
                 <div className="pt-4 border-t">
                   <Link
                     to="/login"
