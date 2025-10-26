@@ -1,7 +1,9 @@
 // PostgreSQL database for Netlify Functions
 // Connects to Neon PostgreSQL database
 
-import { Pool, PoolClient } from 'pg'
+import { Pool } from 'pg'
+import { createClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export interface User {
   id: string
@@ -13,11 +15,22 @@ export interface User {
   updatedAt: Date
 }
 
+export interface ProductCategory {
+  id: string
+  name: string
+  slug: string
+  description: string
+  icon: string
+  productCount: number
+  subcategories?: ProductCategory[]
+}
+
 export interface Product {
   id: string
   name: string
   description?: string
   category: string
+  categories?: string[] // New field for multiple categories
   basePrice: number
   images: string[]
   sizes: string[]
@@ -25,6 +38,11 @@ export interface Product {
   isActive: boolean
   createdAt: Date
   updatedAt: Date
+  // Enhanced customization fields
+  customizationOptions?: any // JSON field for CustomizationOptions
+  threeDModelUrl?: string
+  materialInfo?: any // JSON field for MaterialInfo[]
+  careInstructions?: string[]
 }
 
 export interface Customization {
@@ -39,6 +57,11 @@ export interface Customization {
   totalPrice: number
   createdAt: Date
   updatedAt: Date
+  // Enhanced customization fields
+  sleeveId?: string
+  customMeasurements?: any // JSON field for MeasurementFields
+  customOptions?: any // JSON field for custom options
+  priceBreakdown?: any // JSON field for price calculation details
 }
 
 export interface Order {
@@ -62,17 +85,75 @@ export interface OrderItem {
   price: number
 }
 
+export interface CustomerReview {
+  id: string
+  productId: string
+  customerId: string
+  customerName: string
+  rating: number // 1-5 stars
+  title: string
+  content: string
+  verified: boolean // purchased customer
+  helpful: number // helpful votes
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface ReviewPhoto {
+  id: string
+  reviewId: string
+  storagePath: string // Supabase Storage path
+  publicUrl: string // Supabase public URL
+  alt?: string
+  width?: number
+  height?: number
+  format?: string
+  fileSize: number
+  originalFilename?: string
+  bucketName: string
+  createdAt: Date
+}
+
+export interface CustomerMeasurements {
+  id: string
+  customerId: string
+  measurements: any // JSON field for MeasurementFields
+  notes?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface CustomizationPreferences {
+  id: string
+  customerId: string
+  savedMeasurements?: any // JSON field for MeasurementFields
+  preferredColors: string[]
+  preferredSizes: string[]
+  notes?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
 // PostgreSQL connection pool
 let pool: Pool | null = null
 
 function getPool(): Pool {
   if (!pool) {
     pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: process.env.DATABASE_URL?.includes('neon.tech') ? { rejectUnauthorized: false } : false,
+      connectionString: process.env.SUPABASE_DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 2000,
+    })
+
+    // Connection event handlers for monitoring
+    pool.on('error', (err) => {
+      console.error('Supabase connection pool error:', err)
+    })
+
+    pool.on('connect', () => {
+      console.log('Connected to Supabase database')
     })
   }
   return pool
@@ -86,9 +167,18 @@ function generateId(): string {
 // Database operations
 export class Database {
   private pool: Pool
+  private supabase?: SupabaseClient // Optional Supabase client for enhanced features
 
   constructor() {
     this.pool = getPool()
+    
+    // Initialize optional Supabase client if credentials are available
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
+      this.supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      )
+    }
   }
 
   private async query(text: string, params?: any[]): Promise<any> {
@@ -118,16 +208,34 @@ export class Database {
       `)
 
       await this.query(`
+        CREATE TABLE IF NOT EXISTS product_categories (
+          id VARCHAR(255) PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          slug VARCHAR(255) UNIQUE NOT NULL,
+          description TEXT,
+          icon VARCHAR(50),
+          "productCount" INTEGER DEFAULT 0,
+          "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+
+      await this.query(`
         CREATE TABLE IF NOT EXISTS products (
           id VARCHAR(255) PRIMARY KEY,
           name VARCHAR(255) NOT NULL,
           description TEXT,
           category VARCHAR(255) NOT NULL,
+          categories TEXT[] DEFAULT '{}',
           "basePrice" DECIMAL(10,2) NOT NULL,
           images TEXT[] DEFAULT '{}',
           sizes TEXT[] DEFAULT '{}',
           colors TEXT[] DEFAULT '{}',
           "isActive" BOOLEAN DEFAULT true,
+          "customizationOptions" JSONB,
+          "threeDModelUrl" VARCHAR(500),
+          "materialInfo" JSONB,
+          "careInstructions" TEXT[],
           "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -144,6 +252,10 @@ export class Database {
           "logoUrl" VARCHAR(500),
           "previewUrl" VARCHAR(500),
           "totalPrice" DECIMAL(10,2) NOT NULL,
+          "sleeveId" VARCHAR(255),
+          "customMeasurements" JSONB,
+          "customOptions" JSONB,
+          "priceBreakdown" JSONB,
           "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -174,6 +286,63 @@ export class Database {
         )
       `)
 
+      await this.query(`
+        CREATE TABLE IF NOT EXISTS customer_reviews (
+          id VARCHAR(255) PRIMARY KEY,
+          "productId" VARCHAR(255) REFERENCES products(id),
+          "customerId" VARCHAR(255) REFERENCES users(id),
+          "customerName" VARCHAR(255) NOT NULL,
+          rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+          title VARCHAR(500) NOT NULL,
+          content TEXT NOT NULL,
+          verified BOOLEAN DEFAULT false,
+          helpful INTEGER DEFAULT 0,
+          "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+
+      await this.query(`
+        CREATE TABLE IF NOT EXISTS review_photos (
+          id VARCHAR(255) PRIMARY KEY,
+          "reviewId" VARCHAR(255) REFERENCES customer_reviews(id) ON DELETE CASCADE,
+          "publicId" VARCHAR(255) NOT NULL,
+          url VARCHAR(500) NOT NULL,
+          "thumbnailUrl" VARCHAR(500) NOT NULL,
+          alt VARCHAR(255),
+          width INTEGER NOT NULL,
+          height INTEGER NOT NULL,
+          format VARCHAR(10) NOT NULL,
+          bytes INTEGER NOT NULL,
+          "originalFilename" VARCHAR(255),
+          "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+
+      await this.query(`
+        CREATE TABLE IF NOT EXISTS customer_measurements (
+          id VARCHAR(255) PRIMARY KEY,
+          "customerId" VARCHAR(255) REFERENCES users(id),
+          measurements JSONB NOT NULL,
+          notes TEXT,
+          "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+
+      await this.query(`
+        CREATE TABLE IF NOT EXISTS customization_preferences (
+          id VARCHAR(255) PRIMARY KEY,
+          "customerId" VARCHAR(255) REFERENCES users(id),
+          "savedMeasurements" JSONB,
+          "preferredColors" TEXT[] DEFAULT '{}',
+          "preferredSizes" TEXT[] DEFAULT '{}',
+          notes TEXT,
+          "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+
       // Insert sample data if tables are empty
       await this.insertSampleData()
     } catch (error) {
@@ -183,6 +352,73 @@ export class Database {
 
   private async insertSampleData(): Promise<void> {
     try {
+      // Check if categories exist
+      const categoriesExist = await this.query('SELECT id FROM product_categories LIMIT 1')
+      
+      if (categoriesExist.rows.length === 0) {
+        // Insert product categories
+        const categories = [
+          {
+            id: 'mother-daughter',
+            name: 'Mother & Daughter Collections',
+            slug: 'mother-daughter',
+            description: 'Matching outfits for special bonding moments',
+            icon: '👩‍👧'
+          },
+          {
+            id: 'birthday-celebration',
+            name: 'Birthday Celebration Outfits',
+            slug: 'birthday-celebration',
+            description: 'Festive wear for memorable celebrations',
+            icon: '🎂'
+          },
+          {
+            id: 'cotton-essentials',
+            name: 'Everyday Cotton Essentials',
+            slug: 'cotton-essentials',
+            description: 'Comfortable daily wear in premium cotton',
+            icon: '👕'
+          },
+          {
+            id: 'maternity',
+            name: 'Maternity Collection',
+            slug: 'maternity',
+            description: 'Stylish and comfortable clothing for expecting mothers',
+            icon: '🤱'
+          },
+          {
+            id: 'newborn-essentials',
+            name: 'Newborn Essentials',
+            slug: 'newborn-essentials',
+            description: 'Soft, safe clothing for babies 0-12 months',
+            icon: '👶'
+          },
+          {
+            id: 'accessories',
+            name: 'Accessories & Add-ons',
+            slug: 'accessories',
+            description: 'Complementary items like scarves, belts, jewelry',
+            icon: '👜'
+          },
+          {
+            id: 'kids-coordinated',
+            name: 'Kids Coordinated Sets',
+            slug: 'kids-coordinated',
+            description: 'Mix-and-match pieces for children',
+            icon: '👦'
+          }
+        ]
+
+        for (const category of categories) {
+          await this.query(`
+            INSERT INTO product_categories (id, name, slug, description, icon, "productCount")
+            VALUES ($1, $2, $3, $4, $5, $6)
+          `, [category.id, category.name, category.slug, category.description, category.icon, 0])
+        }
+
+        console.log('Product categories inserted successfully')
+      }
+
       // Check if admin user exists
       const adminExists = await this.query('SELECT id FROM users WHERE email = $1', ['admin@willowbrook.com'])
 
@@ -193,24 +429,59 @@ export class Database {
           VALUES ($1, $2, $3, $4, $5)
         `, ['admin-1', 'admin@willowbrook.com', 'Admin User', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/VcSAg/9qm', 'ADMIN'])
 
-        // Insert sample products
+        // Insert sample products with enhanced customization options
         const products = [
           {
             id: 'prod-1',
             name: 'Classic T-Shirt',
             description: 'Comfortable cotton t-shirt perfect for customization',
             category: 'shirts',
-            basePrice: 25.00,
+            categories: ['cotton-essentials', 'mother-daughter'],
+            basePrice: 2075.00, // ₹2,075 (25 USD * 83)
             images: ['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400'],
             sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-            colors: ['#000000', '#FFFFFF', '#FF0000', '#0000FF', '#00FF00', '#FFFF00']
+            colors: ['#000000', '#FFFFFF', '#FF0000', '#0000FF', '#00FF00', '#FFFF00'],
+            customizationOptions: {
+              colors: [
+                { id: 'black', name: 'Black', hexCode: '#000000', available: true, priceModifier: 0 },
+                { id: 'white', name: 'White', hexCode: '#FFFFFF', available: true, priceModifier: 0 },
+                { id: 'red', name: 'Red', hexCode: '#FF0000', available: true, priceModifier: 166 }, // ₹166 (2 USD * 83)
+                { id: 'blue', name: 'Blue', hexCode: '#0000FF', available: true, priceModifier: 166 }, // ₹166 (2 USD * 83)
+                { id: 'green', name: 'Green', hexCode: '#00FF00', available: true, priceModifier: 166 }, // ₹166 (2 USD * 83)
+                { id: 'yellow', name: 'Yellow', hexCode: '#FFFF00', available: true, priceModifier: 166 } // ₹166 (2 USD * 83)
+              ],
+              sizes: [
+                { id: 'xs', name: 'XS', category: 'standard', available: true, priceModifier: 0 },
+                { id: 's', name: 'S', category: 'standard', available: true, priceModifier: 0 },
+                { id: 'm', name: 'M', category: 'standard', available: true, priceModifier: 0 },
+                { id: 'l', name: 'L', category: 'standard', available: true, priceModifier: 0 },
+                { id: 'xl', name: 'XL', category: 'standard', available: true, priceModifier: 249 }, // ₹249 (3 USD * 83)
+                { id: 'xxl', name: 'XXL', category: 'standard', available: true, priceModifier: 415 }, // ₹415 (5 USD * 83)
+                { id: 'custom', name: 'Custom Measurements', category: 'custom', available: true, priceModifier: 830 } // ₹830 (10 USD * 83)
+              ],
+              sleeves: [
+                { id: 'short', name: 'Short Sleeve', description: 'Classic short sleeves', category: 'short', available: true, priceModifier: 0 },
+                { id: 'long', name: 'Long Sleeve', description: 'Full-length sleeves', category: 'long', available: true, priceModifier: 415 }, // ₹415 (5 USD * 83)
+                { id: 'sleeveless', name: 'Tank Top', description: 'No sleeves', category: 'sleeveless', available: true, priceModifier: -249 } // -₹249 (-3 USD * 83)
+              ],
+              customOptions: [
+                { id: 'embroidery', name: 'Custom Embroidery', type: 'text', required: false, priceModifier: 664 }, // ₹664 (8 USD * 83)
+                { id: 'logo', name: 'Logo Upload', type: 'image', required: false, priceModifier: 996 } // ₹996 (12 USD * 83)
+              ],
+              allowCustomMeasurements: true
+            },
+            materialInfo: [
+              { name: 'Cotton', percentage: 100, properties: ['Breathable', 'Soft', 'Durable'] }
+            ],
+            careInstructions: ['Machine wash cold', 'Tumble dry low', 'Do not bleach']
           },
           {
             id: 'prod-2',
             name: 'Premium Hoodie',
             description: 'Warm and cozy hoodie with premium materials',
             category: 'hoodies',
-            basePrice: 45.00,
+            categories: ['cotton-essentials', 'birthday-celebration'],
+            basePrice: 3735.00, // ₹3,735 (45 USD * 83)
             images: ['https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400'],
             sizes: ['S', 'M', 'L', 'XL', 'XXL'],
             colors: ['#000000', '#FFFFFF', '#808080', '#000080', '#800000']
@@ -220,20 +491,55 @@ export class Database {
             name: 'Baseball Cap',
             description: 'Classic baseball cap with adjustable strap',
             category: 'accessories',
-            basePrice: 20.00,
+            categories: ['accessories', 'kids-coordinated'],
+            basePrice: 1660.00, // ₹1,660 (20 USD * 83)
             images: ['https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400'],
             sizes: ['One Size'],
             colors: ['#000000', '#FFFFFF', '#FF0000', '#0000FF', '#00FF00']
+          },
+          {
+            id: 'prod-4',
+            name: 'Maternity Dress',
+            description: 'Elegant and comfortable dress for expecting mothers',
+            category: 'dresses',
+            categories: ['maternity', 'cotton-essentials'],
+            basePrice: 5395.00, // ₹5,395 (65 USD * 83)
+            images: ['https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400'],
+            sizes: ['XS', 'S', 'M', 'L', 'XL'],
+            colors: ['#000080', '#800080', '#008000', '#000000']
+          },
+          {
+            id: 'prod-5',
+            name: 'Baby Onesie Set',
+            description: 'Soft organic cotton onesies for newborns',
+            category: 'baby-clothes',
+            categories: ['newborn-essentials', 'cotton-essentials'],
+            basePrice: 2905.00, // ₹2,905 (35 USD * 83)
+            images: ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400'],
+            sizes: ['0-3M', '3-6M', '6-9M', '9-12M'],
+            colors: ['#FFB6C1', '#87CEEB', '#98FB98', '#FFFFE0']
+          },
+          {
+            id: 'prod-6',
+            name: 'Birthday Party Dress',
+            description: 'Special occasion dress perfect for celebrations',
+            category: 'dresses',
+            categories: ['birthday-celebration', 'kids-coordinated'],
+            basePrice: 4565.00, // ₹4,565 (55 USD * 83)
+            images: ['https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=400'],
+            sizes: ['2T', '3T', '4T', '5T', '6T'],
+            colors: ['#FF69B4', '#9370DB', '#FFD700', '#FF6347']
           }
         ]
 
         for (const product of products) {
           await this.query(`
-            INSERT INTO products (id, name, description, category, "basePrice", images, sizes, colors)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            INSERT INTO products (id, name, description, category, categories, "basePrice", images, sizes, colors, "customizationOptions", "materialInfo", "careInstructions")
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
           `, [
-            product.id, product.name, product.description, product.category,
-            product.basePrice, product.images, product.sizes, product.colors
+            product.id, product.name, product.description, product.category, product.categories,
+            product.basePrice, product.images, product.sizes, product.colors,
+            product.customizationOptions, product.materialInfo, product.careInstructions
           ])
         }
 
@@ -302,8 +608,50 @@ export class Database {
     return result.rows
   }
 
+  // Category operations
+  async findCategories(): Promise<ProductCategory[]> {
+    const result = await this.query('SELECT * FROM product_categories ORDER BY name')
+    return result.rows
+  }
+
+  async findCategoryById(id: string): Promise<ProductCategory | null> {
+    const result = await this.query('SELECT * FROM product_categories WHERE id = $1', [id])
+    return result.rows[0] || null
+  }
+
+  async findCategoryBySlug(slug: string): Promise<ProductCategory | null> {
+    const result = await this.query('SELECT * FROM product_categories WHERE slug = $1', [slug])
+    return result.rows[0] || null
+  }
+
+  async updateCategoryProductCount(categoryId: string, count: number): Promise<void> {
+    await this.query('UPDATE product_categories SET "productCount" = $1 WHERE id = $2', [count, categoryId])
+  }
+
+  async getCategoriesWithProductCounts(): Promise<ProductCategory[]> {
+    // Get all categories
+    const categories = await this.findCategories()
+    
+    // Update product counts for each category
+    for (const category of categories) {
+      const result = await this.query(`
+        SELECT COUNT(*) as count 
+        FROM products 
+        WHERE "isActive" = true AND ($1 = ANY(categories) OR category = $1)
+      `, [category.id])
+      
+      const count = parseInt(result.rows[0].count)
+      category.productCount = count
+      
+      // Update in database
+      await this.updateCategoryProductCount(category.id, count)
+    }
+    
+    return categories
+  }
+
   // Product operations
-  async findProducts(where: { isActive?: boolean; category?: string } = {}): Promise<Product[]> {
+  async findProducts(where: { isActive?: boolean; category?: string; categories?: string[] } = {}): Promise<Product[]> {
     let query = 'SELECT * FROM products WHERE 1=1'
     const params = []
     let paramCount = 1
@@ -320,6 +668,17 @@ export class Database {
       paramCount++
     }
 
+    if (where.categories && where.categories.length > 0) {
+      // Filter by multiple categories - product must match at least one category
+      const categoryConditions = where.categories.map((_, index) => {
+        const paramIndex = paramCount + index
+        return `($${paramIndex} = ANY(categories) OR category = $${paramIndex})`
+      })
+      query += ` AND (${categoryConditions.join(' OR ')})`
+      params.push(...where.categories)
+      paramCount += where.categories.length
+    }
+
     query += ' ORDER BY "createdAt" DESC'
 
     const result = await this.query(query, params)
@@ -334,10 +693,10 @@ export class Database {
   async createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
     const id = generateId()
     const result = await this.query(`
-      INSERT INTO products (id, name, description, category, "basePrice", images, sizes, colors, "isActive", "createdAt", "updatedAt")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO products (id, name, description, category, categories, "basePrice", images, sizes, colors, "isActive", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
-    `, [id, data.name, data.description, data.category, data.basePrice, data.images, data.sizes, data.colors, data.isActive])
+    `, [id, data.name, data.description, data.category, data.categories || [], data.basePrice, data.images, data.sizes, data.colors, data.isActive])
     return result.rows[0]
   }
 
@@ -405,10 +764,10 @@ export class Database {
   async createCustomization(data: Omit<Customization, 'id' | 'createdAt' | 'updatedAt'>): Promise<Customization> {
     const id = generateId()
     const result = await this.query(`
-      INSERT INTO customizations (id, "userId", "productId", size, color, embroidery, "logoUrl", "previewUrl", "totalPrice", "createdAt", "updatedAt")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO customizations (id, "userId", "productId", size, color, embroidery, "logoUrl", "previewUrl", "totalPrice", "sleeveId", "customMeasurements", "customOptions", "priceBreakdown", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
-    `, [id, data.userId, data.productId, data.size, data.color, data.embroidery, data.logoUrl, data.previewUrl, data.totalPrice])
+    `, [id, data.userId, data.productId, data.size, data.color, data.embroidery, data.logoUrl, data.previewUrl, data.totalPrice, data.sleeveId, data.customMeasurements, data.customOptions, data.priceBreakdown])
     return result.rows[0]
   }
 
@@ -616,6 +975,419 @@ export class Database {
     )
 
     return ordersWithItems
+  }
+
+  // Review operations
+  async findReviews(where: { productId?: string; customerId?: string; verified?: boolean } = {}, skip = 0, take = 20): Promise<CustomerReview[]> {
+    let query = 'SELECT * FROM customer_reviews WHERE 1=1'
+    const params = []
+    let paramCount = 1
+
+    if (where.productId) {
+      query += ` AND "productId" = $${paramCount}`
+      params.push(where.productId)
+      paramCount++
+    }
+
+    if (where.customerId) {
+      query += ` AND "customerId" = $${paramCount}`
+      params.push(where.customerId)
+      paramCount++
+    }
+
+    if (where.verified !== undefined) {
+      query += ` AND verified = $${paramCount}`
+      params.push(where.verified)
+      paramCount++
+    }
+
+    query += ` ORDER BY "createdAt" DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`
+    params.push(take, skip)
+
+    const result = await this.query(query, params)
+    return result.rows
+  }
+
+  async findReviewById(id: string): Promise<CustomerReview | null> {
+    const result = await this.query('SELECT * FROM customer_reviews WHERE id = $1', [id])
+    return result.rows[0] || null
+  }
+
+  async createReview(data: Omit<CustomerReview, 'id' | 'createdAt' | 'updatedAt'>): Promise<CustomerReview> {
+    const id = generateId()
+    const result = await this.query(`
+      INSERT INTO customer_reviews (id, "productId", "customerId", "customerName", rating, title, content, verified, helpful, "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      RETURNING *
+    `, [id, data.productId, data.customerId, data.customerName, data.rating, data.title, data.content, data.verified, data.helpful])
+    return result.rows[0]
+  }
+
+  async updateReview(id: string, data: Partial<CustomerReview>): Promise<CustomerReview | null> {
+    const fields = []
+    const values = []
+    let paramCount = 1
+
+    for (const [key, value] of Object.entries(data)) {
+      if (key !== 'id' && key !== 'createdAt') {
+        fields.push(`"${key}" = $${paramCount}`)
+        values.push(value)
+        paramCount++
+      }
+    }
+
+    if (fields.length === 0) return null
+
+    fields.push(`"updatedAt" = CURRENT_TIMESTAMP`)
+    values.push(id)
+
+    const result = await this.query(`
+      UPDATE customer_reviews SET ${fields.join(', ')}
+      WHERE id = $${paramCount}
+      RETURNING *
+    `, values)
+
+    return result.rows[0] || null
+  }
+
+  async deleteReview(id: string): Promise<boolean> {
+    const result = await this.query('DELETE FROM customer_reviews WHERE id = $1', [id])
+    return result.rowCount > 0
+  }
+
+  async countReviews(where: { productId?: string; verified?: boolean } = {}): Promise<number> {
+    let query = 'SELECT COUNT(*) FROM customer_reviews WHERE 1=1'
+    const params = []
+    let paramCount = 1
+
+    if (where.productId) {
+      query += ` AND "productId" = $${paramCount}`
+      params.push(where.productId)
+      paramCount++
+    }
+
+    if (where.verified !== undefined) {
+      query += ` AND verified = $${paramCount}`
+      params.push(where.verified)
+      paramCount++
+    }
+
+    const result = await this.query(query, params)
+    return parseInt(result.rows[0].count)
+  }
+
+  async getReviewSummary(productId: string): Promise<{
+    averageRating: number;
+    totalReviews: number;
+    ratingDistribution: { [key: number]: number };
+    verifiedPurchasePercentage: number;
+    photoReviewCount: number;
+  }> {
+    // Get basic review stats
+    const statsResult = await this.query(`
+      SELECT 
+        AVG(rating) as average_rating,
+        COUNT(*) as total_reviews,
+        COUNT(CASE WHEN verified = true THEN 1 END) as verified_count
+      FROM customer_reviews 
+      WHERE "productId" = $1
+    `, [productId])
+
+    const stats = statsResult.rows[0]
+    const averageRating = parseFloat(stats.average_rating) || 0
+    const totalReviews = parseInt(stats.total_reviews) || 0
+    const verifiedCount = parseInt(stats.verified_count) || 0
+
+    // Get rating distribution
+    const distributionResult = await this.query(`
+      SELECT rating, COUNT(*) as count
+      FROM customer_reviews 
+      WHERE "productId" = $1
+      GROUP BY rating
+      ORDER BY rating
+    `, [productId])
+
+    const ratingDistribution: { [key: number]: number } = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+    distributionResult.rows.forEach((row: any) => {
+      ratingDistribution[row.rating] = parseInt(row.count)
+    })
+
+    // Get photo review count
+    const photoCountResult = await this.query(`
+      SELECT COUNT(DISTINCT cr.id) as photo_review_count
+      FROM customer_reviews cr
+      INNER JOIN review_photos rp ON cr.id = rp."reviewId"
+      WHERE cr."productId" = $1
+    `, [productId])
+
+    const photoReviewCount = parseInt(photoCountResult.rows[0].photo_review_count) || 0
+    const verifiedPurchasePercentage = totalReviews > 0 ? (verifiedCount / totalReviews) * 100 : 0
+
+    return {
+      averageRating,
+      totalReviews,
+      ratingDistribution,
+      verifiedPurchasePercentage,
+      photoReviewCount
+    }
+  }
+
+  // Review photo operations
+  async createReviewPhotos(photos: Omit<ReviewPhoto, 'id'>[]): Promise<ReviewPhoto[]> {
+    const results = []
+    for (const photo of photos) {
+      const id = generateId()
+      const result = await this.query(`
+        INSERT INTO review_photos (id, "reviewId", "storagePath", "publicUrl", alt, width, height, format, "fileSize", "originalFilename", "bucketName", "createdAt")
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP)
+        RETURNING *
+      `, [id, photo.reviewId, photo.storagePath, photo.publicUrl, photo.alt, photo.width, photo.height, photo.format, photo.fileSize, photo.originalFilename, photo.bucketName])
+      results.push(result.rows[0])
+    }
+    return results
+  }
+
+  async findReviewPhotos(reviewId: string): Promise<ReviewPhoto[]> {
+    const result = await this.query('SELECT * FROM review_photos WHERE "reviewId" = $1 ORDER BY "createdAt"', [reviewId])
+    return result.rows
+  }
+
+  async deleteReviewPhotos(reviewId: string): Promise<boolean> {
+    const result = await this.query('DELETE FROM review_photos WHERE "reviewId" = $1', [reviewId])
+    return result.rowCount > 0
+  }
+
+  // Enhanced review queries with photos
+  async findReviewsWithPhotos(where: { productId?: string; customerId?: string; verified?: boolean; withPhotos?: boolean } = {}, skip = 0, take = 20): Promise<(CustomerReview & { photos: ReviewPhoto[] })[]> {
+    let query = 'SELECT * FROM customer_reviews WHERE 1=1'
+    const params = []
+    let paramCount = 1
+
+    if (where.productId) {
+      query += ` AND "productId" = $${paramCount}`
+      params.push(where.productId)
+      paramCount++
+    }
+
+    if (where.customerId) {
+      query += ` AND "customerId" = $${paramCount}`
+      params.push(where.customerId)
+      paramCount++
+    }
+
+    if (where.verified !== undefined) {
+      query += ` AND verified = $${paramCount}`
+      params.push(where.verified)
+      paramCount++
+    }
+
+    if (where.withPhotos) {
+      query += ` AND EXISTS (SELECT 1 FROM review_photos WHERE "reviewId" = customer_reviews.id)`
+    }
+
+    query += ` ORDER BY "createdAt" DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`
+    params.push(take, skip)
+
+    const result = await this.query(query, params)
+    const reviews = result.rows
+
+    // Get photos for each review
+    const reviewsWithPhotos = await Promise.all(
+      reviews.map(async (review: any) => {
+        const photos = await this.findReviewPhotos(review.id)
+        return {
+          ...review,
+          photos
+        }
+      })
+    )
+
+    return reviewsWithPhotos
+  }
+
+  async checkUserPurchasedProduct(userId: string, productId: string): Promise<boolean> {
+    const result = await this.query(`
+      SELECT 1 FROM orders o
+      INNER JOIN order_items oi ON o.id = oi."orderId"
+      WHERE o."userId" = $1 AND oi."productId" = $2 AND o.status IN ('PAID', 'PROCESSING', 'MANUFACTURING', 'SHIPPED', 'DELIVERED')
+      LIMIT 1
+    `, [userId, productId])
+    
+    return result.rows.length > 0
+  }
+
+  // Customer measurements operations
+  async findCustomerMeasurements(customerId: string): Promise<CustomerMeasurements | null> {
+    const result = await this.query('SELECT * FROM customer_measurements WHERE "customerId" = $1 ORDER BY "updatedAt" DESC LIMIT 1', [customerId])
+    return result.rows[0] || null
+  }
+
+  async createCustomerMeasurements(data: Omit<CustomerMeasurements, 'id' | 'createdAt' | 'updatedAt'>): Promise<CustomerMeasurements> {
+    const id = generateId()
+    const result = await this.query(`
+      INSERT INTO customer_measurements (id, "customerId", measurements, notes, "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      RETURNING *
+    `, [id, data.customerId, data.measurements, data.notes])
+    return result.rows[0]
+  }
+
+  async updateCustomerMeasurements(customerId: string, data: Partial<CustomerMeasurements>): Promise<CustomerMeasurements | null> {
+    const fields = []
+    const values = []
+    let paramCount = 1
+
+    for (const [key, value] of Object.entries(data)) {
+      if (key !== 'id' && key !== 'customerId' && key !== 'createdAt') {
+        fields.push(`"${key}" = $${paramCount}`)
+        values.push(value)
+        paramCount++
+      }
+    }
+
+    if (fields.length === 0) return null
+
+    fields.push(`"updatedAt" = CURRENT_TIMESTAMP`)
+    values.push(customerId)
+
+    const result = await this.query(`
+      UPDATE customer_measurements SET ${fields.join(', ')}
+      WHERE "customerId" = $${paramCount}
+      RETURNING *
+    `, values)
+
+    return result.rows[0] || null
+  }
+
+  // Customization preferences operations
+  async findCustomizationPreferences(customerId: string): Promise<CustomizationPreferences | null> {
+    const result = await this.query('SELECT * FROM customization_preferences WHERE "customerId" = $1', [customerId])
+    return result.rows[0] || null
+  }
+
+  async createCustomizationPreferences(data: Omit<CustomizationPreferences, 'id' | 'createdAt' | 'updatedAt'>): Promise<CustomizationPreferences> {
+    const id = generateId()
+    const result = await this.query(`
+      INSERT INTO customization_preferences (id, "customerId", "savedMeasurements", "preferredColors", "preferredSizes", notes, "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      RETURNING *
+    `, [id, data.customerId, data.savedMeasurements, data.preferredColors, data.preferredSizes, data.notes])
+    return result.rows[0]
+  }
+
+  async updateCustomizationPreferences(customerId: string, data: Partial<CustomizationPreferences>): Promise<CustomizationPreferences | null> {
+    const fields = []
+    const values = []
+    let paramCount = 1
+
+    for (const [key, value] of Object.entries(data)) {
+      if (key !== 'id' && key !== 'customerId' && key !== 'createdAt') {
+        fields.push(`"${key}" = $${paramCount}`)
+        values.push(value)
+        paramCount++
+      }
+    }
+
+    if (fields.length === 0) return null
+
+    fields.push(`"updatedAt" = CURRENT_TIMESTAMP`)
+    values.push(customerId)
+
+    const result = await this.query(`
+      UPDATE customization_preferences SET ${fields.join(', ')}
+      WHERE "customerId" = $${paramCount}
+      RETURNING *
+    `, values)
+
+    return result.rows[0] || null
+  }
+
+  // Optional Supabase enhancement methods
+  // These methods provide additional functionality when Supabase client is available
+  
+  /**
+   * Get Supabase client instance for enhanced features
+   * @returns SupabaseClient instance or null if not configured
+   */
+  getSupabaseClient(): SupabaseClient | null {
+    return this.supabase || null
+  }
+
+  /**
+   * Subscribe to real-time order updates (future enhancement)
+   * @param userId - User ID to filter orders
+   * @param callback - Callback function for order updates
+   * @returns Subscription object or null if Supabase client not available
+   */
+  async subscribeToOrderUpdates(userId: string, callback: (payload: any) => void) {
+    if (!this.supabase) return null
+    
+    return this.supabase
+      .channel('order-updates')
+      .on(
+        'postgres_changes' as any,
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `userId=eq.${userId}`
+        },
+        callback
+      )
+      .subscribe()
+  }
+
+  /**
+   * Authenticate user with Supabase (future enhancement)
+   * @param token - JWT token to validate
+   * @returns User data or null if authentication fails
+   */
+  async authenticateWithSupabase(token: string) {
+    if (!this.supabase) return null
+    
+    try {
+      const { data, error } = await this.supabase.auth.getUser(token)
+      if (error) throw error
+      return data.user
+    } catch (error) {
+      console.error('Supabase authentication error:', error)
+      return null
+    }
+  }
+
+  /**
+   * Validate database connection and schema
+   * @returns Promise<boolean> indicating if migration is valid
+   */
+  async validateMigration(): Promise<boolean> {
+    try {
+      // Check table existence
+      const tables = ['users', 'products', 'orders', 'customizations', 'customer_reviews']
+      for (const table of tables) {
+        const result = await this.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = $1
+          )
+        `, [table])
+        
+        if (!result.rows[0].exists) {
+          console.error(`Table ${table} not found`)
+          return false
+        }
+      }
+
+      // Validate data integrity
+      const userCount = await this.countUsers()
+      const productCount = await this.countProducts()
+      
+      console.log(`Migration validation: ${userCount} users, ${productCount} products`)
+      return true
+    } catch (error) {
+      console.error('Migration validation failed:', error)
+      return false
+    }
   }
 }
 

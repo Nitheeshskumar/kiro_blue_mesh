@@ -16,7 +16,7 @@
 
 ## Backend Stack
 - **Netlify Functions** (serverless Express.js)
-- **Neon PostgreSQL** (serverless database)
+- **Supabase PostgreSQL** (serverless database with real-time capabilities)
 - **Custom database layer** (no ORM for serverless optimization)
 - **JWT** for authentication
 - **Stripe** for payment processing
@@ -39,9 +39,12 @@ npm run setup
 # Install all dependencies (root, client, server)
 npm run install:all
 
-# Database setup
-npm run setup-db
-npm run seed-db
+# Database setup (Supabase)
+npm run setup-supabase-db
+npm run seed-supabase-db
+
+# Database testing
+npm run test-supabase-connection
 ```
 
 ### Development
@@ -87,10 +90,17 @@ npm run diagnose
 ## Environment Requirements
 - **Node.js**: >=16.0.0 (production uses 20.12.2)
 - **npm**: >=8.0.0
-- **PostgreSQL**: Compatible with Neon serverless
+- **Supabase**: Project setup with API keys and database URL
+- **Supabase Environment Variables**:
+  - `SUPABASE_URL`: Project URL (https://your-project.supabase.co)
+  - `SUPABASE_ANON_KEY`: Anonymous/public API key
+  - `SUPABASE_SERVICE_ROLE_KEY`: Service role key for server operations
+  - `SUPABASE_DATABASE_URL`: Direct PostgreSQL connection string
 
 ## Key Configuration Files
 - `netlify.toml`: Netlify deployment and routing config
 - `vite.config.ts`: Frontend build configuration
 - `tsconfig.json`: TypeScript compiler settings
-- `.env`: Environment variables (database, JWT, Stripe keys)
+- `.env`: Environment variables (Supabase, JWT, Stripe keys)
+- `supabase-schema.sql`: Database schema for Supabase setup
+- `supabase-sample-data.sql`: Sample data for development

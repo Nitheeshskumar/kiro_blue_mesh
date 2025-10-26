@@ -38,12 +38,14 @@ try {
   
   const requiredDeps = [
     '@netlify/functions',
+    '@supabase/supabase-js',
     'express',
     'serverless-http',
     'cors',
     'helmet',
     'bcryptjs',
-    'jsonwebtoken'
+    'jsonwebtoken',
+    'pg'
   ];
 
   let allDepsPresent = true;
@@ -71,11 +73,13 @@ try {
   
   const requiredConfig = [
     'publish = "client/dist"',
-    'command = "npm run build:netlify"',
+    'command = "npm run install:all && npm run build:netlify"',
     'functions = "netlify/functions"',
     'node_bundler = "esbuild"',
     'from = "/api/*"',
-    'to = "/.netlify/functions/api/:splat"'
+    'to = "/.netlify/functions/api/:splat"',
+    '@supabase/supabase-js',
+    'pg'
   ];
 
   let allConfigPresent = true;
@@ -140,11 +144,13 @@ console.log('\n' + '='.repeat(50));
 if (allFilesExist) {
   console.log('🎉 All tests passed! Netlify Functions setup is complete.');
   console.log('\n📋 Next steps:');
-  console.log('1. Run: npm run prepare:netlify');
-  console.log('2. Push to GitHub');
-  console.log('3. Connect to Netlify');
-  console.log('4. Set environment variables');
-  console.log('5. Deploy!');
+  console.log('1. Set up Supabase database: npm run setup-supabase-db');
+  console.log('2. Test Supabase connection: npm run test-supabase-connection');
+  console.log('3. Run: npm run prepare:netlify');
+  console.log('4. Push to GitHub');
+  console.log('5. Connect to Netlify');
+  console.log('6. Set Supabase environment variables in Netlify dashboard');
+  console.log('7. Deploy and validate: npm run validate-supabase');
 } else {
   console.log('❌ Some tests failed. Please fix the issues above.');
   process.exit(1);

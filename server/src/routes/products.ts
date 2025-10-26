@@ -5,53 +5,121 @@ import { authenticateToken, requireAdmin } from '../middleware/auth';
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Products are now stored in the database
+// Use the seeding script to populate: npm run seed-products
+
+// Category metadata for display purposes
+const categoryMetadata: Record<string, { name: string; description: string; icon: string }> = {
+  'shirts': { name: 'Shirts', description: 'Comfortable cotton shirts perfect for customization', icon: '👕' },
+  'hoodies': { name: 'Hoodies', description: 'Warm and cozy hoodies with premium materials', icon: '🧥' },
+  'accessories': { name: 'Accessories', description: 'Complementary items like caps and jewelry', icon: '👜' },
+  'dresses': { name: 'Dresses', description: 'Elegant dresses for special occasions', icon: '👗' },
+  'baby-clothes': { name: 'Baby Clothes', description: 'Soft, safe clothing for babies', icon: '👶' }
+};
+
 // Get all products
 router.get('/', async (req, res) => {
   try {
-    const products = await prisma.product.findMany({
-      where: { isActive: true },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        category: true,
-        basePrice: true,
-        images: true,
-        sizes: true,
-        colors: true
+    const { category, categories, search } = req.query;
+    
+    // Build Prisma query filters
+    const where: any = {
+      isActive: true
+    };
+    
+    // Filter by category
+    if (category) {
+      where.category = category as string;
+    }
+    
+    // Filter by multiple categories (for now, just use the first one since we don't have categories array)
+    if (categories && !category) {
+      const categoryList = typeof categories === 'string' 
+        ? categories.split(',').map(c => c.trim()) 
+        : categories as string[];
+      
+      if (categoryList.length > 0) {
+        where.category = { in: categoryList };
       }
+    }
+    
+    // Filter by search term
+    if (search) {
+      const searchTerm = search as string;
+      where.OR = [
+        { name: { contains: searchTerm, mode: 'insensitive' } },
+        { description: { contains: searchTerm, mode: 'insensitive' } }
+      ];
+    }
+    
+    // Fetch products from database
+    const products = await prisma.product.findMany({
+      where,
+      orderBy: { createdAt: 'desc' }
     });
+    
     res.json(products);
   } catch (error) {
+    console.error('Get products error:', error);
     res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+// Get all categories with product counts
+router.get('/categories/all', async (req, res) => {
+  try {
+    // Get categories from products in database
+    const categoryStats = await prisma.product.groupBy({
+      by: ['category'],
+      where: { isActive: true },
+      _count: { category: true }
+    });
+
+    // Map to category objects with metadata
+    const categories = categoryStats.map(stat => {
+      const metadata = categoryMetadata[stat.category] || {
+        name: stat.category.charAt(0).toUpperCase() + stat.category.slice(1),
+        description: `${stat.category} collection`,
+        icon: '📦'
+      };
+
+      return {
+        id: stat.category,
+        name: metadata.name,
+        slug: stat.category,
+        description: metadata.description,
+        icon: metadata.icon,
+        productCount: stat._count.category
+      };
+    });
+
+    res.json(categories);
+  } catch (error) {
+    console.error('Get categories error:', error);
+    res.status(500).json({ error: 'Failed to fetch categories' });
   }
 });
 
 // Get product by ID
 router.get('/:id', async (req, res) => {
   try {
+    const { id } = req.params;
+    
+    // Find product in database
     const product = await prisma.product.findUnique({
-      where: { id: req.params.id },
+      where: { id },
       include: {
-        customizations: {
-          take: 10,
-          orderBy: { createdAt: 'desc' },
-          select: {
-            id: true,
-            previewUrl: true,
-            color: true,
-            size: true
-          }
-        }
+        customizations: true
       }
     });
-
+    
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
     res.json(product);
   } catch (error) {
+    console.error('Get product error:', error);
     res.status(500).json({ error: 'Failed to fetch product' });
   }
 });

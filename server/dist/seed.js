@@ -11,7 +11,7 @@ async function main() {
             name: 'Classic T-Shirt',
             description: 'Comfortable 100% cotton t-shirt perfect for everyday wear',
             category: 'shirts',
-            basePrice: 25.00,
+            basePrice: 2075.00, // ₹2,075 (25 USD * 83)
             images: ['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&crop=center'],
             sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
             colors: ['#000000', '#FFFFFF', '#FF0000', '#0000FF', '#00FF00', '#FFFF00', '#FF00FF', '#00FFFF']
@@ -21,7 +21,7 @@ async function main() {
             name: 'Premium Hoodie',
             description: 'Cozy fleece hoodie with kangaroo pocket and adjustable drawstring',
             category: 'hoodies',
-            basePrice: 45.00,
+            basePrice: 3735.00, // ₹3,735 (45 USD * 83)
             images: ['https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop&crop=center'],
             sizes: ['S', 'M', 'L', 'XL', 'XXL'],
             colors: ['#000000', '#FFFFFF', '#808080', '#FF0000', '#0000FF', '#008000']
@@ -31,7 +31,7 @@ async function main() {
             name: 'Business Polo',
             description: 'Professional polo shirt ideal for business casual settings',
             category: 'shirts',
-            basePrice: 35.00,
+            basePrice: 2905.00, // ₹2,905 (35 USD * 83)
             images: ['https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=400&h=400&fit=crop&crop=center'],
             sizes: ['S', 'M', 'L', 'XL', 'XXL'],
             colors: ['#000080', '#FFFFFF', '#000000', '#800000', '#008000']
@@ -41,7 +41,7 @@ async function main() {
             name: 'Athletic Tank Top',
             description: 'Moisture-wicking tank top perfect for workouts and sports',
             category: 'activewear',
-            basePrice: 20.00,
+            basePrice: 1660.00, // ₹1,660 (20 USD * 83)
             images: ['https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400&h=400&fit=crop&crop=center'],
             sizes: ['XS', 'S', 'M', 'L', 'XL'],
             colors: ['#FF4500', '#000000', '#FFFFFF', '#0000FF', '#FF0000']
@@ -51,7 +51,7 @@ async function main() {
             name: 'Crew Neck Sweatshirt',
             description: 'Classic crew neck sweatshirt made from soft cotton blend',
             category: 'sweatshirts',
-            basePrice: 40.00,
+            basePrice: 3320.00, // ₹3,320 (40 USD * 83)
             images: ['https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop&crop=center'],
             sizes: ['S', 'M', 'L', 'XL', 'XXL'],
             colors: ['#708090', '#000000', '#FFFFFF', '#800000', '#000080']
@@ -61,7 +61,7 @@ async function main() {
             name: 'Long Sleeve Basic',
             description: 'Essential long sleeve shirt for layering or standalone wear',
             category: 'shirts',
-            basePrice: 30.00,
+            basePrice: 2490.00, // ₹2,490 (30 USD * 83)
             images: ['https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=400&fit=crop&crop=center'],
             sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
             colors: ['#2F4F4F', '#000000', '#FFFFFF', '#FF0000', '#0000FF', '#008000']

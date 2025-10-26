@@ -7,19 +7,20 @@
 npm run auto-setup
 ```
 
-### 2. Configure Database
-Edit `server/.env` with your PostgreSQL database URL:
+### 2. Configure Supabase
+Edit `.env` with your Supabase credentials:
 ```env
-DATABASE_URL="postgresql://username:password@localhost:5432/clothing_customizer"
+SUPABASE_URL="https://your-project.supabase.co"
+SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+SUPABASE_DATABASE_URL="postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres"
 JWT_SECRET="your-secret-key-here"
 ```
 
-### 3. Setup Database
+### 3. Setup Supabase Database
 ```bash
-cd server
-npm run db:push
-npm run db:seed
-cd ..
+npm run setup-supabase-db
+npm run seed-supabase-db
 ```
 
 ### 4. Start the Project
@@ -40,16 +41,14 @@ cd ..
 
 ### 2. Setup Environment
 ```bash
-cp server/.env.example server/.env
-# Edit server/.env with your database details
+cp .env.example .env
+# Edit .env with your Supabase credentials
 ```
 
-### 3. Setup Database
+### 3. Setup Supabase Database
 ```bash
-cd server
-npm run db:push
-npm run db:seed
-cd ..
+npm run setup-supabase-db
+npm run seed-supabase-db
 ```
 
 ### 4. Start Development
@@ -81,6 +80,9 @@ npm run install-deps
 
 # Fix TypeScript issues
 npm run fix-typescript
+
+# Test Supabase connection
+npm run test-supabase-connection
 ```
 
 That's it! Your clothing customizer is ready! 🎉

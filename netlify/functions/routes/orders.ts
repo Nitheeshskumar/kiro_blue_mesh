@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import { getDatabase } from '../lib/database'
+import { PRICING } from '../lib/pricing'
 
 const router = Router()
 
@@ -61,6 +62,9 @@ router.post('/', async (req, res) => {
         price: customization.totalPrice
       })
     }
+
+    // Add shipping cost (consistent with frontend)
+    totalAmount += PRICING.STANDARD_SHIPPING
 
     // Create order
     const order = await db.createOrder({

@@ -1,8 +1,12 @@
 import { Routes, Route } from 'react-router-dom'
 import { Navbar } from './components/Navbar'
 import { AdminLayout } from './components/AdminLayout'
+import { Breadcrumb } from './components/ui/Breadcrumb'
+import { ErrorBoundary } from './components/ui/ErrorBoundary'
+import { ToastProvider } from './components/ui/Toast'
 import { HomePage } from './pages/HomePage'
 import { ProductsPage } from './pages/ProductsPage'
+import { BrandStoryPage } from './pages/BrandStoryPage'
 import { CustomizerPage } from './pages/CustomizerPage'
 import { CartPage } from './pages/CartPage'
 import { OrdersPage } from './pages/OrdersPage'
@@ -17,11 +21,22 @@ import { EditProduct } from './pages/admin/EditProduct'
 import { OrderManagement } from './pages/admin/OrderManagement'
 import { UserManagement } from './pages/admin/UserManagement'
 import { AuthProvider } from './contexts/AuthContext'
+import { initializeStorageBuckets } from './lib/supabaseStorage'
+import { useEffect } from 'react'
 
 function App() {
+  useEffect(() => {
+    // Initialize Supabase Storage buckets on app start
+    initializeStorageBuckets().catch(error => {
+      console.warn('Failed to initialize storage buckets:', error);
+    });
+  }, []);
+
   return (
-    <AuthProvider>
-      <Routes>
+    <ErrorBoundary>
+      <ToastProvider>
+        <AuthProvider>
+          <Routes>
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
@@ -36,11 +51,15 @@ function App() {
         <Route path="/*" element={
           <div className="min-h-screen bg-gray-50">
             <Navbar />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <Breadcrumb className="py-4" />
+            </div>
             <main>
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/products" element={<ProductsPage />} />
-                <Route path="/customize/:productId" element={<CustomizerPage />} />
+                <Route path="/brand-story" element={<BrandStoryPage />} />
+                <Route path="/products/:productId/customize" element={<CustomizerPage />} />
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
@@ -51,8 +70,10 @@ function App() {
             </main>
           </div>
         } />
-      </Routes>
-    </AuthProvider>
+          </Routes>
+        </AuthProvider>
+      </ToastProvider>
+    </ErrorBoundary>
   )
 }
 

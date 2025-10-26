@@ -5,11 +5,22 @@ export interface User {
   role: string
 }
 
+export interface ProductCategory {
+  id: string
+  name: string
+  slug: string
+  description: string
+  icon: string
+  productCount: number
+  subcategories?: ProductCategory[]
+}
+
 export interface Product {
   id: string
   name: string
   description: string
   category: string
+  categories?: string[] // New field for multiple categories
   basePrice: number
   images: string[]
   sizes: string[]

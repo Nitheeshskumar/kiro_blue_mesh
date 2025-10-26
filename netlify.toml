@@ -7,10 +7,18 @@
   NODE_VERSION = "20.12.2"
   NPM_VERSION = "9"
 
+# Required Supabase Environment Variables (set in Netlify dashboard):
+# SUPABASE_URL = "https://your-project.supabase.co"
+# SUPABASE_ANON_KEY = "your-anon-key"
+# SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key"
+# SUPABASE_DATABASE_URL = "postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres"
+# JWT_SECRET = "your-jwt-secret"
+# STRIPE_SECRET_KEY = "your-stripe-secret-key"
+
 # Function settings
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["express", "serverless-http", "bcryptjs", "jsonwebtoken", "stripe"]
+  external_node_modules = ["express", "serverless-http", "bcryptjs", "jsonwebtoken", "stripe", "pg", "@supabase/supabase-js"]
 
 # API routes to Netlify Functions
 [[redirects]]

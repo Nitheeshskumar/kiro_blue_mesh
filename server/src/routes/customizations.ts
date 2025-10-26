@@ -21,8 +21,8 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
 
     // Calculate total price (base price + customization costs)
     let totalPrice = product.basePrice;
-    if (embroidery) totalPrice += 15; // $15 for embroidery
-    if (logoUrl) totalPrice += 10; // $10 for logo
+    if (embroidery) totalPrice += 1245; // ₹1,245 for embroidery
+    if (logoUrl) totalPrice += 830; // ₹830 for logo
 
     // Generate story for this customization
     const story = generateOrderStory({

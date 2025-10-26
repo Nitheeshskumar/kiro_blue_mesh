@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useCartStore } from '../stores/cartStore'
 import { Product } from '../types'
 import { ProductPreview } from '../components/ProductPreview'
+import { PRICING, formatPrice, calculateCustomizationPrice } from '../constants/pricing'
 
 export const CustomizerPage = () => {
   const { productId } = useParams<{ productId: string }>()
@@ -75,8 +76,11 @@ export const CustomizerPage = () => {
   const calculatePrice = () => {
     if (!product) return
     
-    let price = product.basePrice
-    if (embroideryText.trim()) price += 15
+    const price = calculateCustomizationPrice(
+      product.basePrice,
+      !!embroideryText.trim(),
+      false // No logo option in this component yet
+    )
     setTotalPrice(price)
   }
 
@@ -215,7 +219,7 @@ export const CustomizerPage = () => {
           {/* Embroidery */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Custom Embroidery (+$15)
+              Custom Embroidery (+{formatPrice(PRICING.EMBROIDERY_COST)})
             </label>
             <input
               type="text"
@@ -236,7 +240,7 @@ export const CustomizerPage = () => {
             className="w-full btn-primary py-3 text-lg"
             disabled={!selectedSize || !selectedColor}
           >
-            Add to Cart - ${totalPrice.toFixed(2)}
+            Add to Cart - {formatPrice(totalPrice)}
           </button>
         </div>
       </div>

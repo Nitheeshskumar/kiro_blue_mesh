@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, X, Upload } from 'lucide-react'
+import { ArrowLeft, Plus, X, Upload, Link, Image as ImageIcon } from 'lucide-react'
 import { api } from '../../lib/api'
+import { SupabaseUploadWidget, type SupabaseUploadResult } from '../../components/SupabaseUploadWidget'
+import { STORAGE_BUCKETS, validateProductImage } from '../../lib/supabaseStorage'
 
 const CATEGORIES = [
   'shirts',
@@ -20,15 +22,24 @@ const PRESET_COLORS = [
   '#FFC0CB', '#A52A2A', '#808080', '#000080', '#008000'
 ]
 
+interface ProductImage {
+  id: string;
+  url: string;
+  type: 'upload' | 'url';
+  file?: File;
+  uploading?: boolean;
+}
+
 export const AddProduct = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const [uploadingImages, setUploadingImages] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     category: 'shirts',
     basePrice: '',
-    images: [''],
+    images: [] as ProductImage[],
     sizes: ['M'],
     colors: ['#000000']
   })
@@ -41,24 +52,49 @@ export const AddProduct = () => {
   }
 
   const addImageUrl = () => {
+    const newImage: ProductImage = {
+      id: `url-${Date.now()}`,
+      url: '',
+      type: 'url'
+    }
     setFormData(prev => ({
       ...prev,
-      images: [...prev.images, '']
+      images: [...prev.images, newImage]
     }))
   }
 
-  const removeImageUrl = (index: number) => {
+  const removeImage = (id: string) => {
     setFormData(prev => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      images: prev.images.filter(img => img.id !== id)
     }))
   }
 
-  const updateImageUrl = (index: number, url: string) => {
+  const updateImageUrl = (id: string, url: string) => {
     setFormData(prev => ({
       ...prev,
-      images: prev.images.map((img, i) => i === index ? url : img)
+      images: prev.images.map(img => 
+        img.id === id ? { ...img, url } : img
+      )
     }))
+  }
+
+  const handleImageUpload = (results: SupabaseUploadResult[]) => {
+    const newImages: ProductImage[] = results.map(result => ({
+      id: `upload-${Date.now()}-${Math.random()}`,
+      url: result.publicUrl,
+      type: 'upload'
+    }))
+
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, ...newImages]
+    }))
+  }
+
+  const handleUploadError = (error: string) => {
+    console.error('Image upload error:', error)
+    alert(`Image upload failed: ${error}`)
   }
 
   const toggleSize = (size: string) => {
@@ -88,13 +124,21 @@ export const AddProduct = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate that we have at least one image
+    const validImages = formData.images.filter(img => img.url.trim() !== '')
+    if (validImages.length === 0) {
+      alert('Please add at least one product image.')
+      return
+    }
+
     setLoading(true)
 
     try {
       const productData = {
         ...formData,
         basePrice: parseFloat(formData.basePrice),
-        images: formData.images.filter(img => img.trim() !== '')
+        images: validImages.map(img => img.url)
       }
 
       await api.post('/products', productData)
@@ -193,35 +237,103 @@ export const AddProduct = () => {
         <div className="bg-white p-6 rounded-lg shadow-md border">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Product Images</h2>
           
-          <div className="space-y-3">
-            {formData.images.map((image, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <input
-                  type="url"
-                  value={image}
-                  onChange={(e) => updateImageUrl(index, e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://example.com/image.jpg"
-                />
-                {formData.images.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeImageUrl(index)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
+          {/* Upload Section */}
+          <div className="mb-6">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Upload Images</h3>
+            <SupabaseUploadWidget
+              onUpload={handleImageUpload}
+              onError={handleUploadError}
+              bucket={STORAGE_BUCKETS.PRODUCT_IMAGES}
+              path="products"
+              maxFiles={10}
+              maxSizeMB={7}
+              validateFile={validateProductImage}
+              disabled={loading || uploadingImages}
+            >
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">Click to upload</span> or drag and drop
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  PNG, JPG, WebP up to 7MB each
+                </p>
               </div>
-            ))}
-            
+            </SupabaseUploadWidget>
+          </div>
+
+          {/* Current Images */}
+          {formData.images.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Current Images</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {formData.images.map((image) => (
+                  <div key={image.id} className="relative group">
+                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                      {image.url ? (
+                        <img
+                          src={image.url}
+                          alt="Product"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDEyVjdBMiAyIDAgMCAwIDE5IDVINUEyIDIgMCAwIDAgMyA3VjE3QTIgMiAwIDAgMCA1IDE5SDE5QTIgMiAwIDAgMCAyMSAxN1YxMloiIHN0cm9rZT0iIzk5OTk5OSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTMgMTNMMTAgNkwxNiAxMkwyMSA3IiBzdHJva2U9IiM5OTk5OTkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImageIcon className="w-8 h-8 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Image type indicator */}
+                    <div className="absolute top-2 left-2">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        image.type === 'upload' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {image.type === 'upload' ? 'Uploaded' : 'URL'}
+                      </span>
+                    </div>
+                    
+                    {/* Remove button */}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(image.id)}
+                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                    
+                    {/* URL input for URL type images */}
+                    {image.type === 'url' && (
+                      <div className="mt-2">
+                        <input
+                          type="url"
+                          value={image.url}
+                          onChange={(e) => updateImageUrl(image.id, e.target.value)}
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Image URL"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Add URL Option */}
+          <div className="border-t pt-4">
             <button
               type="button"
               onClick={addImageUrl}
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
             >
-              <Plus className="w-4 h-4" />
-              Add Another Image
+              <Link className="w-4 h-4" />
+              Add Image URL
             </button>
           </div>
         </div>

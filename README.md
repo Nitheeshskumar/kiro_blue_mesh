@@ -25,7 +25,7 @@ A premium custom clothing platform with real-time design preview, order manageme
 
 ### Backend (Serverless)
 - **Netlify Functions** with Express
-- **Neon PostgreSQL** (serverless database)
+- **Supabase PostgreSQL** (serverless database with real-time capabilities)
 - Custom database layer (no ORM for serverless optimization)
 - JWT authentication
 - Stripe for payments
@@ -35,14 +35,14 @@ A premium custom clothing platform with real-time design preview, order manageme
 ### Deployment
 - **Frontend**: Netlify static hosting
 - **Backend**: Netlify serverless functions
-- **Database**: Neon PostgreSQL (serverless)
+- **Database**: Supabase PostgreSQL (serverless with enhanced features)
 - **CDN**: Netlify Edge Network
 
 ## Quick Start
 
 ### Prerequisites
 - Node.js 18+
-- PostgreSQL database
+- Supabase project (free tier available)
 - Stripe account (for payments)
 
 ### Installation
@@ -56,10 +56,14 @@ npm run setup
 
 2. **Database Setup**
 ```bash
-cd server
-# Edit .env with your database URL and other secrets
-npm run db:push
-npm run db:seed  # Add sample products
+# Set up Supabase database
+npm run setup-supabase-db
+
+# Test connection
+npm run test-supabase-connection
+
+# Seed with sample data
+npm run seed-supabase-db
 ```
 
 3. **Start Development Servers**
@@ -78,8 +82,11 @@ This starts:
 Set in Netlify dashboard or use `.env` files:
 
 ```env
-# Database (Neon PostgreSQL - Required)
-DATABASE_URL="postgresql://username:password@ep-xxx.us-east-1.aws.neon.tech/dbname?sslmode=require"
+# Supabase Configuration (Required)
+SUPABASE_URL="https://your-project.supabase.co"
+SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+SUPABASE_DATABASE_URL="postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres"
 
 # JWT Secret (Required)
 JWT_SECRET="your-super-secret-jwt-key-here"
@@ -100,7 +107,12 @@ Create `server/.env` and `client/.env`:
 
 **Server (.env):**
 ```env
-DATABASE_URL="postgresql://username:password@localhost:5432/willowbrook_clothing"
+# Supabase Configuration
+SUPABASE_URL="https://your-project.supabase.co"
+SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+SUPABASE_DATABASE_URL="postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres"
+
 JWT_SECRET="your-super-secret-jwt-key"
 STRIPE_SECRET_KEY="sk_test_..."
 CLIENT_URL="http://localhost:3000"
@@ -253,7 +265,7 @@ The app is **already deployed** on Netlify with full serverless architecture:
 #### Architecture
 - **Frontend**: Static React app served from Netlify CDN
 - **Backend**: Netlify Functions (serverless Express app)
-- **Database**: Neon PostgreSQL (serverless database)
+- **Database**: Supabase PostgreSQL (serverless database with real-time capabilities)
 - **Routing**: Automatic API routing via `netlify.toml`
 
 #### Build Process
@@ -269,8 +281,11 @@ npm run build:netlify
 Set these in your Netlify dashboard:
 
 ```env
-# Database (Neon PostgreSQL)
-DATABASE_URL="postgresql://username:password@ep-xxx.us-east-1.aws.neon.tech/dbname?sslmode=require"
+# Supabase Configuration
+SUPABASE_URL="https://your-project.supabase.co"
+SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+SUPABASE_DATABASE_URL="postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres"
 
 # JWT Secret
 JWT_SECRET="your-super-secret-jwt-key-here"
@@ -290,10 +305,11 @@ CLIENT_URL="https://your-netlify-site.netlify.app"
 - **API Redirects**: `/api/*` → `/.netlify/functions/api/:splat`
 
 #### Database Setup
-The app uses Neon PostgreSQL with automatic table creation:
-- Tables are created automatically on first function run
-- Sample data (admin user + products) is inserted automatically
+The app uses Supabase PostgreSQL with automatic table creation:
+- Tables are created automatically via setup scripts
+- Sample data (admin user + products) is inserted via seeding
 - Default admin: `admin@willowbrook.com` / `secret123`
+- Enhanced features: real-time subscriptions, built-in auth capabilities
 
 ### Local Development
 
@@ -360,11 +376,10 @@ The clothing customizer app is now **100% functional** with all TypeScript error
 # 1. One-command setup
 npm run setup
 
-# 2. Configure database
-cd server
-# Edit .env with your PostgreSQL URL
-npm run db:push
-npm run db:seed
+# 2. Configure Supabase database
+# Edit .env with your Supabase credentials
+npm run setup-supabase-db
+npm run seed-supabase-db
 
 # 3. Test setup (optional)
 cd ..

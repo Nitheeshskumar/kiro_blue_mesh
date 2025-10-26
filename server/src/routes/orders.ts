@@ -67,7 +67,7 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
     // Create Stripe payment intent
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(totalAmount * 100), // Convert to cents
-      currency: 'usd',
+      currency: 'inr',
       metadata: {
         userId: req.user!.id
       }

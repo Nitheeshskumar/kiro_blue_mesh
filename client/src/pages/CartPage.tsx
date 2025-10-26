@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
 import { OrderStory } from '../components/OrderStory'
 import { ProductPreview } from '../components/ProductPreview'
+import { PRICING, formatPrice } from '../constants/pricing'
 
 export const CartPage = () => {
   const navigate = useNavigate()
@@ -124,7 +125,7 @@ export const CartPage = () => {
                       Size: {item.size} • Color: {item.color}
                     </p>
                     <p className="text-lg font-bold text-primary-600">
-                      ${item.price.toFixed(2)}
+                      {formatPrice(item.price)}
                     </p>
                   </div>
 
@@ -177,15 +178,15 @@ export const CartPage = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>${getTotalPrice().toFixed(2)}</span>
+                <span>{formatPrice(getTotalPrice())}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>$9.99</span>
+                <span>{formatPrice(PRICING.STANDARD_SHIPPING)}</span>
               </div>
               <div className="border-t pt-2 flex justify-between font-bold">
                 <span>Total</span>
-                <span>${(getTotalPrice() + 9.99).toFixed(2)}</span>
+                <span>{formatPrice(getTotalPrice() + PRICING.STANDARD_SHIPPING)}</span>
               </div>
             </div>
           </div>

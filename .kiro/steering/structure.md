@@ -10,6 +10,10 @@ willowbrook-clothing/
 ├── .vscode/                # VS Code settings
 ├── package.json            # Root build scripts & dependencies
 ├── netlify.toml           # Netlify deployment config
+├── supabase-schema.sql     # Supabase database schema
+├── supabase-sample-data.sql # Sample data for Supabase
+├── setup-supabase-database.js # Supabase setup script
+├── test-supabase-connection.js # Connection testing
 └── *.js                   # Setup & utility scripts
 ```
 
@@ -79,13 +83,31 @@ Used for local development only. Contains Prisma schema and traditional Express 
 - Request/response validation with Zod
 
 ### Database Layer
-- Custom database abstraction (no ORM for serverless)
-- Connection pooling optimized for serverless
-- Automatic table creation on first run
-- Seed data for development
+- Custom database abstraction (no ORM for serverless optimization)
+- **Supabase PostgreSQL** with enhanced capabilities:
+  - Direct PostgreSQL connection via `pg` pool for existing operations
+  - Optional Supabase client for real-time features and enhanced auth
+  - Connection pooling optimized for serverless functions
+  - SSL connections in production environment
+- **Schema Management**:
+  - SQL schema files: `supabase-schema.sql`, `supabase-sample-data.sql`
+  - Automatic table creation and seeding via setup scripts
+  - Database validation and health monitoring
+- **Supabase-Specific Patterns**:
+  - Environment-based connection configuration
+  - Optional real-time subscriptions for live updates
+  - Enhanced authentication integration capabilities
+  - Row-level security (RLS) ready for future implementation
 
 ### Deployment Structure
 - **Frontend**: Static files served from Netlify CDN
 - **Backend**: Serverless functions at `/.netlify/functions/api/*`
-- **Database**: Neon PostgreSQL with connection string
+- **Database**: Supabase PostgreSQL with multiple access methods:
+  - Direct PostgreSQL connection via `SUPABASE_DATABASE_URL`
+  - Supabase API access via `SUPABASE_URL` and API keys
+  - Real-time capabilities and enhanced features available
+- **Environment Configuration**:
+  - Supabase project credentials in environment variables
+  - SSL-enabled connections for production security
+  - Connection pooling for optimal serverless performance
 - **Routing**: API calls proxied via `netlify.toml` redirects

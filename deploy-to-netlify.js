@@ -18,10 +18,12 @@ function checkNetlifyCLI() {
 // Create production environment file
 function createProductionEnv() {
   const envContent = `# Willowbrook Clothing - Production Environment
-VITE_API_URL=https://your-backend-url.com/api
+VITE_API_URL=/.netlify/functions/api
 VITE_STRIPE_PUBLIC_KEY=pk_live_your_stripe_public_key
 VITE_APP_NAME=Willowbrook Clothing
 VITE_APP_URL=https://willowbrook-clothing.netlify.app
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 `;
 
   fs.writeFileSync('client/.env.production', envContent);
@@ -55,18 +57,25 @@ async function main() {
     console.log('\n🎉 Netlify deployment preparation complete!\n');
     
     console.log('📋 Next steps:');
-    console.log('1. Update client/.env.production with your actual backend URL');
-    console.log('2. Deploy to Netlify:');
+    console.log('1. Configure Supabase environment variables in Netlify dashboard:');
+    console.log('   - SUPABASE_URL=https://your-project.supabase.co');
+    console.log('   - SUPABASE_ANON_KEY=your-anon-key');
+    console.log('   - SUPABASE_SERVICE_ROLE_KEY=your-service-role-key');
+    console.log('   - SUPABASE_DATABASE_URL=postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres');
+    console.log('   - JWT_SECRET=your-jwt-secret');
+    console.log('   - STRIPE_SECRET_KEY=your-stripe-secret-key');
+    console.log('2. Update client/.env.production with your actual Supabase credentials');
+    console.log('3. Deploy to Netlify:');
     
     if (checkNetlifyCLI()) {
-      console.log('   netlify deploy --prod --dir=client/dist');
+      console.log('   netlify deploy --prod');
     } else {
       console.log('   - Install Netlify CLI: npm install -g netlify-cli');
-      console.log('   - Or drag client/dist folder to Netlify dashboard');
+      console.log('   - Or use Netlify dashboard with auto-deploy from Git');
     }
     
-    console.log('3. Update API redirects in netlify.toml with your backend URL');
-    console.log('\n🌐 Your Willowbrook Clothing app will be live on Netlify!');
+    console.log('4. Test the deployment with: npm run validate-supabase');
+    console.log('\n🌐 Your Willowbrook Clothing app will be live on Netlify with Supabase!');
 
   } catch (error) {
     console.error('❌ Deployment preparation failed:', error.message);

@@ -10,6 +10,7 @@ import productRoutes from './routes/products'
 import customizationRoutes from './routes/customizations'
 import orderRoutes from './routes/orders'
 import adminRoutes from './routes/admin'
+import reviewRoutes from './routes/reviews'
 import { errorHandler } from './middleware/errorHandler'
 
 // Create Express app
@@ -48,6 +49,7 @@ app.use('/products', productRoutes)
 app.use('/customizations', customizationRoutes)
 app.use('/orders', orderRoutes)
 app.use('/admin', adminRoutes)
+app.use('/reviews', reviewRoutes)
 
 // Health check
 app.get('/health', (req, res) => {
