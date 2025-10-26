@@ -89,7 +89,8 @@ app.use(errorHandler)
 
 // Export the serverless function
 const serverlessApp = serverless(app, {
-  binary: false
+  binary: false,
+  basePath: '/.netlify/functions/api'
 })
 
 export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
@@ -99,11 +100,30 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
   console.log('Netlify Function called:', {
     httpMethod: event.httpMethod,
     path: event.path,
+    rawUrl: event.rawUrl,
     headers: event.headers
   })
 
+  // Fix the path for serverless-http
+  // Remove the function prefix to get the actual API path
+  let apiPath = event.path
+  if (apiPath.startsWith('/.netlify/functions/api')) {
+    apiPath = apiPath.replace('/.netlify/functions/api', '') || '/'
+  }
+  
+  // Update the event path for proper routing
+  const modifiedEvent = {
+    ...event,
+    path: apiPath
+  }
+
+  console.log('Modified event path:', {
+    original: event.path,
+    modified: apiPath
+  })
+
   try {
-    const result = await serverlessApp(event, context) as any
+    const result = await serverlessApp(modifiedEvent, context) as any
     console.log('Function result:', result)
     return result
   } catch (error) {
