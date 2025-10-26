@@ -36,10 +36,18 @@ app.use(express.urlencoded({ extended: true }))
 // })
 
 app.use((req, res, next) => {
-  // Remove the "/api" prefix if present
-  if (req.url.startsWith('/api')) {
-    req.url = req.url.slice(4); // removes "/api"
-  }
+  console.log('Incoming request:', {
+    method: req.method,
+    url: req.url,
+    originalUrl: req.originalUrl,
+    path: req.path
+  });
+
+  // Remove the "/api" prefix if present (for redirect compatibility)
+  // if (req.url.startsWith('/api')) {
+  //   req.url = req.url.slice(4); // removes "/api"
+  //   console.log('Removed /api prefix, new URL:', req.url);
+  // }
   next();
 });
 
@@ -58,12 +66,21 @@ app.get('/health', (req, res) => {
 
 // Catch-all route for debugging
 app.use('*', (req, res) => {
-  console.log('Unmatched route:', req.method, req.originalUrl, req.path)
+  console.log('Unmatched route:', {
+    method: req.method,
+    originalUrl: req.originalUrl,
+    path: req.path,
+    url: req.url,
+    baseUrl: req.baseUrl
+  });
+
   res.status(404).json({
     error: 'Route not found',
     method: req.method,
     path: req.path,
-    originalUrl: req.originalUrl
+    url: req.url,
+    originalUrl: req.originalUrl,
+    availableRoutes: ['/auth', '/products', '/customizations', '/orders', '/admin', '/reviews', '/health']
   })
 })
 
