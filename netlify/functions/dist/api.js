@@ -36,10 +36,17 @@ app.use(express_1.default.urlencoded({ extended: true }));
 //   next()
 // })
 app.use((req, res, next) => {
-    // Remove the "/api" prefix if present
-    if (req.url.startsWith('/api')) {
-        req.url = req.url.slice(4); // removes "/api"
-    }
+    console.log('Incoming request:', {
+        method: req.method,
+        url: req.url,
+        originalUrl: req.originalUrl,
+        path: req.path
+    });
+    // Remove the "/api" prefix if present (for redirect compatibility)
+    // if (req.url.startsWith('/api')) {
+    //   req.url = req.url.slice(4); // removes "/api"
+    //   console.log('Removed /api prefix, new URL:', req.url);
+    // }
     next();
 });
 // Routes - Note: Netlify Functions automatically handle the /.netlify/functions/api prefix
@@ -55,19 +62,28 @@ app.get('/health', (req, res) => {
 });
 // Catch-all route for debugging
 app.use('*', (req, res) => {
-    console.log('Unmatched route:', req.method, req.originalUrl, req.path);
+    console.log('Unmatched route:', {
+        method: req.method,
+        originalUrl: req.originalUrl,
+        path: req.path,
+        url: req.url,
+        baseUrl: req.baseUrl
+    });
     res.status(404).json({
         error: 'Route not found',
         method: req.method,
         path: req.path,
-        originalUrl: req.originalUrl
+        url: req.url,
+        originalUrl: req.originalUrl,
+        availableRoutes: ['/auth', '/products', '/customizations', '/orders', '/admin', '/reviews', '/health']
     });
 });
 // Error handling
 app.use(errorHandler_1.errorHandler);
 // Export the serverless function
 const serverlessApp = (0, serverless_http_1.default)(app, {
-    binary: false
+    binary: false,
+    basePath: '/.netlify/functions/api'
 });
 const handler = async (event, context) => {
     // Set context to not wait for empty event loop
@@ -75,10 +91,26 @@ const handler = async (event, context) => {
     console.log('Netlify Function called:', {
         httpMethod: event.httpMethod,
         path: event.path,
+        rawUrl: event.rawUrl,
         headers: event.headers
     });
+    // Fix the path for serverless-http
+    // Remove the function prefix to get the actual API path
+    let apiPath = event.path;
+    if (apiPath.startsWith('/.netlify/functions/api')) {
+        apiPath = apiPath.replace('/.netlify/functions/api', '') || '/';
+    }
+    // Update the event path for proper routing
+    const modifiedEvent = {
+        ...event,
+        path: apiPath
+    };
+    console.log('Modified event path:', {
+        original: event.path,
+        modified: apiPath
+    });
     try {
-        const result = await serverlessApp(event, context);
+        const result = await serverlessApp(modifiedEvent, context);
         console.log('Function result:', result);
         return result;
     }
