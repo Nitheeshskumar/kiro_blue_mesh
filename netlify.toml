@@ -26,6 +26,7 @@
   to = "/.netlify/functions/api/:splat"
   status = 200
 
+
 # SPA routing - must come after API redirects
 [[redirects]]
   from = "/*"

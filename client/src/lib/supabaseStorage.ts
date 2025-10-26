@@ -5,7 +5,12 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  console.error('Supabase Environment Variables Check:');
+  console.error('VITE_SUPABASE_URL:', supabaseUrl ? '✅ Set' : '❌ Missing');
+  console.error('VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? '✅ Set' : '❌ Missing');
+  console.error('Available env vars:', Object.keys(import.meta.env).filter(key => key.startsWith('VITE_')));
+
+  throw new Error(`Missing Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your Netlify environment variables.`);
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -67,7 +72,7 @@ export const uploadFile = async (
 
     if (file.type.startsWith('image/')) {
       format = fileExt?.toLowerCase();
-      
+
       // Create image to get dimensions
       const img = new Image();
       const imageLoaded = new Promise<void>((resolve) => {
@@ -77,7 +82,7 @@ export const uploadFile = async (
           resolve();
         };
       });
-      
+
       img.src = URL.createObjectURL(file);
       await imageLoaded;
       URL.revokeObjectURL(img.src);
@@ -156,13 +161,13 @@ export const getThumbnailUrl = (publicUrl: string, size: number = 150): string =
 // Initialize storage buckets (call this during app setup)
 export const initializeStorageBuckets = async (): Promise<void> => {
   const buckets = Object.values(STORAGE_BUCKETS);
-  
+
   for (const bucketName of buckets) {
     try {
       // Check if bucket exists
       const { data: existingBuckets } = await supabase.storage.listBuckets();
       const bucketExists = existingBuckets?.some(bucket => bucket.name === bucketName);
-      
+
       if (!bucketExists) {
         // Create bucket if it doesn't exist
         const { error } = await supabase.storage.createBucket(bucketName, {
@@ -170,7 +175,7 @@ export const initializeStorageBuckets = async (): Promise<void> => {
           allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
           fileSizeLimit: 10485760 // 10MB
         });
-        
+
         if (error && !error.message.includes('already exists')) {
           console.error(`Failed to create bucket ${bucketName}:`, error);
         }
