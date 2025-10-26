@@ -21,15 +21,13 @@ import { EditProduct } from './pages/admin/EditProduct'
 import { OrderManagement } from './pages/admin/OrderManagement'
 import { UserManagement } from './pages/admin/UserManagement'
 import { AuthProvider } from './contexts/AuthContext'
-import { initializeStorageBuckets } from './lib/supabaseStorage'
 import { useEffect } from 'react'
 
 function App() {
   useEffect(() => {
-    // Initialize Supabase Storage buckets on app start
-    initializeStorageBuckets().catch(error => {
-      console.warn('Failed to initialize storage buckets:', error);
-    });
+    // Supabase Storage buckets are already created server-side
+    // No client-side initialization needed
+    console.log('Willowbrook Clothing app initialized');
   }, []);
 
   return (
@@ -37,39 +35,39 @@ function App() {
       <ToastProvider>
         <AuthProvider>
           <Routes>
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="products" element={<ProductManagement />} />
-          <Route path="products/new" element={<AddProduct />} />
-          <Route path="products/edit/:productId" element={<EditProduct />} />
-          <Route path="orders" element={<OrderManagement />} />
-          <Route path="users" element={<UserManagement />} />
-        </Route>
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="products" element={<ProductManagement />} />
+              <Route path="products/new" element={<AddProduct />} />
+              <Route path="products/edit/:productId" element={<EditProduct />} />
+              <Route path="orders" element={<OrderManagement />} />
+              <Route path="users" element={<UserManagement />} />
+            </Route>
 
-        {/* Public Routes */}
-        <Route path="/*" element={
-          <div className="min-h-screen bg-gray-50">
-            <Navbar />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <Breadcrumb className="py-4" />
-            </div>
-            <main>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/products" element={<ProductsPage />} />
-                <Route path="/brand-story" element={<BrandStoryPage />} />
-                <Route path="/products/:productId/customize" element={<CustomizerPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/orders" element={<OrdersPage />} />
-                <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
-                <Route path="/profile" element={<UserProfile />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-              </Routes>
-            </main>
-          </div>
-        } />
+            {/* Public Routes */}
+            <Route path="/*" element={
+              <div className="min-h-screen bg-gray-50">
+                <Navbar />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <Breadcrumb className="py-4" />
+                </div>
+                <main>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/products" element={<ProductsPage />} />
+                    <Route path="/brand-story" element={<BrandStoryPage />} />
+                    <Route path="/products/:productId/customize" element={<CustomizerPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/orders" element={<OrdersPage />} />
+                    <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
+                    <Route path="/profile" element={<UserProfile />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                  </Routes>
+                </main>
+              </div>
+            } />
           </Routes>
         </AuthProvider>
       </ToastProvider>

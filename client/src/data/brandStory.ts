@@ -11,7 +11,7 @@ export const brandStoryData: BrandStory = {
       id: "1",
       year: 2018,
       title: "The Beginning",
-      description: "Founded by Sarah Chen in her home studio with a vision to make custom clothing accessible to everyone.",
+      description: "Founded by Banu in her home studio with a vision to make custom clothing accessible to everyone.",
       image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
       milestone: true
     },
@@ -89,28 +89,28 @@ export const brandStoryData: BrandStory = {
   team: [
     {
       id: "1",
-      name: "Sarah Chen",
+      name: "Banu Nazir Maheen",
       role: "Founder & Creative Director",
       bio: "With over 15 years in fashion design, Sarah founded Willowbrook to democratize custom clothing. She believes everyone deserves clothing that fits perfectly and reflects their personality.",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      image: "https://frbdhevxgofuvnrcbcvi.supabase.co/storage/v1/object/public/user-avatars/banu_brand.jpg",
       isFounder: true
     },
-    {
-      id: "2",
-      name: "Marcus Rodriguez",
-      role: "Head of Technology",
-      bio: "Marcus leads our innovation in 3D visualization and customization technology, making the impossible possible in digital fashion.",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      isFounder: false
-    },
-    {
-      id: "3",
-      name: "Emma Thompson",
-      role: "Sustainability Director",
-      bio: "Emma ensures our commitment to environmental responsibility while maintaining the highest quality standards in our manufacturing processes.",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      isFounder: false
-    }
+    // {
+    //   id: "2",
+    //   name: "Marcus Rodriguez",
+    //   role: "Head of Technology",
+    //   bio: "Marcus leads our innovation in 3D visualization and customization technology, making the impossible possible in digital fashion.",
+    //   image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+    //   isFounder: false
+    // },
+    // {
+    //   id: "3",
+    //   name: "Emma Thompson",
+    //   role: "Sustainability Director",
+    //   bio: "Emma ensures our commitment to environmental responsibility while maintaining the highest quality standards in our manufacturing processes.",
+    //   image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+    //   isFounder: false
+    // }
   ],
   sustainability: {
     title: "Our Commitment to the Planet",
