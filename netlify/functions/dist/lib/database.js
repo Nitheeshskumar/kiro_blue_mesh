@@ -9,12 +9,19 @@ const supabase_js_1 = require("@supabase/supabase-js");
 let pool = null;
 function getPool() {
     if (!pool) {
+        const connectionString = process.env.SUPABASE_DATABASE_URL;
+        if (!connectionString) {
+            throw new Error('SUPABASE_DATABASE_URL environment variable is not set');
+        }
+        console.log('Initializing database connection to:', connectionString.replace(/:[^:@]*@/, ':****@'));
         pool = new pg_1.Pool({
-            connectionString: process.env.SUPABASE_DATABASE_URL,
-            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+            connectionString,
+            ssl: {
+                rejectUnauthorized: false
+            },
             max: 20,
             idleTimeoutMillis: 30000,
-            connectionTimeoutMillis: 2000,
+            connectionTimeoutMillis: 10000, // Increased timeout for Netlify
         });
         // Connection event handlers for monitoring
         pool.on('error', (err) => {
@@ -33,7 +40,14 @@ function generateId() {
 // Database operations
 class Database {
     constructor() {
-        this.pool = getPool();
+        try {
+            this.pool = getPool();
+            console.log('Database pool initialized successfully');
+        }
+        catch (error) {
+            console.error('Database initialization error:', error);
+            throw error;
+        }
         // Initialize optional Supabase client if credentials are available
         if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
             this.supabase = (0, supabase_js_1.createClient)(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY);

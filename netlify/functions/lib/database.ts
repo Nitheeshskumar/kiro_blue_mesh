@@ -139,12 +139,22 @@ let pool: Pool | null = null
 
 function getPool(): Pool {
   if (!pool) {
+    const connectionString = process.env.SUPABASE_DATABASE_URL;
+    
+    if (!connectionString) {
+      throw new Error('SUPABASE_DATABASE_URL environment variable is not set');
+    }
+    
+    console.log('Initializing database connection to:', connectionString.replace(/:[^:@]*@/, ':****@'));
+    
     pool = new Pool({
-      connectionString: process.env.SUPABASE_DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      connectionString,
+      ssl: {
+        rejectUnauthorized: false
+      },
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      connectionTimeoutMillis: 10000, // Increased timeout for Netlify
     })
 
     // Connection event handlers for monitoring
@@ -170,7 +180,13 @@ export class Database {
   private supabase?: SupabaseClient // Optional Supabase client for enhanced features
 
   constructor() {
-    this.pool = getPool()
+    try {
+      this.pool = getPool()
+      console.log('Database pool initialized successfully')
+    } catch (error) {
+      console.error('Database initialization error:', error)
+      throw error
+    }
     
     // Initialize optional Supabase client if credentials are available
     if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
