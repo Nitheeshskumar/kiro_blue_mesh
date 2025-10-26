@@ -170,7 +170,8 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
         format: photo.format,
         fileSize: photo.fileSize,
         originalFilename: photo.originalFilename,
-        bucketName: photo.bucketName
+        bucketName: photo.bucketName,
+        createdAt: new Date()
       }));
 
       await db.createReviewPhotos(photoData);
@@ -329,7 +330,8 @@ router.put('/:reviewId', authenticateToken, async (req: Request, res: Response) 
           format: photo.format,
           fileSize: photo.fileSize,
           originalFilename: photo.originalFilename,
-          bucketName: photo.bucketName
+          bucketName: photo.bucketName,
+          createdAt: new Date()
         }));
 
         await db.createReviewPhotos(photoData);

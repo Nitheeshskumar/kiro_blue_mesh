@@ -11,6 +11,7 @@
     "setup-supabase-storage": "node setup-supabase-storage.js",
     "migrate-to-supabase": "node migrate-to-supabase-storage.js",
     "seed-products": "cd server && node seed-products.js",
+    "test-deployment": "node test-deployment.js",
     "setup-db": "npm run setup-supabase-db",
     "seed-db": "npm run seed-supabase-db",
     "test-db": "npm run test-supabase-connection",
