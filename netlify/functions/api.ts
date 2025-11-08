@@ -88,10 +88,8 @@ app.use('*', (req, res) => {
 app.use(errorHandler)
 
 // Export the serverless function
-const serverlessApp = serverless(app, {
-  binary: false,
-  basePath: '/.netlify/functions/api'
-})
+// Don't set basePath - let serverless-http handle it automatically
+const serverlessApp = serverless(app)
 
 export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
   // Set context to not wait for empty event loop
@@ -100,31 +98,47 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
   console.log('Netlify Function called:', {
     httpMethod: event.httpMethod,
     path: event.path,
-    rawUrl: event.rawUrl,
-    headers: event.headers
+    rawUrl: event.rawUrl
   })
 
-  // Fix the path for serverless-http
-  // Remove the function prefix to get the actual API path
-  let apiPath = event.path
-  if (apiPath.startsWith('/.netlify/functions/api')) {
-    apiPath = apiPath.replace('/.netlify/functions/api', '') || '/'
+  // serverless-http expects the path after /.netlify/functions/api
+  // When request comes as /api/auth/login -> redirected to /.netlify/functions/api/auth/login
+  // We need to pass /auth/login to Express
+
+  let modifiedPath = event.path
+
+  // Remove the Netlify function prefix (production)
+  if (modifiedPath.startsWith('/.netlify/functions/api')) {
+    modifiedPath = modifiedPath.replace('/.netlify/functions/api', '')
   }
-  
-  // Update the event path for proper routing
+  // Remove /api prefix (local dev with netlify dev)
+  else if (modifiedPath.startsWith('/api')) {
+    modifiedPath = modifiedPath.replace('/api', '')
+  }
+
+  // Ensure path starts with /
+  if (!modifiedPath.startsWith('/')) {
+    modifiedPath = '/' + modifiedPath
+  }
+
+  // If path is just /, it should go to health check
+  if (modifiedPath === '/') {
+    modifiedPath = '/health'
+  }
+
+  console.log('Path transformation:', {
+    original: event.path,
+    modified: modifiedPath
+  })
+
+  // Create modified event with corrected path
   const modifiedEvent = {
     ...event,
-    path: apiPath
+    path: modifiedPath
   }
-
-  console.log('Modified event path:', {
-    original: event.path,
-    modified: apiPath
-  })
 
   try {
     const result = await serverlessApp(modifiedEvent, context) as any
-    console.log('Function result:', result)
     return result
   } catch (error) {
     console.error('Serverless function error:', error)

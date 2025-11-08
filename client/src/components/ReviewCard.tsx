@@ -63,7 +63,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
                 </span>
               </div>
               {review.verified && (
-                <div className="flex items-center gap-1 text-green-600">
+                <div className="flex items-center gap-1 text-secondary-600">
                   <CheckCircle className="w-4 h-4" />
                   <span className="text-xs font-medium">Verified Purchase</span>
                 </div>
@@ -123,7 +123,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             disabled={helpfulClicked}
             className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-colors ${
               helpfulClicked
-                ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                ? 'bg-secondary-100 text-secondary-700 cursor-not-allowed'
                 : 'hover:bg-gray-100 text-gray-600'
             }`}
           >

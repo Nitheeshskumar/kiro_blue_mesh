@@ -62,6 +62,11 @@ export interface Order {
   paymentId?: string
   shippingInfo: any
   trackingCode?: string
+  trackingUrl?: string
+  adminNotes?: string
+  contactMethod?: string
+  customerInstagram?: string
+  statusHistory?: StatusHistoryEntry[]
   createdAt: string
   updatedAt: string
   items: OrderItem[]
@@ -82,15 +87,21 @@ export interface OrderItem {
     size: string
     color: string
     previewUrl?: string
+    embroidery?: any
   }
+}
+
+export interface StatusHistoryEntry {
+  status: OrderStatus
+  timestamp: string
+  previousStatus?: OrderStatus
 }
 
 export enum OrderStatus {
   PENDING = 'PENDING',
   PAID = 'PAID',
-  PROCESSING = 'PROCESSING',
-  MANUFACTURING = 'MANUFACTURING',
   SHIPPED = 'SHIPPED',
   DELIVERED = 'DELIVERED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
+  RETURNED = 'RETURNED'
 }

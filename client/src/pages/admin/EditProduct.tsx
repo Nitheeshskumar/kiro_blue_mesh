@@ -3,14 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Plus, X, Save, Trash2 } from 'lucide-react'
 import { api } from '../../lib/api'
 
-const CATEGORIES = [
-  'shirts',
-  'hoodies',
-  'sweatshirts',
-  'activewear',
-  'pants',
-  'accessories'
-]
+interface ProductCategory {
+  id: string
+  name: string
+  slug: string
+  description: string
+  icon: string
+  productCount: number
+}
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL']
 
@@ -25,6 +25,7 @@ interface Product {
   name: string
   description: string
   category: string
+  categories?: string[]
   basePrice: number
   images: string[]
   sizes: string[]
@@ -38,10 +39,13 @@ export const EditProduct = () => {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [product, setProduct] = useState<Product | null>(null)
+  const [categories, setCategories] = useState<ProductCategory[]>([])
+  const [loadingCategories, setLoadingCategories] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: 'shirts',
+    category: '',
+    categories: [] as string[],
     basePrice: '',
     images: [''],
     sizes: ['M'],
@@ -50,10 +54,22 @@ export const EditProduct = () => {
   })
 
   useEffect(() => {
+    fetchCategories()
     if (productId) {
       fetchProduct()
     }
   }, [productId])
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/products/categories/all')
+      setCategories(response.data)
+    } catch (error) {
+      console.error('Failed to fetch categories:', error)
+    } finally {
+      setLoadingCategories(false)
+    }
+  }
 
   const fetchProduct = async () => {
     try {
@@ -64,6 +80,7 @@ export const EditProduct = () => {
         name: productData.name,
         description: productData.description || '',
         category: productData.category,
+        categories: productData.categories || [],
         basePrice: productData.basePrice.toString(),
         images: productData.images.length > 0 ? productData.images : [''],
         sizes: productData.sizes,
@@ -185,7 +202,7 @@ export const EditProduct = () => {
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h1>
         <button
           onClick={() => navigate('/admin/products')}
-          className="btn-primary"
+          className="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
         >
           Back to Products
         </button>
@@ -256,25 +273,35 @@ export const EditProduct = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category *
+                Primary Category *
               </label>
               <select
                 required
                 value={formData.category}
                 onChange={(e) => handleInputChange('category', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={loadingCategories}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
               >
-                {CATEGORIES.map(category => (
-                  <option key={category} value={category}>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                  </option>
-                ))}
+                {loadingCategories ? (
+                  <option>Loading categories...</option>
+                ) : categories.length === 0 ? (
+                  <option>No categories available</option>
+                ) : (
+                  <>
+                    <option value="">Select a category</option>
+                    {categories.map(category => (
+                      <option key={category.id} value={category.id}>
+                        {category.icon} {category.name}
+                      </option>
+                    ))}
+                  </>
+                )}
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Base Price ($) *
+                Base Price (₹) *
               </label>
               <input
                 type="number"

@@ -30,7 +30,7 @@ export const ProductPageWithReviews: React.FC<ProductPageWithReviewsProps> = ({
           
           {/* Add to Cart, Customization, etc. */}
           <div className="space-y-4">
-            <button className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors">
+            <button className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors">
               Customize & Add to Cart
             </button>
           </div>

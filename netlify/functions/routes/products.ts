@@ -160,7 +160,7 @@ const verifyToken = async (authHeader: string | undefined) => {
 
   const token = authHeader.split(' ')[1]
   const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
-  
+
   const db = await getDatabase()
   const user = await db.findUserById(decoded.userId)
   if (!user) {
@@ -174,52 +174,86 @@ const verifyToken = async (authHeader: string | undefined) => {
 router.get('/', async (req, res) => {
   try {
     const { category, categories, search } = req.query
-    
-    let filteredProducts = sampleProducts.filter(p => p.isActive)
-    
-    // Filter by category
+    const db = await getDatabase()
+
+    // Build query filters
+    const where: any = { isActive: true }
+
+    // Filter by single category
     if (category) {
-      filteredProducts = filteredProducts.filter(p => 
-        p.category === category || p.categories?.includes(category as string)
-      )
+      where.category = category as string
     }
-    
+
     // Filter by multiple categories
     if (categories) {
-      const categoryList = typeof categories === 'string' 
-        ? categories.split(',').map(c => c.trim()) 
+      const categoryList = typeof categories === 'string'
+        ? categories.split(',').map(c => c.trim())
         : categories as string[]
-      
-      filteredProducts = filteredProducts.filter(p => 
-        categoryList.some(cat => 
-          p.category === cat || p.categories?.includes(cat)
-        )
-      )
+      where.categories = categoryList
     }
-    
-    // Filter by search term
+
+    // Fetch products from database
+    let products = await db.findProducts(where)
+
+    // Filter by search term (client-side filtering for now)
     if (search) {
       const searchTerm = (search as string).toLowerCase()
-      filteredProducts = filteredProducts.filter(p => 
+      products = products.filter(p =>
         p.name.toLowerCase().includes(searchTerm) ||
         p.description?.toLowerCase().includes(searchTerm)
       )
     }
-    
-    res.json(filteredProducts)
+
+    res.json(products)
   } catch (error) {
     console.error('Get products error:', error)
-    res.status(500).json({ error: 'Failed to fetch products' })
+    // Fallback to sample data if database fails
+    console.log('Falling back to sample data')
+    let filteredProducts = sampleProducts.filter(p => p.isActive)
+
+    const { category, categories, search } = req.query
+
+    if (category) {
+      filteredProducts = filteredProducts.filter(p =>
+        p.category === category || p.categories?.includes(category as string)
+      )
+    }
+
+    if (categories) {
+      const categoryList = typeof categories === 'string'
+        ? categories.split(',').map(c => c.trim())
+        : categories as string[]
+
+      filteredProducts = filteredProducts.filter(p =>
+        categoryList.some(cat =>
+          p.category === cat || p.categories?.includes(cat)
+        )
+      )
+    }
+
+    if (search) {
+      const searchTerm = (search as string).toLowerCase()
+      filteredProducts = filteredProducts.filter(p =>
+        p.name.toLowerCase().includes(searchTerm) ||
+        p.description?.toLowerCase().includes(searchTerm)
+      )
+    }
+
+    res.json(filteredProducts)
   }
 })
 
 // Get all categories with product counts
 router.get('/categories/all', async (req, res) => {
   try {
-    res.json(sampleCategories)
+    const db = await getDatabase()
+    const categories = await db.getCategoriesWithProductCounts()
+    res.json(categories)
   } catch (error) {
     console.error('Get categories error:', error)
-    res.status(500).json({ error: 'Failed to fetch categories' })
+    // Fallback to sample data if database fails
+    console.log('Falling back to sample categories')
+    res.json(sampleCategories)
   }
 })
 
@@ -227,9 +261,10 @@ router.get('/categories/all', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params
-    
-    // Find product in sample data
-    const product = sampleProducts.find(p => p.id === id)
+    const db = await getDatabase()
+
+    // Fetch product from database
+    const product = await db.findProductById(id)
 
     if (!product) {
       return res.status(404).json({ error: 'Product not found' })
@@ -244,7 +279,16 @@ router.get('/:id', async (req, res) => {
     res.json(productWithCustomizations)
   } catch (error) {
     console.error('Get product error:', error)
-    res.status(500).json({ error: 'Failed to fetch product' })
+    // Fallback to sample data if database fails
+    console.log('Falling back to sample data for product')
+    const { id } = req.params
+    const product = sampleProducts.find(p => p.id === id)
+
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' })
+    }
+
+    res.json({ ...product, customizations: [] })
   }
 })
 
@@ -292,7 +336,7 @@ router.put('/:id', async (req, res) => {
 
     const { id } = req.params
     const { name, description, category, categories, basePrice, images, sizes, colors, isActive } = req.body
-    
+
     const db = await getDatabase()
     const product = await db.updateProduct(id, {
       ...(name && { name }),

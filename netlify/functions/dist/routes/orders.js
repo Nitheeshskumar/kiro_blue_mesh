@@ -26,7 +26,7 @@ const verifyToken = async (authHeader) => {
 router.post('/', async (req, res) => {
     try {
         const user = await verifyToken(req.headers.authorization);
-        const { items, shippingInfo } = req.body;
+        const { items, shippingInfo, contactMethod, customerInstagram } = req.body;
         if (!items || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ error: 'Items are required' });
         }
@@ -56,12 +56,14 @@ router.post('/', async (req, res) => {
         }
         // Add shipping cost (consistent with frontend)
         totalAmount += pricing_1.PRICING.STANDARD_SHIPPING;
-        // Create order
+        // Create order with contact method
         const order = await db.createOrder({
             userId: user.id,
             status: 'PENDING',
             totalAmount,
-            shippingInfo
+            shippingInfo,
+            contactMethod: contactMethod || 'INSTAGRAM',
+            customerInstagram: customerInstagram || undefined
         });
         // Create order items
         const orderItems = await db.createOrderItems(orderItemsData.map((item) => ({ ...item, orderId: order.id })));

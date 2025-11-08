@@ -90,10 +90,10 @@ export const ProductManagement = () => {
         </h1>
         <Link
           to="/admin/products/new"
-          className="btn-primary flex items-center gap-2"
+          className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Add New Product
+          Add Product
         </Link>
       </div>
 
@@ -188,7 +188,7 @@ export const ProductManagement = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${product.basePrice.toFixed(2)}
+                    ₹{product.basePrice.toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {product._count.orderItems}
@@ -196,7 +196,7 @@ export const ProductManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                       product.isActive 
-                        ? 'bg-green-100 text-green-800' 
+                        ? 'bg-secondary-100 text-secondary-800' 
                         : 'bg-red-100 text-red-800'
                     }`}>
                       {product.isActive ? 'Active' : 'Inactive'}
@@ -215,7 +215,7 @@ export const ProductManagement = () => {
                         className={`${
                           product.isActive 
                             ? 'text-red-600 hover:text-red-900' 
-                            : 'text-green-600 hover:text-green-900'
+                            : 'text-secondary-600 hover:text-secondary-900'
                         }`}
                       >
                         {product.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

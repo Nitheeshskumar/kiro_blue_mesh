@@ -324,10 +324,14 @@ export const createCustomization = async (req: Request, res: Response) => {
       productId,
       size,
       color,
-      embroidery: embroidery ? { text: embroidery.trim() } : null,
-      logoUrl,
+      embroidery: embroidery ? { text: embroidery.trim() } : undefined,
+      logoUrl: logoUrl || undefined,
       previewUrl: product.images[0] || '', // Use product image as preview
-      totalPrice
+      totalPrice,
+      sleeveId: undefined,
+      customMeasurements: undefined,
+      customOptions: undefined,
+      priceBreakdown: undefined
     })
     
     res.status(201).json(customization)

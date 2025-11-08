@@ -96,3 +96,5 @@ Thumbs.db
 
 # Prisma
 prisma/migrations/
+# Local Netlify folder
+.netlify

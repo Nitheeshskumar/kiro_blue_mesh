@@ -7,6 +7,14 @@
   NODE_VERSION = "20.12.2"
   NPM_VERSION = "9"
 
+[dev]
+  command = "npm run dev:client"
+  port = 8888
+  targetPort = 3000
+  publish = "client/dist"
+  functions = "netlify/functions"
+  functionsPort = 9999
+
 # Required Supabase Environment Variables (set in Netlify dashboard):
 # SUPABASE_URL = "https://your-project.supabase.co"
 # SUPABASE_ANON_KEY = "your-anon-key"

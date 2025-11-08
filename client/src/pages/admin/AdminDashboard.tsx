@@ -128,7 +128,7 @@ export const AdminDashboard = () => {
         <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
         <Link
           to="/admin/products/new"
-          className="btn-primary flex items-center gap-2"
+          className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Product
@@ -153,7 +153,7 @@ export const AdminDashboard = () => {
               <p className="text-sm font-medium text-gray-600">Total Orders</p>
               <p className="text-2xl font-bold text-gray-900">{stats?.totalOrders || 0}</p>
             </div>
-            <ShoppingCart className="w-8 h-8 text-green-600" />
+            <ShoppingCart className="w-8 h-8 text-primary-600" />
           </div>
         </div>
 
@@ -172,7 +172,7 @@ export const AdminDashboard = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
               <p className="text-2xl font-bold text-gray-900">
-                ${(stats?.totalRevenue || 0).toFixed(2)}
+                ₹{(stats?.totalRevenue || 0).toFixed(2)}
               </p>
             </div>
             <DollarSign className="w-8 h-8 text-yellow-600" />
@@ -210,12 +210,12 @@ export const AdminDashboard = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-gray-900">
-                      ${(order.totalAmount || 0).toFixed(2)}
+                      ₹{(order.totalAmount || 0).toFixed(2)}
                     </p>
                     <span className={`text-xs px-2 py-1 rounded-full ${
-                      order.status === 'PAID' ? 'bg-green-100 text-green-800' :
+                      order.status === 'PAID' ? 'bg-secondary-100 text-secondary-800' :
                       order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-blue-100 text-blue-800'
+                      'bg-secondary-100 text-secondary-800'
                     }`}>
                       {order.status || 'UNKNOWN'}
                     </span>
@@ -248,7 +248,7 @@ export const AdminDashboard = () => {
                 <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <p className="font-medium text-gray-900">{product.name || 'Unknown Product'}</p>
-                    <p className="text-sm text-gray-600">${(product.basePrice || 0).toFixed(2)}</p>
+                    <p className="text-sm text-gray-600">₹{(product.basePrice || 0).toFixed(2)}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-blue-600">

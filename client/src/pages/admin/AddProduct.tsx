@@ -1,18 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Plus, X, Upload, Link, Image as ImageIcon } from 'lucide-react'
 import { api } from '../../lib/api'
 import { SupabaseUploadWidget, type SupabaseUploadResult } from '../../components/SupabaseUploadWidget'
 import { STORAGE_BUCKETS, validateProductImage } from '../../lib/supabaseStorage'
 
-const CATEGORIES = [
-  'shirts',
-  'hoodies',
-  'sweatshirts',
-  'activewear',
-  'pants',
-  'accessories'
-]
+interface ProductCategory {
+  id: string
+  name: string
+  slug: string
+  description: string
+  icon: string
+  productCount: number
+}
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL']
 
@@ -34,15 +34,42 @@ export const AddProduct = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [uploadingImages, setUploadingImages] = useState(false)
+  const [categories, setCategories] = useState<ProductCategory[]>([])
+  const [loadingCategories, setLoadingCategories] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: 'shirts',
+    category: '',
+    categories: [] as string[],
     basePrice: '',
     images: [] as ProductImage[],
     sizes: ['M'],
     colors: ['#000000']
   })
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/products/categories/all')
+      const fetchedCategories = response.data
+      setCategories(fetchedCategories)
+
+      // Set default category to first one if available
+      if (fetchedCategories.length > 0 && !formData.category) {
+        setFormData(prev => ({
+          ...prev,
+          category: fetchedCategories[0].id
+        }))
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories:', error)
+    } finally {
+      setLoadingCategories(false)
+    }
+  }
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
@@ -73,7 +100,7 @@ export const AddProduct = () => {
   const updateImageUrl = (id: string, url: string) => {
     setFormData(prev => ({
       ...prev,
-      images: prev.images.map(img => 
+      images: prev.images.map(img =>
         img.id === id ? { ...img, url } : img
       )
     }))
@@ -124,7 +151,7 @@ export const AddProduct = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Validate that we have at least one image
     const validImages = formData.images.filter(img => img.url.trim() !== '')
     if (validImages.length === 0) {
@@ -168,7 +195,7 @@ export const AddProduct = () => {
         {/* Basic Information */}
         <div className="bg-white p-6 rounded-lg shadow-md border">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Basic Information</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -186,25 +213,35 @@ export const AddProduct = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category *
+                Primary Category *
               </label>
               <select
                 required
                 value={formData.category}
                 onChange={(e) => handleInputChange('category', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={loadingCategories}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
               >
-                {CATEGORIES.map(category => (
-                  <option key={category} value={category}>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                  </option>
-                ))}
+                {loadingCategories ? (
+                  <option>Loading categories...</option>
+                ) : categories.length === 0 ? (
+                  <option>No categories available</option>
+                ) : (
+                  <>
+                    <option value="">Select a category</option>
+                    {categories.map(category => (
+                      <option key={category.id} value={category.id}>
+                        {category.icon} {category.name}
+                      </option>
+                    ))}
+                  </>
+                )}
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Base Price ($) *
+                Base Price (₹) *
               </label>
               <input
                 type="number"
@@ -231,12 +268,48 @@ export const AddProduct = () => {
               placeholder="Describe your product..."
             />
           </div>
+
+          {/* Additional Categories */}
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Additional Categories (Optional)
+            </label>
+            <p className="text-sm text-gray-500 mb-3">
+              Select additional categories this product belongs to
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {categories.map(category => (
+                <label
+                  key={category.id}
+                  className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors ${formData.categories.includes(category.id)
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={formData.categories.includes(category.id)}
+                    onChange={(e) => {
+                      const newCategories = e.target.checked
+                        ? [...formData.categories, category.id]
+                        : formData.categories.filter(c => c !== category.id)
+                      handleInputChange('categories', newCategories)
+                    }}
+                    className="rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm">
+                    {category.icon} {category.name}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Images */}
         <div className="bg-white p-6 rounded-lg shadow-md border">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Product Images</h2>
-          
+
           {/* Upload Section */}
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-700 mb-3">Upload Images</h3>
@@ -286,18 +359,17 @@ export const AddProduct = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Image type indicator */}
                     <div className="absolute top-2 left-2">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        image.type === 'upload' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-blue-100 text-blue-800'
-                      }`}>
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${image.type === 'upload'
+                        ? 'bg-secondary-100 text-secondary-800'
+                        : 'bg-primary-100 text-primary-800'
+                        }`}>
                         {image.type === 'upload' ? 'Uploaded' : 'URL'}
                       </span>
                     </div>
-                    
+
                     {/* Remove button */}
                     <button
                       type="button"
@@ -306,7 +378,7 @@ export const AddProduct = () => {
                     >
                       <X className="w-3 h-3" />
                     </button>
-                    
+
                     {/* URL input for URL type images */}
                     {image.type === 'url' && (
                       <div className="mt-2">
@@ -341,18 +413,17 @@ export const AddProduct = () => {
         {/* Sizes */}
         <div className="bg-white p-6 rounded-lg shadow-md border">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Available Sizes</h2>
-          
+
           <div className="grid grid-cols-4 md:grid-cols-7 gap-3">
             {SIZES.map(size => (
               <button
                 key={size}
                 type="button"
                 onClick={() => toggleSize(size)}
-                className={`py-2 px-3 border rounded-lg font-medium transition-colors ${
-                  formData.sizes.includes(size)
-                    ? 'border-blue-600 bg-blue-50 text-blue-600'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
+                className={`py-2 px-3 border rounded-lg font-medium transition-colors ${formData.sizes.includes(size)
+                  ? 'border-blue-600 bg-blue-50 text-blue-600'
+                  : 'border-gray-300 hover:border-gray-400'
+                  }`}
               >
                 {size}
               </button>
@@ -363,7 +434,7 @@ export const AddProduct = () => {
         {/* Colors */}
         <div className="bg-white p-6 rounded-lg shadow-md border">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Available Colors</h2>
-          
+
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-600 mb-3">Selected Colors:</p>
@@ -385,7 +456,7 @@ export const AddProduct = () => {
                 ))}
               </div>
             </div>
-            
+
             <div>
               <p className="text-sm text-gray-600 mb-3">Add Colors:</p>
               <div className="grid grid-cols-8 md:grid-cols-15 gap-2">

@@ -176,7 +176,7 @@ export const ChangePasswordModal = ({ onClose, onSuccess }: ChangePasswordModalP
                   formData.newPassword.length >= 8 && /[A-Z]/.test(formData.newPassword) ? 'bg-orange-400' : 'bg-gray-200'
                 }`} />
                 <div className={`h-1 flex-1 rounded ${
-                  formData.newPassword.length >= 8 && /[A-Z]/.test(formData.newPassword) && /[0-9]/.test(formData.newPassword) ? 'bg-green-400' : 'bg-gray-200'
+                  formData.newPassword.length >= 8 && /[A-Z]/.test(formData.newPassword) && /[0-9]/.test(formData.newPassword) ? 'bg-secondary-400' : 'bg-gray-200'
                 }`} />
               </div>
             </div>

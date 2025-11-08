@@ -40,7 +40,7 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
         onClick={() => updateFilter('rating', isActive ? undefined : rating)}
         className={`flex items-center justify-between w-full p-3 rounded-lg border transition-colors ${
           isActive
-            ? 'border-green-500 bg-green-50 text-green-700'
+            ? 'border-primary-500 bg-primary-50 text-primary-700'
             : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
         }`}
       >
@@ -86,7 +86,7 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="text-sm text-green-600 hover:text-green-700 font-medium"
+            className="text-sm text-primary-600 hover:text-primary-700 font-medium"
           >
             Clear All
           </button>
@@ -113,7 +113,7 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
               onClick={() => updateFilter('verified', filters.verified ? undefined : true)}
               className={`flex items-center justify-between w-full p-3 rounded-lg border transition-colors ${
                 filters.verified
-                  ? 'border-green-500 bg-green-50 text-green-700'
+                  ? 'border-secondary-500 bg-secondary-50 text-secondary-700'
                   : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }`}
             >
@@ -131,7 +131,7 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
               onClick={() => updateFilter('withPhotos', filters.withPhotos ? undefined : true)}
               className={`flex items-center justify-between w-full p-3 rounded-lg border transition-colors ${
                 filters.withPhotos
-                  ? 'border-green-500 bg-green-50 text-green-700'
+                  ? 'border-secondary-500 bg-secondary-50 text-secondary-700'
                   : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }`}
             >
@@ -168,33 +168,33 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
         <div className="mt-6 pt-4 border-t border-gray-200">
           <div className="flex flex-wrap gap-2">
             {filters.rating && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
                 {filters.rating} stars
                 <button
                   onClick={() => updateFilter('rating', undefined)}
-                  className="ml-1 hover:text-green-900"
+                  className="ml-1 hover:text-primary-900"
                 >
                   ×
                 </button>
               </span>
             )}
             {filters.verified && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-secondary-100 text-secondary-700 text-xs rounded-full">
                 Verified
                 <button
                   onClick={() => updateFilter('verified', undefined)}
-                  className="ml-1 hover:text-green-900"
+                  className="ml-1 hover:text-secondary-900"
                 >
                   ×
                 </button>
               </span>
             )}
             {filters.withPhotos && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-secondary-100 text-secondary-700 text-xs rounded-full">
                 With Photos
                 <button
                   onClick={() => updateFilter('withPhotos', undefined)}
-                  className="ml-1 hover:text-green-900"
+                  className="ml-1 hover:text-secondary-900"
                 >
                   ×
                 </button>

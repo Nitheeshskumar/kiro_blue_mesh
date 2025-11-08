@@ -171,19 +171,45 @@ const verifyToken = async (authHeader) => {
 router.get('/', async (req, res) => {
     try {
         const { category, categories, search } = req.query;
-        let filteredProducts = sampleProducts.filter(p => p.isActive);
-        // Filter by category
+        const db = await (0, database_1.getDatabase)();
+        // Build query filters
+        const where = { isActive: true };
+        // Filter by single category
         if (category) {
-            filteredProducts = filteredProducts.filter(p => p.category === category || p.categories?.includes(category));
+            where.category = category;
         }
         // Filter by multiple categories
         if (categories) {
             const categoryList = typeof categories === 'string'
                 ? categories.split(',').map(c => c.trim())
                 : categories;
+            where.categories = categoryList;
+        }
+        // Fetch products from database
+        let products = await db.findProducts(where);
+        // Filter by search term (client-side filtering for now)
+        if (search) {
+            const searchTerm = search.toLowerCase();
+            products = products.filter(p => p.name.toLowerCase().includes(searchTerm) ||
+                p.description?.toLowerCase().includes(searchTerm));
+        }
+        res.json(products);
+    }
+    catch (error) {
+        console.error('Get products error:', error);
+        // Fallback to sample data if database fails
+        console.log('Falling back to sample data');
+        let filteredProducts = sampleProducts.filter(p => p.isActive);
+        const { category, categories, search } = req.query;
+        if (category) {
+            filteredProducts = filteredProducts.filter(p => p.category === category || p.categories?.includes(category));
+        }
+        if (categories) {
+            const categoryList = typeof categories === 'string'
+                ? categories.split(',').map(c => c.trim())
+                : categories;
             filteredProducts = filteredProducts.filter(p => categoryList.some(cat => p.category === cat || p.categories?.includes(cat)));
         }
-        // Filter by search term
         if (search) {
             const searchTerm = search.toLowerCase();
             filteredProducts = filteredProducts.filter(p => p.name.toLowerCase().includes(searchTerm) ||
@@ -191,27 +217,28 @@ router.get('/', async (req, res) => {
         }
         res.json(filteredProducts);
     }
-    catch (error) {
-        console.error('Get products error:', error);
-        res.status(500).json({ error: 'Failed to fetch products' });
-    }
 });
 // Get all categories with product counts
 router.get('/categories/all', async (req, res) => {
     try {
-        res.json(sampleCategories);
+        const db = await (0, database_1.getDatabase)();
+        const categories = await db.getCategoriesWithProductCounts();
+        res.json(categories);
     }
     catch (error) {
         console.error('Get categories error:', error);
-        res.status(500).json({ error: 'Failed to fetch categories' });
+        // Fallback to sample data if database fails
+        console.log('Falling back to sample categories');
+        res.json(sampleCategories);
     }
 });
 // Get product by ID
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        // Find product in sample data
-        const product = sampleProducts.find(p => p.id === id);
+        const db = await (0, database_1.getDatabase)();
+        // Fetch product from database
+        const product = await db.findProductById(id);
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
@@ -224,7 +251,14 @@ router.get('/:id', async (req, res) => {
     }
     catch (error) {
         console.error('Get product error:', error);
-        res.status(500).json({ error: 'Failed to fetch product' });
+        // Fallback to sample data if database fails
+        console.log('Falling back to sample data for product');
+        const { id } = req.params;
+        const product = sampleProducts.find(p => p.id === id);
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+        res.json({ ...product, customizations: [] });
     }
 });
 // Create product (admin only)

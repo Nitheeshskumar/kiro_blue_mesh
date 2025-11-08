@@ -1,0 +1,295 @@
+import { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { CheckCircle, Instagram, Package, MapPin, Copy, Check } from 'lucide-react'
+import { api } from '../lib/api'
+import { Order } from '../types'
+import { openInstagramDM, formatOrderMessage } from '../lib/instagram'
+
+export const OrderConfirmationPage = () => {
+  const { orderId } = useParams<{ orderId: string }>()
+  const navigate = useNavigate()
+  const [order, setOrder] = useState<Order | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [redirecting, setRedirecting] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [orderMessage, setOrderMessage] = useState('')
+
+  const handleContactInstagram = () => {
+    if (!order) return
+
+    setRedirecting(true)
+
+    // Get first item details for message
+    const firstItem = order.items[0]
+    const shippingInfo = order.shippingInfo
+
+    const orderDetails = {
+      orderId: order.id,
+      productName: firstItem.product.name,
+      size: firstItem.customization.size,
+      color: firstItem.customization.color,
+      embroidery: firstItem.customization.embroidery?.text,
+      price: order.totalAmount,
+      customerName: shippingInfo.name || shippingInfo.fullName || 'Customer',
+      shippingAddress: `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.state} ${shippingInfo.zipCode}`
+    }
+
+    // Open Instagram DM
+    openInstagramDM(orderDetails)
+
+    // Re-enable button after 5 seconds
+    setTimeout(() => {
+      setRedirecting(false)
+    }, 5000)
+  }
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const response = await api.get(`/orders/${orderId}`)
+        const orderData = response.data
+        setOrder(orderData)
+
+        // Generate order message
+        const firstItem = orderData.items[0]
+        const shippingInfo = orderData.shippingInfo
+        const message = formatOrderMessage({
+          orderId: orderData.id,
+          productName: firstItem.product.name,
+          size: firstItem.customization.size,
+          color: firstItem.customization.color,
+          embroidery: firstItem.customization.embroidery?.text,
+          price: orderData.totalAmount,
+          customerName: shippingInfo.name || shippingInfo.fullName || 'Customer',
+          shippingAddress: `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.state} ${shippingInfo.zipCode}`
+        })
+        setOrderMessage(message)
+      } catch (error) {
+        console.error('Failed to fetch order:', error)
+        navigate('/orders')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (orderId) {
+      fetchOrder()
+    }
+  }, [orderId, navigate])
+
+  // Separate effect for auto-redirect to avoid stale closure
+  useEffect(() => {
+    if (!order) return
+
+    // Auto-redirect to Instagram after 3 seconds
+    const timer = setTimeout(() => {
+      handleContactInstagram()
+    }, 3000)
+
+    // Cleanup timer on unmount
+    return () => clearTimeout(timer)
+  }, [order]) // Depend on order so it runs after order is loaded
+
+  const handleCopyMessage = async () => {
+    try {
+      await navigator.clipboard.writeText(orderMessage)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (error) {
+      console.error('Failed to copy:', error)
+      // Fallback: select the text
+      const textarea = document.getElementById('order-message') as HTMLTextAreaElement
+      if (textarea) {
+        textarea.select()
+        document.execCommand('copy')
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading order details...</p>
+      </div>
+    )
+  }
+
+  if (!order) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+        <p className="text-gray-600">Order not found</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto px-4 py-8">
+      {/* Success Header */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+          <CheckCircle className="w-10 h-10 text-green-600" />
+        </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Order Placed Successfully!
+        </h1>
+        <p className="text-lg text-gray-600">
+          Order ID: <span className="font-semibold">#{order.id}</span>
+        </p>
+      </div>
+
+      {/* Instagram Contact Card */}
+      <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg p-6 mb-6">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            <Instagram className="w-12 h-12 text-purple-600" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              Continue on Instagram
+            </h2>
+            <p className="text-gray-700 mb-4">
+              {redirecting
+                ? "Redirecting you to Instagram..."
+                : "We'll redirect you to Instagram in a moment to confirm your order and share payment details."}
+            </p>
+            <button
+              onClick={handleContactInstagram}
+              disabled={redirecting}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 px-6 rounded-lg transition-all disabled:opacity-50"
+            >
+              <Instagram className="w-5 h-5" />
+              {redirecting ? 'Opening Instagram...' : 'Contact us on Instagram'}
+            </button>
+          </div>
+        </div>
+
+        {/* Copyable Message */}
+        <div className="mt-6 pt-6 border-t border-purple-200">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium text-gray-700">
+              Order Message (Copy & Paste to Instagram)
+            </label>
+            <button
+              onClick={handleCopyMessage}
+              className="inline-flex items-center gap-2 text-sm text-purple-600 hover:text-purple-700 font-medium"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  Copy Message
+                </>
+              )}
+            </button>
+          </div>
+          <textarea
+            id="order-message"
+            value={orderMessage}
+            readOnly
+            rows={12}
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg bg-white text-sm font-mono text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+          />
+          <p className="text-xs text-gray-600 mt-2">
+            💡 If the Instagram message isn't pre-filled, copy this message and paste it in the chat.
+          </p>
+        </div>
+      </div>
+
+      {/* Order Summary */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
+
+        {/* Order Items */}
+        <div className="space-y-4 mb-4">
+          {order.items.map((item) => (
+            <div key={item.id} className="flex gap-4">
+              <img
+                src={item.product.images[0]}
+                alt={item.product.name}
+                className="w-20 h-20 object-cover rounded"
+              />
+              <div className="flex-1">
+                <h4 className="font-medium text-gray-900">{item.product.name}</h4>
+                <p className="text-sm text-gray-600">
+                  Size: {item.customization.size} | Color: {item.customization.color}
+                </p>
+                {item.customization.embroidery?.text && (
+                  <p className="text-sm text-gray-600">
+                    Embroidery: "{item.customization.embroidery.text}"
+                  </p>
+                )}
+                <p className="text-sm font-medium text-gray-900 mt-1">
+                  Qty: {item.quantity} × ₹{item.price.toFixed(2)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Total */}
+        <div className="border-t pt-4">
+          <div className="flex justify-between text-lg font-bold">
+            <span>Total Amount:</span>
+            <span className="text-primary-600">₹{order.totalAmount.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Shipping Information */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <MapPin className="w-5 h-5 text-gray-600" />
+          <h3 className="text-lg font-semibold text-gray-900">Shipping Address</h3>
+        </div>
+        <div className="text-gray-700">
+          <p className="font-medium">{order.shippingInfo.name || order.shippingInfo.fullName}</p>
+          <p>{order.shippingInfo.address}</p>
+          <p>
+            {order.shippingInfo.city}, {order.shippingInfo.state} {order.shippingInfo.zipCode}
+          </p>
+          {order.shippingInfo.phone && <p>Phone: {order.shippingInfo.phone}</p>}
+        </div>
+      </div>
+
+      {/* Next Steps */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div className="flex items-start gap-3">
+          <Package className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-2">What happens next?</h3>
+            <ol className="list-decimal list-inside space-y-2 text-gray-700">
+              <li>We'll confirm your order on Instagram</li>
+              <li>Share payment details (UPI/Bank Transfer)</li>
+              <li>Once payment is received, we'll start processing</li>
+              <li>You'll receive tracking details when shipped</li>
+              <li>Track your order anytime from "My Orders"</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="mt-8 flex gap-4">
+        <button
+          onClick={() => navigate('/orders')}
+          className="flex-1 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors"
+        >
+          View My Orders
+        </button>
+        <button
+          onClick={() => navigate('/')}
+          className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+        >
+          Continue Shopping
+        </button>
+      </div>
+    </div>
+  )
+}

@@ -282,8 +282,8 @@ class Database {
             if (adminExists.rows.length === 0) {
                 // Insert admin user (password: secret123)
                 await this.query(`
-          INSERT INTO users (id, email, name, password, role)
-          VALUES ($1, $2, $3, $4, $5)
+          INSERT INTO users (id, email, name, password, role, "createdAt", "updatedAt")
+          VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         `, ['admin-1', 'admin@willowbrook.com', 'Admin User', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/VcSAg/9qm', 'ADMIN']);
                 // Insert sample products with enhanced customization options
                 const products = [
@@ -647,10 +647,23 @@ class Database {
     async createOrder(data) {
         const id = generateId();
         const result = await this.query(`
-      INSERT INTO orders (id, "userId", status, "totalAmount", "paymentId", "shippingInfo", "trackingCode", "createdAt", "updatedAt")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO orders (id, "userId", status, "totalAmount", "paymentId", "shippingInfo", "trackingCode", "trackingUrl", "adminNotes", "contactMethod", "customerInstagram", "statusHistory", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
-    `, [id, data.userId, data.status, data.totalAmount, data.paymentId, data.shippingInfo, data.trackingCode]);
+    `, [
+            id,
+            data.userId,
+            data.status,
+            data.totalAmount,
+            data.paymentId || null,
+            data.shippingInfo,
+            data.trackingCode || null,
+            data.trackingUrl || null,
+            data.adminNotes || null,
+            data.contactMethod || 'INSTAGRAM',
+            data.customerInstagram || null,
+            data.statusHistory || '[]'
+        ]);
         return result.rows[0];
     }
     async updateOrder(id, data) {

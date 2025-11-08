@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Eye } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
 import { Order, OrderStatus } from '../types'
 
 const statusColors: Record<OrderStatus, string> = {
   [OrderStatus.PENDING]: 'bg-yellow-100 text-yellow-800',
-  [OrderStatus.PAID]: 'bg-blue-100 text-blue-800',
-  [OrderStatus.PROCESSING]: 'bg-purple-100 text-purple-800',
-  [OrderStatus.MANUFACTURING]: 'bg-orange-100 text-orange-800',
-  [OrderStatus.SHIPPED]: 'bg-green-100 text-green-800',
+  [OrderStatus.PAID]: 'bg-green-100 text-green-800',
+  [OrderStatus.SHIPPED]: 'bg-blue-100 text-blue-800',
   [OrderStatus.DELIVERED]: 'bg-green-100 text-green-800',
-  [OrderStatus.CANCELLED]: 'bg-red-100 text-red-800'
+  [OrderStatus.CANCELLED]: 'bg-red-100 text-red-800',
+  [OrderStatus.RETURNED]: 'bg-orange-100 text-orange-800'
 }
 
 export const OrdersPage = () => {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -63,7 +65,7 @@ export const OrdersPage = () => {
       <div className="max-w-4xl mx-auto px-4 py-8 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">No Orders Yet</h1>
         <p className="text-gray-600 mb-8">You haven't placed any orders yet.</p>
-        <a href="/products" className="btn-primary">
+        <a href="/products" className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
           Start Shopping
         </a>
       </div>
@@ -140,6 +142,16 @@ export const OrdersPage = () => {
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-4 pt-4 border-t">
+              <button
+                onClick={() => navigate(`/order-tracking/${order.id}`)}
+                className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
+              >
+                <Eye className="w-4 h-4" />
+                View Order Details & Tracking
+              </button>
             </div>
           </div>
         ))}

@@ -11,6 +11,8 @@ import { CustomizerPage } from './pages/CustomizerPage'
 import { CartPage } from './pages/CartPage'
 import { OrdersPage } from './pages/OrdersPage'
 import { OrderSuccessPage } from './pages/OrderSuccessPage'
+import { OrderConfirmationPage } from './pages/OrderConfirmationPage'
+import { OrderTrackingPage } from './pages/OrderTrackingPage'
 import { UserProfile } from './pages/UserProfile'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -47,7 +49,7 @@ function App() {
 
             {/* Public Routes */}
             <Route path="/*" element={
-              <div className="min-h-screen bg-gray-50">
+              <div className="min-h-screen bg-gradient-to-br from-secondary-50/30 via-white to-primary-50/30">
                 <Navbar />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <Breadcrumb className="py-4" />
@@ -61,6 +63,8 @@ function App() {
                     <Route path="/cart" element={<CartPage />} />
                     <Route path="/orders" element={<OrdersPage />} />
                     <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
+                    <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
+                    <Route path="/order-tracking/:orderId" element={<OrderTrackingPage />} />
                     <Route path="/profile" element={<UserProfile />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />

@@ -26,7 +26,7 @@ export const UserManagement = () => {
   const fetchUsers = async () => {
     try {
       const response = await api.get('/admin/users')
-      setUsers(response.data)
+      setUsers(response.data.users)
     } catch (error) {
       console.error('Failed to fetch users:', error)
     } finally {
@@ -121,8 +121,8 @@ export const UserManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                       user.role === 'ADMIN' 
-                        ? 'bg-red-100 text-red-800' 
-                        : 'bg-green-100 text-green-800'
+                        ? 'bg-primary-100 text-primary-800' 
+                        : 'bg-secondary-100 text-secondary-800'
                     }`}>
                       {user.role}
                     </span>

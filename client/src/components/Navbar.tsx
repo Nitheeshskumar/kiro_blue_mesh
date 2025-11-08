@@ -27,10 +27,13 @@ export const Navbar = () => {
           {/* Logo and Desktop Navigation */}
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">W</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-lg flex items-center justify-center">
+                <span className="text-white font-light text-sm">W</span>
               </div>
-              <span className="text-xl font-bold text-gray-900 font-serif">Willowbrook</span>
+              <div className="flex flex-col">
+                <span className="text-xl font-light text-gray-900 font-heading leading-tight">Willowbrook</span>
+                <span className="text-[10px] text-gray-500 font-light -mt-1">Mom & Baby</span>
+              </div>
             </Link>
 
             <div className="hidden lg:flex space-x-8">
