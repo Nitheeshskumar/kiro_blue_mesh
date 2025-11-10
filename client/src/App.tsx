@@ -60,7 +60,7 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/products" element={<ProductsPage />} />
                     <Route path="/brand-story" element={<BrandStoryPage />} />
-                    <Route path="/products/:productId/customize" element={<CustomizerPage />} />
+                    <Route path="/products/:productId" element={<CustomizerPage />} />
                     <Route path="/cart" element={<CartPage />} />
                     <Route path="/orders" element={<OrdersPage />} />
                     <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />

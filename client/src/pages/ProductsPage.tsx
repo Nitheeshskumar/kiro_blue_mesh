@@ -7,8 +7,8 @@ export const ProductsPage: React.FC = () => {
   const navigate = useNavigate()
 
   const handleProductSelect = (product: Product) => {
-    // Navigate to product customization page
-    navigate(`/products/${product.id}/customize`)
+    // Navigate to product page
+    navigate(`/products/${product.id}`)
   }
 
   return (

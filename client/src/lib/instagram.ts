@@ -5,6 +5,7 @@
 
 export interface OrderDetails {
   orderId: string
+  productId: string
   productName: string
   size: string
   color: string
@@ -33,6 +34,7 @@ export const generateInstagramDMLink = (orderDetails: OrderDetails): string => {
  */
 export const formatOrderMessage = (orderDetails: OrderDetails): string => {
   const businessName = import.meta.env.VITE_BUSINESS_NAME || 'Willowbrook Clothing'
+  const siteUrl = import.meta.env.VITE_APP_URL || window.location.origin
 
   let message = `Hi ${businessName}! 👋\n\n`
   message += `I'd like to place an order:\n\n`
@@ -47,6 +49,7 @@ export const formatOrderMessage = (orderDetails: OrderDetails): string => {
   }
 
   message += `\n💰 Total: ₹${orderDetails.price.toFixed(2)}\n\n`
+  message += `🔗 Product Link:\n${siteUrl}/products/${orderDetails.productId}\n\n`
   message += `📍 Shipping To:\n${orderDetails.customerName}\n${orderDetails.shippingAddress}\n\n`
   message += `Please confirm my order and share payment details. Thank you! 🙏`
 

@@ -22,6 +22,7 @@ export const OrderConfirmationPage = () => {
 
     return {
       orderId: order.id,
+      productId: firstItem.productId,
       productName: firstItem.product.name,
       size: firstItem.customization.size,
       color: firstItem.customization.color,
@@ -70,6 +71,7 @@ export const OrderConfirmationPage = () => {
         const shippingInfo = orderData.shippingInfo
         const message = formatOrderMessage({
           orderId: orderData.id,
+          productId: firstItem.productId,
           productName: firstItem.product.name,
           size: firstItem.customization.size,
           color: firstItem.customization.color,
@@ -230,13 +232,23 @@ export const OrderConfirmationPage = () => {
         <div className="space-y-4 mb-4">
           {order.items.map((item) => (
             <div key={item.id} className="flex gap-4">
-              <img
-                src={item.product.images[0]}
-                alt={item.product.name}
-                className="w-20 h-20 object-cover rounded"
-              />
+              <a
+                href={`/products/${item.productId}`}
+                className="block w-20 h-20 flex-shrink-0"
+              >
+                <img
+                  src={item.product.images[0]}
+                  alt={item.product.name}
+                  className="w-full h-full object-cover rounded hover:opacity-80 transition-opacity cursor-pointer"
+                />
+              </a>
               <div className="flex-1">
-                <h4 className="font-medium text-gray-900">{item.product.name}</h4>
+                <a
+                  href={`/products/${item.productId}`}
+                  className="font-medium text-gray-900 hover:text-primary-600 transition-colors"
+                >
+                  {item.product.name}
+                </a>
                 <p className="text-sm text-gray-600">
                   Size: {item.customization.size} | Color: {item.customization.color}
                 </p>

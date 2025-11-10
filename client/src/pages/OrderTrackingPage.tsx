@@ -64,12 +64,13 @@ export const OrderTrackingPage = () => {
         const response = await api.get(`/orders/${orderId}`)
         const orderData = response.data
         setOrder(orderData)
-        
+
         // Generate order message for copying
         const firstItem = orderData.items[0]
         const shippingInfo = orderData.shippingInfo
         const message = formatOrderMessage({
           orderId: orderData.id,
+          productId: firstItem.productId,
           productName: firstItem.product.name,
           size: firstItem.customization.size,
           color: firstItem.customization.color,
@@ -99,6 +100,7 @@ export const OrderTrackingPage = () => {
 
     return {
       orderId: order.id,
+      productId: firstItem.productId,
       productName: firstItem.product.name,
       size: firstItem.customization.size,
       color: firstItem.customization.color,
@@ -251,13 +253,23 @@ export const OrderTrackingPage = () => {
         <div className="space-y-4">
           {order.items.map((item) => (
             <div key={item.id} className="flex gap-4 pb-4 border-b last:border-b-0">
-              <img
-                src={item.product.images[0]}
-                alt={item.product.name}
-                className="w-24 h-24 object-cover rounded"
-              />
+              <a
+                href={`/products/${item.productId}`}
+                className="block w-24 h-24 flex-shrink-0"
+              >
+                <img
+                  src={item.product.images[0]}
+                  alt={item.product.name}
+                  className="w-full h-full object-cover rounded hover:opacity-80 transition-opacity cursor-pointer"
+                />
+              </a>
               <div className="flex-1">
-                <h4 className="font-medium text-gray-900">{item.product.name}</h4>
+                <a
+                  href={`/products/${item.productId}`}
+                  className="font-medium text-gray-900 hover:text-primary-600 transition-colors"
+                >
+                  {item.product.name}
+                </a>
                 <p className="text-sm text-gray-600 mt-1">
                   Size: {item.customization.size} | Color: {item.customization.color}
                 </p>
@@ -301,7 +313,7 @@ export const OrderTrackingPage = () => {
         <p className="text-gray-700 mb-4">
           Have questions about your order? Contact us on WhatsApp or Instagram for quick support.
         </p>
-        
+
         {/* Contact Buttons */}
         <div className="grid md:grid-cols-2 gap-3 mb-6">
           <button
@@ -311,7 +323,7 @@ export const OrderTrackingPage = () => {
             <MessageCircle className="w-5 h-5" />
             <span>WhatsApp Support</span>
           </button>
-          
+
           <button
             onClick={handleContactInstagram}
             className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-all shadow-md hover:shadow-lg"

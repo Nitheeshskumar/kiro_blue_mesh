@@ -117,22 +117,30 @@ export const OrdersPage = () => {
             <div className="space-y-3">
               {order.items.map(item => (
                 <div key={item.id} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden">
+                  <a
+                    href={`/products/${item.productId}`}
+                    className="block w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0"
+                  >
                     {item.customization.previewUrl ? (
                       <img
                         src={item.customization.previewUrl}
                         alt={item.product.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover hover:opacity-80 transition-opacity"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs hover:bg-gray-300 transition-colors">
                         No Preview
                       </div>
                     )}
-                  </div>
+                  </a>
                   
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">{item.product.name}</h3>
+                    <a
+                      href={`/products/${item.productId}`}
+                      className="font-medium text-gray-900 hover:text-primary-600 transition-colors"
+                    >
+                      {item.product.name}
+                    </a>
                     <p className="text-sm text-gray-600">
                       Size: {item.customization.size} • Color: {item.customization.color}
                     </p>
