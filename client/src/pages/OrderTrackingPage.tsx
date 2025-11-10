@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Package, Truck, CheckCircle, XCircle, Clock, Instagram, ExternalLink, Copy, Check } from 'lucide-react'
+import { Package, Truck, CheckCircle, XCircle, Clock, Instagram, ExternalLink, Copy, Check, MessageCircle } from 'lucide-react'
 import { api } from '../lib/api'
 import { Order, OrderStatus } from '../types'
-import { generateDTDCTrackingUrl, getInstagramProfileUrl, formatOrderMessage } from '../lib/instagram'
+import { generateDTDCTrackingUrl, getInstagramProfileUrl, formatOrderMessage, openWhatsApp, openInstagramDM } from '../lib/instagram'
 
 const statusConfig = {
   PENDING: {
@@ -90,6 +90,36 @@ export const OrderTrackingPage = () => {
       fetchOrder()
     }
   }, [orderId])
+
+  const getOrderDetails = () => {
+    if (!order) return null
+
+    const firstItem = order.items[0]
+    const shippingInfo = order.shippingInfo
+
+    return {
+      orderId: order.id,
+      productName: firstItem.product.name,
+      size: firstItem.customization.size,
+      color: firstItem.customization.color,
+      embroidery: firstItem.customization.embroidery?.text,
+      price: order.totalAmount,
+      customerName: shippingInfo.name || shippingInfo.fullName || 'Customer',
+      shippingAddress: `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.state} ${shippingInfo.zipCode}`
+    }
+  }
+
+  const handleContactWhatsApp = () => {
+    const orderDetails = getOrderDetails()
+    if (!orderDetails) return
+    openWhatsApp(orderDetails)
+  }
+
+  const handleContactInstagram = () => {
+    const orderDetails = getOrderDetails()
+    if (!orderDetails) return
+    openInstagramDM(orderDetails)
+  }
 
   const handleCopyMessage = async () => {
     try {
@@ -266,31 +296,36 @@ export const OrderTrackingPage = () => {
       </div>
 
       {/* Contact Support */}
-      <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-        <div className="flex items-start gap-4">
-          <Instagram className="w-8 h-8 text-purple-600 flex-shrink-0" />
-          <div className="flex-1">
-            <h3 className="font-semibold text-gray-900 mb-2">Need Help?</h3>
-            <p className="text-gray-700 mb-4">
-              Have questions about your order? Contact us on Instagram for quick support.
-            </p>
-            <a
-              href={getInstagramProfileUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-2 px-4 rounded-lg transition-all"
-            >
-              <Instagram className="w-5 h-5" />
-              Contact on Instagram
-            </a>
-          </div>
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
+        <h3 className="font-semibold text-gray-900 mb-2">Need Help?</h3>
+        <p className="text-gray-700 mb-4">
+          Have questions about your order? Contact us on WhatsApp or Instagram for quick support.
+        </p>
+        
+        {/* Contact Buttons */}
+        <div className="grid md:grid-cols-2 gap-3 mb-6">
+          <button
+            onClick={handleContactWhatsApp}
+            className="flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-3 px-4 rounded-lg transition-all shadow-md hover:shadow-lg"
+          >
+            <MessageCircle className="w-5 h-5" />
+            <span>WhatsApp Support</span>
+          </button>
+          
+          <button
+            onClick={handleContactInstagram}
+            className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-all shadow-md hover:shadow-lg"
+          >
+            <Instagram className="w-5 h-5" />
+            <span>Instagram Support</span>
+          </button>
         </div>
 
         {/* Copyable Message */}
-        <div className="mt-6 pt-6 border-t border-purple-200">
+        <div className="pt-6 border-t border-blue-200">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium text-gray-700">
-              Order Details Message (Copy to share on Instagram)
+              Order Details Message (Auto-filled or Copy & Paste)
             </label>
             <button
               onClick={handleCopyMessage}

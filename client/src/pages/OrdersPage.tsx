@@ -15,14 +15,17 @@ const statusColors: Record<OrderStatus, string> = {
 }
 
 export const OrdersPage = () => {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!user) return
+      if (!user) {
+        setLoading(false)
+        return
+      }
       
       try {
         const response = await api.get('/orders/user')
@@ -34,18 +37,13 @@ export const OrdersPage = () => {
       }
     }
 
-    fetchOrders()
-  }, [user])
+    if (!authLoading) {
+      fetchOrders()
+    }
+  }, [user, authLoading])
 
-  if (!user) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to view your orders</h1>
-      </div>
-    )
-  }
-
-  if (loading) {
+  // Show loading while auth is being checked
+  if (authLoading || loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="space-y-4">
@@ -56,6 +54,14 @@ export const OrdersPage = () => {
             </div>
           ))}
         </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to view your orders</h1>
       </div>
     )
   }
@@ -95,7 +101,7 @@ export const OrdersPage = () => {
                   {order.status.replace('_', ' ')}
                 </span>
                 <p className="text-lg font-bold text-gray-900 mt-1">
-                  ${order.totalAmount.toFixed(2)}
+                  ₹{order.totalAmount.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -131,13 +137,13 @@ export const OrdersPage = () => {
                       Size: {item.customization.size} • Color: {item.customization.color}
                     </p>
                     <p className="text-sm text-gray-600">
-                      Quantity: {item.quantity} × ${item.price.toFixed(2)}
+                      Quantity: {item.quantity} × ₹{item.price.toFixed(2)}
                     </p>
                   </div>
                   
                   <div className="text-right">
                     <p className="font-medium text-gray-900">
-                      ${(item.quantity * item.price).toFixed(2)}
+                      ₹{(item.quantity * item.price).toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -146,11 +152,11 @@ export const OrdersPage = () => {
 
             <div className="mt-4 pt-4 border-t">
               <button
-                onClick={() => navigate(`/order-tracking/${order.id}`)}
+                onClick={() => navigate(`/order-confirmation/${order.id}`)}
                 className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
               >
                 <Eye className="w-4 h-4" />
-                View Order Details & Tracking
+                View Order Details
               </button>
             </div>
           </div>

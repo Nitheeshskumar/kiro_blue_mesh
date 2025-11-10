@@ -83,6 +83,12 @@ export const Navbar = () => {
                   </Link>
                 )}
                 <Link
+                  to="/orders"
+                  className="hidden sm:flex text-gray-600 hover:text-primary-600 px-3 py-2 rounded-lg hover:bg-primary-50 transition-all duration-200 text-sm font-medium"
+                >
+                  My Orders
+                </Link>
+                <Link
                   to="/profile"
                   className="flex items-center space-x-2 text-gray-600 hover:text-primary-600 px-3 py-2 rounded-lg hover:bg-primary-50 transition-all duration-200"
                 >
@@ -159,6 +165,16 @@ export const Navbar = () => {
                       </div>
                     </Link>
                   )}
+                  <Link
+                    to="/orders"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                  >
+                    <div>
+                      <div className="font-medium">My Orders</div>
+                      <div className="text-sm text-gray-500 mt-1">View order history and tracking</div>
+                    </div>
+                  </Link>
                   <Link
                     to="/profile"
                     onClick={() => setIsMobileMenuOpen(false)}

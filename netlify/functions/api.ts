@@ -11,6 +11,7 @@ import customizationRoutes from './routes/customizations'
 import orderRoutes from './routes/orders'
 import adminRoutes from './routes/admin'
 import reviewRoutes from './routes/reviews'
+import addressRoutes from './routes/addresses'
 import { errorHandler } from './middleware/errorHandler'
 
 // Create Express app
@@ -20,8 +21,28 @@ const app = express()
 app.use(helmet({
   contentSecurityPolicy: false
 }))
+
+// CORS configuration - allow both production and local development
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:8888',
+  process.env.CLIENT_URL,
+  'https://willowbrooks.netlify.app'
+].filter(Boolean)
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true)
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      console.log('CORS blocked origin:', origin)
+      callback(null, true) // Allow anyway for development
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -58,6 +79,7 @@ app.use('/customizations', customizationRoutes)
 app.use('/orders', orderRoutes)
 app.use('/admin', adminRoutes)
 app.use('/reviews', reviewRoutes)
+app.use('/addresses', addressRoutes)
 
 // Health check
 app.get('/health', (req, res) => {
@@ -80,7 +102,7 @@ app.use('*', (req, res) => {
     path: req.path,
     url: req.url,
     originalUrl: req.originalUrl,
-    availableRoutes: ['/auth', '/products', '/customizations', '/orders', '/admin', '/reviews', '/health']
+    availableRoutes: ['/auth', '/products', '/customizations', '/orders', '/admin', '/reviews', '/addresses', '/health']
   })
 })
 

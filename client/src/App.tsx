@@ -14,6 +14,7 @@ import { OrderSuccessPage } from './pages/OrderSuccessPage'
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage'
 import { OrderTrackingPage } from './pages/OrderTrackingPage'
 import { UserProfile } from './pages/UserProfile'
+import { ProfilePage } from './pages/ProfilePage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
@@ -65,7 +66,8 @@ function App() {
                     <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
                     <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
                     <Route path="/order-tracking/:orderId" element={<OrderTrackingPage />} />
-                    <Route path="/profile" element={<UserProfile />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/user-profile" element={<UserProfile />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                   </Routes>
