@@ -43,6 +43,9 @@ export interface Product {
   threeDModelUrl?: string
   materialInfo?: any // JSON field for MaterialInfo[]
   careInstructions?: string[]
+  // Fixed colors support
+  hasFixedColors?: boolean // True if colors are fixed to the product design/image
+  colorType?: 'customizable' | 'fixed' // Type of color options available
 }
 
 export interface Customization {
@@ -714,10 +717,10 @@ export class Database {
   async createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
     const id = generateId()
     const result = await this.query(`
-      INSERT INTO products (id, name, description, category, categories, "basePrice", images, sizes, colors, "isActive", "createdAt", "updatedAt")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO products (id, name, description, category, categories, "basePrice", images, sizes, colors, "isActive", "hasFixedColors", "colorType", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
-    `, [id, data.name, data.description, data.category, data.categories || [], data.basePrice, data.images, data.sizes, data.colors, data.isActive])
+    `, [id, data.name, data.description, data.category, data.categories || [], data.basePrice, data.images, data.sizes, data.colors, data.isActive, data.hasFixedColors || false, data.colorType || 'customizable'])
     return result.rows[0]
   }
 

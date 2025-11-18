@@ -48,12 +48,12 @@ export const SupabaseUploadWidget: React.FC<SupabaseUploadWidgetProps> = ({
       if (validation.valid) {
         validFiles.push(file);
       } else {
-        validationErrors.push(`File ${index + 1}: ${validation.error}`);
+        validationErrors.push(`${file.name}: ${validation.error}`);
       }
     });
 
     if (validationErrors.length > 0) {
-      onError?.(validationErrors.join(', '));
+      onError?.(`File validation failed: ${validationErrors.join(', ')}`);
       return;
     }
 
@@ -65,11 +65,37 @@ export const SupabaseUploadWidget: React.FC<SupabaseUploadWidgetProps> = ({
     setUploading(true);
 
     try {
-      const results = await uploadMultipleFiles(validFiles, bucket, path);
-      onUpload(results);
+      console.log(`Starting upload of ${validFiles.length} files to Supabase...`);
+      
+      const results = await uploadMultipleFiles(
+        validFiles, 
+        bucket, 
+        path,
+        (completed, total) => {
+          console.log(`Upload progress: ${completed}/${total} files completed`);
+        }
+      );
+      
+      if (results.length > 0) {
+        console.log(`✅ Successfully uploaded ${results.length} files`);
+        onUpload(results);
+      } else {
+        onError?.('No files were uploaded successfully');
+      }
     } catch (error) {
       console.error('Upload error:', error);
-      onError?.(error instanceof Error ? error.message : 'Upload failed');
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+      
+      // Provide more specific error messages
+      if (errorMessage.includes('timeout')) {
+        onError?.('Upload timed out. Please check your internet connection and try again.');
+      } else if (errorMessage.includes('policy')) {
+        onError?.('Upload permission denied. Please contact support if this persists.');
+      } else if (errorMessage.includes('bucket')) {
+        onError?.('Storage configuration error. Please contact support.');
+      } else {
+        onError?.(`Upload failed: ${errorMessage}`);
+      }
     } finally {
       setUploading(false);
       // Reset file input

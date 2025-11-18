@@ -2,169 +2,156 @@
 
 /**
  * Fixed Colors Migration Script
+ * Adds colorType and hasFixedColors columns to the products table
  * 
- * This script adds support for products with fixed colors (like printed designs)
- * where colors are part of the product image and not customizable.
+ * This script fixes the TypeScript error by adding the missing database columns
+ * that are referenced in the products API routes.
  */
 
-const { Client } = require('pg');
-const fs = require('fs');
-const path = require('path');
+const { Pool } = require('pg');
 require('dotenv').config();
 
-const client = new Client({
-  connectionString: process.env.SUPABASE_DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+async function runFixedColorsMigration() {
+  const connectionString = process.env.SUPABASE_DATABASE_URL;
+  
+  if (!connectionString) {
+    console.error('❌ SUPABASE_DATABASE_URL environment variable is not set');
+    console.log('Please check your .env file and ensure SUPABASE_DATABASE_URL is configured');
+    process.exit(1);
+  }
 
-async function runMigration() {
-  try {
-    console.log('🔄 Connecting to database...');
-    await client.connect();
+  console.log('🚀 Starting Fixed Colors Migration...');
+  console.log('📍 Database:', connectionString.replace(/:[^:@]*@/, ':****@'));
 
-    console.log('📝 Reading migration file...');
-    const migrationSQL = fs.readFileSync(
-      path.join(__dirname, 'add-fixed-colors-support.sql'),
-      'utf8'
-    );
-
-    console.log('🚀 Running fixed colors migration...');
-    await client.query(migrationSQL);
-
-    console.log('✅ Migration completed successfully!');
-
-    // Add some sample products with fixed colors
-    console.log('🎨 Adding sample products with fixed colors...');
-    
-    const fixedColorProducts = [
-      {
-        id: 'prod-7',
-        name: 'Vintage Band T-Shirt',
-        description: 'Classic vintage band design with fixed artwork colors',
-        category: 'shirts',
-        categories: ['cotton-essentials'],
-        basePrice: 2490.00,
-        images: [
-          'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=400',
-          'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400'
-        ],
-        sizes: ['S', 'M', 'L', 'XL'],
-        colors: ['As Shown'], // Fixed color as shown in image
-        hasFixedColors: true,
-        colorType: 'fixed'
-      },
-      {
-        id: 'prod-8',
-        name: 'Floral Print Dress',
-        description: 'Beautiful floral pattern with unique color combination',
-        category: 'dresses',
-        categories: ['cotton-essentials'],
-        basePrice: 4150.00,
-        images: [
-          'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400',
-          'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400'
-        ],
-        sizes: ['XS', 'S', 'M', 'L', 'XL'],
-        colors: ['Floral Pattern'], // Fixed pattern color
-        hasFixedColors: true,
-        colorType: 'fixed'
-      },
-      {
-        id: 'prod-9',
-        name: 'Graphic Print Hoodie',
-        description: 'Street art inspired hoodie with unique graphic design',
-        category: 'hoodies',
-        categories: ['cotton-essentials'],
-        basePrice: 4565.00,
-        images: [
-          'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400',
-          'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400'
-        ],
-        sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-        colors: ['Original Design'], // Fixed graphic colors
-        hasFixedColors: true,
-        colorType: 'fixed'
-      }
-    ];
-
-    for (const product of fixedColorProducts) {
-      const insertQuery = `
-        INSERT INTO products (
-          id, name, description, category, categories, "basePrice", 
-          images, sizes, colors, "hasFixedColors", "colorType", "isActive", "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        ON CONFLICT (id) DO UPDATE SET
-          name = EXCLUDED.name,
-          description = EXCLUDED.description,
-          category = EXCLUDED.category,
-          categories = EXCLUDED.categories,
-          "basePrice" = EXCLUDED."basePrice",
-          images = EXCLUDED.images,
-          sizes = EXCLUDED.sizes,
-          colors = EXCLUDED.colors,
-          "hasFixedColors" = EXCLUDED."hasFixedColors",
-          "colorType" = EXCLUDED."colorType",
-          "updatedAt" = CURRENT_TIMESTAMP
-      `;
-
-      await client.query(insertQuery, [
-        product.id,
-        product.name,
-        product.description,
-        product.category,
-        product.categories,
-        product.basePrice,
-        product.images,
-        product.sizes,
-        product.colors,
-        product.hasFixedColors,
-        product.colorType,
-        true
-      ]);
-
-      console.log(`✅ Added fixed color product: ${product.name}`);
+  const pool = new Pool({
+    connectionString,
+    ssl: {
+      rejectUnauthorized: false
     }
+  });
+
+  try {
+    // Test connection
+    console.log('🔌 Testing database connection...');
+    await pool.query('SELECT NOW()');
+    console.log('✅ Database connection successful');
+
+    // Check if columns already exist
+    console.log('🔍 Checking existing table structure...');
+    const columnCheck = await pool.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'products' 
+      AND column_name IN ('hasFixedColors', 'colorType')
+    `);
+
+    const existingColumns = columnCheck.rows.map(row => row.column_name);
+    console.log('📋 Existing columns:', existingColumns);
+
+    // Add missing columns
+    if (!existingColumns.includes('hasFixedColors')) {
+      console.log('➕ Adding hasFixedColors column...');
+      await pool.query(`
+        ALTER TABLE products 
+        ADD COLUMN "hasFixedColors" BOOLEAN DEFAULT false
+      `);
+      console.log('✅ hasFixedColors column added');
+    } else {
+      console.log('ℹ️  hasFixedColors column already exists');
+    }
+
+    if (!existingColumns.includes('colorType')) {
+      console.log('➕ Adding colorType column...');
+      await pool.query(`
+        ALTER TABLE products 
+        ADD COLUMN "colorType" VARCHAR(20) DEFAULT 'customizable' 
+        CHECK ("colorType" IN ('customizable', 'fixed'))
+      `);
+      console.log('✅ colorType column added');
+    } else {
+      console.log('ℹ️  colorType column already exists');
+    }
+
+    // Add column comments
+    console.log('📝 Adding column documentation...');
+    await pool.query(`
+      COMMENT ON COLUMN products."hasFixedColors" IS 'True if product colors are fixed to the design/image and not customizable'
+    `);
+    await pool.query(`
+      COMMENT ON COLUMN products."colorType" IS 'Type of color options: customizable (user can choose colors) or fixed (colors are part of the design)'
+    `);
+
+    // Update existing products to have default values
+    console.log('🔄 Updating existing products with default values...');
+    const updateResult = await pool.query(`
+      UPDATE products 
+      SET "hasFixedColors" = COALESCE("hasFixedColors", false),
+          "colorType" = COALESCE("colorType", 'customizable')
+      WHERE "hasFixedColors" IS NULL OR "colorType" IS NULL
+    `);
+    console.log(`✅ Updated ${updateResult.rowCount} products with default values`);
+
+    // Create indexes for better performance
+    console.log('🔍 Creating performance indexes...');
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_products_color_type ON products("colorType")
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_products_has_fixed_colors ON products("hasFixedColors")
+    `);
+    console.log('✅ Performance indexes created');
 
     // Verify the migration
-    console.log('\n🔍 Verifying migration...');
-    const verifyQuery = `
+    console.log('🔍 Verifying migration results...');
+    const verifyResult = await pool.query(`
       SELECT 
-        id, 
-        name, 
-        "colorType",
-        "hasFixedColors",
-        colors,
-        array_length(colors, 1) as color_count
-      FROM products 
-      WHERE "colorType" = 'fixed'
-      ORDER BY id
-    `;
-    
-    const result = await client.query(verifyQuery);
-    
-    if (result.rows.length > 0) {
-      console.log('\n📊 Products with Fixed Colors:');
-      console.log('ID\t\tName\t\t\tColors');
-      console.log('─'.repeat(60));
-      
-      result.rows.forEach(row => {
-        console.log(`${row.id}\t${row.name.padEnd(25)}\t${row.colors.join(', ')}`);
-      });
-    }
+        COUNT(*) as total_products,
+        COUNT(CASE WHEN "colorType" = 'customizable' THEN 1 END) as customizable_products,
+        COUNT(CASE WHEN "colorType" = 'fixed' THEN 1 END) as fixed_products,
+        COUNT(CASE WHEN "hasFixedColors" = true THEN 1 END) as has_fixed_colors_true,
+        COUNT(CASE WHEN "hasFixedColors" = false THEN 1 END) as has_fixed_colors_false
+      FROM products
+    `);
 
-    console.log('\n✅ Fixed colors support added successfully!');
-    console.log('\n💡 New features available:');
-    console.log('   • Products can have fixed colors (as shown in image)');
-    console.log('   • Admin can specify color type when adding products');
-    console.log('   • Customizer shows appropriate color options');
+    const stats = verifyResult.rows[0];
+    console.log('📊 Migration Results:');
+    console.log(`   Total Products: ${stats.total_products}`);
+    console.log(`   Customizable: ${stats.customizable_products}`);
+    console.log(`   Fixed Colors: ${stats.fixed_products}`);
+    console.log(`   Has Fixed Colors (true): ${stats.has_fixed_colors_true}`);
+    console.log(`   Has Fixed Colors (false): ${stats.has_fixed_colors_false}`);
+
+    // Show sample of updated products
+    console.log('📋 Sample of products after migration:');
+    const sampleResult = await pool.query(`
+      SELECT id, name, "colorType", "hasFixedColors", 
+             array_length(colors, 1) as color_count
+      FROM products 
+      ORDER BY "createdAt" DESC 
+      LIMIT 5
+    `);
+
+    sampleResult.rows.forEach(product => {
+      console.log(`   ${product.id}: ${product.name} | Type: ${product.colorType} | Fixed: ${product.hasFixedColors} | Colors: ${product.color_count || 0}`);
+    });
+
+    console.log('\n🎉 Fixed Colors Migration completed successfully!');
+    console.log('✅ The TypeScript error should now be resolved');
+    console.log('💡 You can now use colorType and hasFixedColors in your products API');
 
   } catch (error) {
     console.error('❌ Migration failed:', error);
+    console.error('Stack trace:', error.stack);
     process.exit(1);
   } finally {
-    await client.end();
+    await pool.end();
+    console.log('🔌 Database connection closed');
   }
 }
 
 // Run the migration
-runMigration();
+if (require.main === module) {
+  runFixedColorsMigration().catch(console.error);
+}
+
+module.exports = { runFixedColorsMigration };

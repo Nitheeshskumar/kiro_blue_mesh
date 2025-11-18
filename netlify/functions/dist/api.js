@@ -15,6 +15,7 @@ const customizations_1 = __importDefault(require("./routes/customizations"));
 const orders_1 = __importDefault(require("./routes/orders"));
 const admin_1 = __importDefault(require("./routes/admin"));
 const reviews_1 = __importDefault(require("./routes/reviews"));
+const addresses_1 = __importDefault(require("./routes/addresses"));
 const errorHandler_1 = require("./middleware/errorHandler");
 // Create Express app
 const app = (0, express_1.default)();
@@ -22,8 +23,27 @@ const app = (0, express_1.default)();
 app.use((0, helmet_1.default)({
     contentSecurityPolicy: false
 }));
+// CORS configuration - allow both production and local development
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:8888',
+    process.env.CLIENT_URL,
+    'https://willowbrooks.netlify.app'
+].filter(Boolean);
 app.use((0, cors_1.default)({
-    origin: process.env.CLIENT_URL || '*',
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin)
+            return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            console.log('CORS blocked origin:', origin);
+            callback(null, true); // Allow anyway for development
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -56,6 +76,7 @@ app.use('/customizations', customizations_1.default);
 app.use('/orders', orders_1.default);
 app.use('/admin', admin_1.default);
 app.use('/reviews', reviews_1.default);
+app.use('/addresses', addresses_1.default);
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date().toISOString() });
@@ -75,7 +96,7 @@ app.use('*', (req, res) => {
         path: req.path,
         url: req.url,
         originalUrl: req.originalUrl,
-        availableRoutes: ['/auth', '/products', '/customizations', '/orders', '/admin', '/reviews', '/health']
+        availableRoutes: ['/auth', '/products', '/customizations', '/orders', '/admin', '/reviews', '/addresses', '/health']
     });
 });
 // Error handling

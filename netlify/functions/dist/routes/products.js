@@ -16,7 +16,11 @@ const sampleProducts = [
         category: 'shirts',
         categories: ['cotton-essentials', 'mother-daughter'],
         basePrice: 2075.00, // ₹2,075 (25 USD * 83)
-        images: ['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400'],
+        images: [
+            'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
+            'https://images.unsplash.com/photo-1583743814966-8936f37f4678?w=400',
+            'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400'
+        ],
         sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
         colors: ['#000000', '#FFFFFF', '#FF0000', '#0000FF', '#00FF00', '#FFFF00'],
         isActive: true,
@@ -30,7 +34,12 @@ const sampleProducts = [
         category: 'hoodies',
         categories: ['cotton-essentials', 'birthday-celebration'],
         basePrice: 3735.00, // ₹3,735 (45 USD * 83)
-        images: ['https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400'],
+        images: [
+            'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
+            'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400',
+            'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400',
+            'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400'
+        ],
         sizes: ['S', 'M', 'L', 'XL', 'XXL'],
         colors: ['#000000', '#FFFFFF', '#808080', '#000080', '#800000'],
         isActive: true,
@@ -44,7 +53,10 @@ const sampleProducts = [
         category: 'accessories',
         categories: ['accessories', 'kids-coordinated'],
         basePrice: 1660.00, // ₹1,660 (20 USD * 83)
-        images: ['https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400'],
+        images: [
+            'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400',
+            'https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?w=400'
+        ],
         sizes: ['One Size'],
         colors: ['#000000', '#FFFFFF', '#FF0000', '#0000FF', '#00FF00'],
         isActive: true,
@@ -58,7 +70,11 @@ const sampleProducts = [
         category: 'dresses',
         categories: ['maternity', 'cotton-essentials'],
         basePrice: 5395.00, // ₹5,395 (65 USD * 83)
-        images: ['https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400'],
+        images: [
+            'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400',
+            'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400',
+            'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400'
+        ],
         sizes: ['XS', 'S', 'M', 'L', 'XL'],
         colors: ['#000080', '#800080', '#008000', '#000000'],
         isActive: true,
@@ -72,7 +88,10 @@ const sampleProducts = [
         category: 'baby-clothes',
         categories: ['newborn-essentials', 'cotton-essentials'],
         basePrice: 2905.00, // ₹2,905 (35 USD * 83)
-        images: ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400'],
+        images: [
+            'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400',
+            'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400'
+        ],
         sizes: ['0-3M', '3-6M', '6-9M', '9-12M'],
         colors: ['#FFB6C1', '#87CEEB', '#98FB98', '#FFFFE0'],
         isActive: true,
@@ -86,7 +105,11 @@ const sampleProducts = [
         category: 'dresses',
         categories: ['birthday-celebration', 'kids-coordinated'],
         basePrice: 4565.00, // ₹4,565 (55 USD * 83)
-        images: ['https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=400'],
+        images: [
+            'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=400',
+            'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400',
+            'https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=400'
+        ],
         sizes: ['2T', '3T', '4T', '5T', '6T'],
         colors: ['#FF69B4', '#9370DB', '#FFD700', '#FF6347'],
         isActive: true,
@@ -268,7 +291,7 @@ router.post('/', async (req, res) => {
         if (user.role !== 'ADMIN') {
             return res.status(403).json({ error: 'Admin access required' });
         }
-        const { name, description, category, categories, basePrice, images, sizes, colors } = req.body;
+        const { name, description, category, categories, basePrice, images, sizes, colors, colorType, hasFixedColors } = req.body;
         if (!name || !category || !basePrice) {
             return res.status(400).json({ error: 'Name, category, and basePrice are required' });
         }
@@ -282,6 +305,8 @@ router.post('/', async (req, res) => {
             images: images || [],
             sizes: sizes || [],
             colors: colors || [],
+            colorType: colorType || 'customizable',
+            hasFixedColors: hasFixedColors || false,
             isActive: true
         });
         res.status(201).json(product);
@@ -299,7 +324,7 @@ router.put('/:id', async (req, res) => {
             return res.status(403).json({ error: 'Admin access required' });
         }
         const { id } = req.params;
-        const { name, description, category, categories, basePrice, images, sizes, colors, isActive } = req.body;
+        const { name, description, category, categories, basePrice, images, sizes, colors, isActive, colorType, hasFixedColors } = req.body;
         const db = await (0, database_1.getDatabase)();
         const product = await db.updateProduct(id, {
             ...(name && { name }),
@@ -310,6 +335,8 @@ router.put('/:id', async (req, res) => {
             ...(images && { images }),
             ...(sizes && { sizes }),
             ...(colors && { colors }),
+            ...(colorType && { colorType }),
+            ...(hasFixedColors !== undefined && { hasFixedColors }),
             ...(isActive !== undefined && { isActive })
         });
         if (!product) {
