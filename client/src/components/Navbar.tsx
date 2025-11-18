@@ -10,6 +10,7 @@ export const Navbar = () => {
   const location = useLocation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
+  const businessName = import.meta.env.VITE_BUSINESS_NAME || 'Willowbrook Clothing'
 
   const navigationItems = [
     { name: 'Products', href: '/products', description: 'Browse our premium collection' },
@@ -26,13 +27,15 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo and Desktop Navigation */}
           <div className="flex items-center space-x-8">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-lg flex items-center justify-center">
-                <span className="text-white font-light text-sm">W</span>
-              </div>
+            <Link to="/" className="flex items-center space-x-3">
+              <img 
+                src="/assets/images/willowbrook-logo.jpeg" 
+                alt={businessName} 
+                className="w-10 h-10 rounded-full object-cover border-2 border-gray-200 shadow-sm hover:border-primary-300 transition-colors duration-200"
+              />
               <div className="flex flex-col">
                 <span className="text-xl font-light text-gray-900 font-heading leading-tight">Willowbrook</span>
-                <span className="text-[10px] text-gray-500 font-light -mt-1">Mom & Baby</span>
+                <span className="text-[10px] text-gray-500 font-light -mt-1">Clothing</span>
               </div>
             </Link>
 

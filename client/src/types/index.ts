@@ -25,6 +25,8 @@ export interface Product {
   images: string[]
   sizes: string[]
   colors: string[]
+  hasFixedColors?: boolean // True if colors are fixed to the product design/image
+  colorType?: 'customizable' | 'fixed' // Type of color options available
 }
 
 export interface Customization {

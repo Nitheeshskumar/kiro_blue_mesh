@@ -91,7 +91,7 @@ export const brandStoryData: BrandStory = {
       id: "1",
       name: "Banu Nazir Maheen",
       role: "Founder & Creative Director",
-      bio: "With over 15 years in fashion design, Sarah founded Willowbrook to democratize custom clothing. She believes everyone deserves clothing that fits perfectly and reflects their personality.",
+      bio: "With over 15 years in fashion design, Banu founded Willowbrook to democratize custom clothing. She believes everyone deserves clothing that fits perfectly and reflects their personality.",
       image: "https://frbdhevxgofuvnrcbcvi.supabase.co/storage/v1/object/public/user-avatars/banu_brand.jpg",
       isFounder: true
     },

@@ -31,6 +31,8 @@ interface Product {
   sizes: string[]
   colors: string[]
   isActive: boolean
+  hasFixedColors?: boolean
+  colorType?: 'customizable' | 'fixed'
 }
 
 export const EditProduct = () => {
@@ -50,7 +52,9 @@ export const EditProduct = () => {
     images: [''],
     sizes: ['M'],
     colors: ['#000000'],
-    isActive: true
+    isActive: true,
+    colorType: 'customizable' as 'customizable' | 'fixed',
+    hasFixedColors: false
   })
 
   useEffect(() => {
@@ -85,7 +89,9 @@ export const EditProduct = () => {
         images: productData.images.length > 0 ? productData.images : [''],
         sizes: productData.sizes,
         colors: productData.colors,
-        isActive: productData.isActive
+        isActive: productData.isActive,
+        colorType: productData.colorType || 'customizable',
+        hasFixedColors: productData.hasFixedColors || false
       })
     } catch (error) {
       console.error('Failed to fetch product:', error)
@@ -391,46 +397,138 @@ export const EditProduct = () => {
 
         {/* Colors */}
         <div className="bg-white p-6 rounded-lg shadow-md border">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Available Colors</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-gray-600 mb-3">Selected Colors:</p>
-              <div className="flex flex-wrap gap-2">
-                {formData.colors.map(color => (
-                  <div key={color} className="relative">
-                    <div
-                      className="w-10 h-10 rounded-lg border-2 border-gray-300 cursor-pointer"
-                      style={{ backgroundColor: color }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeColor(color)}
-                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-                    >
-                      ×
-                    </button>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Color Options</h2>
+
+          {/* Color Type Selection */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Color Type *
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${
+                formData.colorType === 'customizable' 
+                  ? 'border-blue-500 bg-blue-50' 
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}>
+                <input
+                  type="radio"
+                  name="colorType"
+                  value="customizable"
+                  checked={formData.colorType === 'customizable'}
+                  onChange={(e) => {
+                    handleInputChange('colorType', e.target.value)
+                    handleInputChange('hasFixedColors', false)
+                  }}
+                  className="text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <div className="font-medium text-gray-900">Customizable Colors</div>
+                  <div className="text-sm text-gray-600">
+                    Customers can choose from available color options
                   </div>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <p className="text-sm text-gray-600 mb-3">Add Colors:</p>
-              <div className="grid grid-cols-8 md:grid-cols-15 gap-2">
-                {PRESET_COLORS.map(color => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => addColor(color)}
-                    className="w-8 h-8 rounded-lg border-2 border-gray-300 hover:border-gray-400"
-                    style={{ backgroundColor: color }}
-                    title={color}
-                  />
-                ))}
-              </div>
+                </div>
+              </label>
+
+              <label className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${
+                formData.colorType === 'fixed' 
+                  ? 'border-blue-500 bg-blue-50' 
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}>
+                <input
+                  type="radio"
+                  name="colorType"
+                  value="fixed"
+                  checked={formData.colorType === 'fixed'}
+                  onChange={(e) => {
+                    handleInputChange('colorType', e.target.value)
+                    handleInputChange('hasFixedColors', true)
+                  }}
+                  className="text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <div className="font-medium text-gray-900">Fixed Colors</div>
+                  <div className="text-sm text-gray-600">
+                    Colors are part of the design/image (e.g., prints, patterns)
+                  </div>
+                </div>
+              </label>
             </div>
           </div>
+
+          {/* Color Options based on type */}
+          {formData.colorType === 'customizable' ? (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-600 mb-3">Selected Colors:</p>
+                <div className="flex flex-wrap gap-2">
+                  {formData.colors.map(color => (
+                    <div key={color} className="relative">
+                      <div
+                        className="w-10 h-10 rounded-lg border-2 border-gray-300 cursor-pointer"
+                        style={{ backgroundColor: color }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeColor(color)}
+                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <p className="text-sm text-gray-600 mb-3">Add Colors:</p>
+                <div className="grid grid-cols-8 md:grid-cols-15 gap-2">
+                  {PRESET_COLORS.map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => addColor(color)}
+                      className="w-8 h-8 rounded-lg border-2 border-gray-300 hover:border-gray-400"
+                      style={{ backgroundColor: color }}
+                      title={color}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Color Description
+                </label>
+                <input
+                  type="text"
+                  value={formData.colors[0] || ''}
+                  onChange={(e) => handleInputChange('colors', [e.target.value])}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., As Shown in Image, Floral Pattern, Original Design"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Describe the fixed color/pattern that customers will see in the product images
+                </p>
+              </div>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-yellow-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <h4 className="text-sm font-medium text-yellow-800">Fixed Color Product</h4>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      This product will show the colors/patterns as they appear in the uploaded images. 
+                      Customers won't be able to change colors during customization.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Submit */}

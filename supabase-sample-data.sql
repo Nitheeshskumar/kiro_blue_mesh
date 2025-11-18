@@ -49,7 +49,7 @@ INSERT INTO products (
     'shirts',
     ARRAY['cotton-essentials', 'mother-daughter'],
     2075.00,
-    ARRAY['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400'],
+    ARRAY['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400', 'https://images.unsplash.com/photo-1583743814966-8936f37f4678?w=400', 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400'],
     ARRAY['XS', 'S', 'M', 'L', 'XL', 'XXL'],
     ARRAY['#000000', '#FFFFFF', '#FF0000', '#0000FF', '#00FF00', '#FFFF00'],
     '{
@@ -91,7 +91,7 @@ INSERT INTO products (
     'hoodies',
     ARRAY['cotton-essentials', 'birthday-celebration'],
     3735.00,
-    ARRAY['https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400'],
+    ARRAY['https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400', 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400', 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400', 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400'],
     ARRAY['S', 'M', 'L', 'XL', 'XXL'],
     ARRAY['#000000', '#FFFFFF', '#808080', '#000080', '#800000'],
     '{
@@ -124,7 +124,7 @@ INSERT INTO products (
     'accessories',
     ARRAY['accessories', 'kids-coordinated'],
     1660.00,
-    ARRAY['https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400'],
+    ARRAY['https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400', 'https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?w=400'],
     ARRAY['One Size'],
     ARRAY['#000000', '#FFFFFF', '#FF0000', '#0000FF', '#00FF00'],
     '{
@@ -153,7 +153,7 @@ INSERT INTO products (
     'dresses',
     ARRAY['maternity', 'cotton-essentials'],
     5395.00,
-    ARRAY['https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400'],
+    ARRAY['https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400', 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400', 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400'],
     ARRAY['XS', 'S', 'M', 'L', 'XL'],
     ARRAY['#000080', '#800080', '#008000', '#000000'],
     '{
@@ -185,7 +185,7 @@ INSERT INTO products (
     'baby-clothes',
     ARRAY['newborn-essentials', 'cotton-essentials'],
     2905.00,
-    ARRAY['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400'],
+    ARRAY['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400', 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400'],
     ARRAY['0-3M', '3-6M', '6-9M', '9-12M'],
     ARRAY['#FFB6C1', '#87CEEB', '#98FB98', '#FFFFE0'],
     '{
@@ -215,7 +215,7 @@ INSERT INTO products (
     'dresses',
     ARRAY['birthday-celebration', 'kids-coordinated'],
     4565.00,
-    ARRAY['https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=400'],
+    ARRAY['https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=400', 'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400', 'https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=400'],
     ARRAY['2T', '3T', '4T', '5T', '6T'],
     ARRAY['#FF69B4', '#9370DB', '#FFD700', '#FF6347'],
     '{

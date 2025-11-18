@@ -24,6 +24,7 @@ export const AdminLayout = () => {
   const location = useLocation()
   const { user, logout } = useAuth()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const businessName = import.meta.env.VITE_BUSINESS_NAME || 'Willowbrook Clothing'
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen)
@@ -58,7 +59,14 @@ export const AdminLayout = () => {
         >
           {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
-        <h1 className="ml-3 text-lg font-bold text-gray-900">Willowbrook Admin</h1>
+        <div className="flex items-center space-x-2 ml-3">
+          <img 
+            src="/assets/images/willowbrook-logo.jpeg" 
+            alt={businessName} 
+            className="w-6 h-6 rounded-full object-cover border border-gray-200 shadow-sm"
+          />
+          <h1 className="text-lg font-bold text-gray-900">Willowbrook Admin</h1>
+        </div>
       </div>
 
       {/* Overlay for mobile */}
@@ -76,7 +84,14 @@ export const AdminLayout = () => {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-6 border-b">
-            <h1 className="text-xl font-bold text-gray-900">Willowbrook Admin</h1>
+            <div className="flex items-center space-x-3">
+              <img 
+                src="/assets/images/willowbrook-logo.jpeg" 
+                alt={businessName} 
+                className="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm"
+              />
+              <h1 className="text-xl font-bold text-gray-900">Willowbrook Admin</h1>
+            </div>
             <div className="flex items-center gap-2">
               <Link
                 to="/"

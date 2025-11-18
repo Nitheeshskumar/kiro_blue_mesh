@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { Navbar } from './components/Navbar'
 import { AdminLayout } from './components/AdminLayout'
+import { Footer } from './components/Footer'
 import { Breadcrumb } from './components/ui/Breadcrumb'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
 import { ToastProvider } from './components/ui/Toast'
@@ -72,6 +73,7 @@ function App() {
                     <Route path="/register" element={<RegisterPage />} />
                   </Routes>
                 </main>
+                <Footer />
               </div>
             } />
           </Routes>
