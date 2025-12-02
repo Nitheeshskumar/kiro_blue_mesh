@@ -9,7 +9,8 @@ import {
   Clock,
   XCircle,
   MapPin,
-  Instagram,
+  /* Instagram, */
+  MessageCircle,
   Save,
   X as CloseIcon,
   Edit2
@@ -408,7 +409,19 @@ export const OrderManagement = () => {
                       </div>
 
                       {/* Customer Contact */}
-                      {(order.contactMethod === 'INSTAGRAM' || order.customerInstagram) && (
+                      {order.contactMethod === 'WHATSAPP' && (
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                            <MessageCircle className="w-5 h-5 text-green-600" />
+                            WhatsApp Contact
+                          </h4>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Customer prefers WhatsApp communication
+                          </p>
+                        </div>
+                      )}
+                      {/* Instagram Contact - Temporarily Disabled */}
+                      {/* {(order.contactMethod === 'INSTAGRAM' || order.customerInstagram) && (
                         <div className="bg-purple-50 rounded-lg p-4">
                           <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                             <Instagram className="w-5 h-5 text-purple-600" />
@@ -423,7 +436,7 @@ export const OrderManagement = () => {
                             Customer prefers Instagram communication
                           </p>
                         </div>
-                      )}
+                      )} */}
 
                       {/* Order Items */}
                       <div className="bg-white border border-gray-200 rounded-lg p-4">

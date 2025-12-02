@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { CheckCircle, Instagram, Package, MapPin, Copy, Check, MessageCircle } from 'lucide-react'
+import { CheckCircle, /* Instagram, */ Package, MapPin, Copy, Check, MessageCircle } from 'lucide-react'
 import { api } from '../lib/api'
 import { Order } from '../types'
-import { openInstagramDM, openWhatsApp, formatOrderMessage } from '../lib/instagram'
+import { /* openInstagramDM, */ openWhatsApp, formatOrderMessage } from '../lib/instagram'
 
 export const OrderConfirmationPage = () => {
   const { orderId } = useParams<{ orderId: string }>()
   const navigate = useNavigate()
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
-  const [redirecting, setRedirecting] = useState<'instagram' | 'whatsapp' | null>(null)
+  const [redirecting, setRedirecting] = useState</* 'instagram' | */ 'whatsapp' | null>(null)
   const [copied, setCopied] = useState(false)
   const [orderMessage, setOrderMessage] = useState('')
 
@@ -33,18 +33,19 @@ export const OrderConfirmationPage = () => {
     }
   }
 
-  const handleContactInstagram = () => {
-    const orderDetails = getOrderDetails()
-    if (!orderDetails) return
+  // Instagram functionality temporarily disabled
+  // const handleContactInstagram = () => {
+  //   const orderDetails = getOrderDetails()
+  //   if (!orderDetails) return
 
-    setRedirecting('instagram')
-    openInstagramDM(orderDetails)
+  //   setRedirecting('instagram')
+  //   openInstagramDM(orderDetails)
 
-    // Re-enable button after 5 seconds
-    setTimeout(() => {
-      setRedirecting(null)
-    }, 5000)
-  }
+  //   // Re-enable button after 5 seconds
+  //   setTimeout(() => {
+  //     setRedirecting(null)
+  //   }, 5000)
+  // }
 
   const handleContactWhatsApp = () => {
     const orderDetails = getOrderDetails()
@@ -147,33 +148,33 @@ export const OrderConfirmationPage = () => {
       </div>
 
       {/* Contact Options Card */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 rounded-lg p-6 mb-6">
         <h2 className="text-xl font-bold text-gray-900 mb-3">
-          Choose Your Preferred Contact Method
+          Contact Us on WhatsApp
         </h2>
         <p className="text-gray-700 mb-6">
-          Contact us to confirm your order and receive payment details. Choose your preferred platform:
+          Contact us on WhatsApp to confirm your order and receive payment details:
         </p>
 
-        {/* Contact Buttons */}
-        <div className="grid md:grid-cols-2 gap-4 mb-6">
+        {/* Contact Button */}
+        <div className="mb-6">
           {/* WhatsApp Button */}
           <button
             onClick={handleContactWhatsApp}
             disabled={redirecting === 'whatsapp'}
-            className="flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-4 px-6 rounded-lg transition-all disabled:opacity-50 shadow-md hover:shadow-lg"
+            className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-4 px-6 rounded-lg transition-all disabled:opacity-50 shadow-md hover:shadow-lg"
           >
             <MessageCircle className="w-6 h-6" />
-            <div className="text-left flex-1">
-              <div className="font-semibold">WhatsApp</div>
+            <div className="text-center">
+              <div className="font-semibold">Contact on WhatsApp</div>
               <div className="text-xs text-green-100">
-                {redirecting === 'whatsapp' ? 'Opening WhatsApp...' : 'Quick & Easy'}
+                {redirecting === 'whatsapp' ? 'Opening WhatsApp...' : 'Quick & Easy Order Confirmation'}
               </div>
             </div>
           </button>
 
-          {/* Instagram Button */}
-          <button
+          {/* Instagram Button - Commented Out */}
+          {/* <button
             onClick={handleContactInstagram}
             disabled={redirecting === 'instagram'}
             className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-4 px-6 rounded-lg transition-all disabled:opacity-50 shadow-md hover:shadow-lg"
@@ -185,18 +186,18 @@ export const OrderConfirmationPage = () => {
                 {redirecting === 'instagram' ? 'Opening Instagram...' : 'DM Us Directly'}
               </div>
             </div>
-          </button>
+          </button> */}
         </div>
 
         {/* Copyable Message */}
-        <div className="pt-6 border-t border-blue-200">
+        <div className="pt-6 border-t border-green-200">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium text-gray-700">
-              Order Message (Auto-filled or Copy & Paste)
+              Order Message (Auto-filled for WhatsApp or Copy & Paste)
             </label>
             <button
               onClick={handleCopyMessage}
-              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+              className="inline-flex items-center gap-2 text-sm text-green-600 hover:text-green-700 font-medium"
             >
               {copied ? (
                 <>
@@ -216,10 +217,10 @@ export const OrderConfirmationPage = () => {
             value={orderMessage}
             readOnly
             rows={12}
-            className="w-full px-3 py-2 border border-blue-300 rounded-lg bg-white text-sm font-mono text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full px-3 py-2 border border-green-300 rounded-lg bg-white text-sm font-mono text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
           />
           <p className="text-xs text-gray-600 mt-2">
-            💡 The message will be pre-filled when you click a button above. If not, copy and paste it manually.
+            💡 The message will be pre-filled when you click the WhatsApp button above. If not, copy and paste it manually.
           </p>
         </div>
       </div>
@@ -297,7 +298,7 @@ export const OrderConfirmationPage = () => {
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">What happens next?</h3>
             <ol className="list-decimal list-inside space-y-2 text-gray-700">
-              <li>Contact us via WhatsApp or Instagram</li>
+              <li>Contact us via WhatsApp using the button above</li>
               <li>We'll confirm your order and share payment details</li>
               <li>Once payment is received, we'll start processing</li>
               <li>You'll receive tracking details when shipped</li>

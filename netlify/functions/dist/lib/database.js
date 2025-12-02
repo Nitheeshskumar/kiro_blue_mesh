@@ -660,7 +660,7 @@ class Database {
             data.trackingCode || null,
             data.trackingUrl || null,
             data.adminNotes || null,
-            data.contactMethod || 'INSTAGRAM',
+            data.contactMethod || 'WHATSAPP', // Changed default from INSTAGRAM to WHATSAPP
             data.customerInstagram || null,
             data.statusHistory || '[]'
         ]);

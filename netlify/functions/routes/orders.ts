@@ -72,7 +72,7 @@ router.post('/', async (req, res) => {
       status: 'PENDING',
       totalAmount,
       shippingInfo,
-      contactMethod: contactMethod || 'INSTAGRAM',
+      contactMethod: contactMethod || 'WHATSAPP', // Changed default from INSTAGRAM to WHATSAPP
       customerInstagram: customerInstagram || undefined
     })
 

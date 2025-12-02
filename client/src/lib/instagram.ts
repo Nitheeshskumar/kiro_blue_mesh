@@ -1,6 +1,9 @@
 /**
  * Instagram Integration Utilities
  * Handles Instagram DM links and message formatting
+ * 
+ * NOTE: Instagram functionality is temporarily disabled.
+ * Users are currently directed to WhatsApp for order confirmation.
  */
 
 export interface OrderDetails {
@@ -17,8 +20,12 @@ export interface OrderDetails {
 
 /**
  * Generate Instagram DM link with pre-filled order message
+ * TEMPORARILY DISABLED - Users are directed to WhatsApp instead
  */
 export const generateInstagramDMLink = (orderDetails: OrderDetails): string => {
+  // Instagram functionality temporarily disabled
+  console.warn('Instagram DM functionality is temporarily disabled. Please use WhatsApp instead.')
+  
   const instagramUsername = import.meta.env.VITE_INSTAGRAM_BUSINESS_USERNAME || 'willowbrook_clothing'
 
   const message = formatOrderMessage(orderDetails)
@@ -58,22 +65,29 @@ export const formatOrderMessage = (orderDetails: OrderDetails): string => {
 
 /**
  * Get Instagram profile URL
+ * TEMPORARILY DISABLED - Users are directed to WhatsApp instead
  */
 export const getInstagramProfileUrl = (): string => {
+  // Instagram functionality temporarily disabled
+  console.warn('Instagram profile functionality is temporarily disabled. Please use WhatsApp instead.')
+  
   const instagramUsername = import.meta.env.VITE_INSTAGRAM_BUSINESS_USERNAME || 'willowbrook_clothing'
   return `https://www.instagram.com/${instagramUsername}/`
 }
 
 /**
  * Open Instagram DM in new window/tab
+ * TEMPORARILY DISABLED - Users are directed to WhatsApp instead
  */
 export const openInstagramDM = (orderDetails: OrderDetails): void => {
-  const dmLink = generateInstagramDMLink(orderDetails)
-
-  // Try to open in new window
-  // On mobile, this will open the Instagram app
-  // On desktop, this will open Instagram web
-  window.open(dmLink, '_blank')
+  // Instagram functionality temporarily disabled - redirect to WhatsApp
+  console.warn('Instagram DM functionality is temporarily disabled. Redirecting to WhatsApp instead.')
+  openWhatsApp(orderDetails)
+  return
+  
+  // Original Instagram code (commented out)
+  // const dmLink = generateInstagramDMLink(orderDetails)
+  // window.open(dmLink, '_blank')
 }
 
 /**

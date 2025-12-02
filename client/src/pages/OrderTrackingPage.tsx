@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Package, Truck, CheckCircle, XCircle, Clock, Instagram, ExternalLink, Copy, Check, MessageCircle } from 'lucide-react'
+import { Package, Truck, CheckCircle, XCircle, Clock, /* Instagram, */ ExternalLink, Copy, Check, MessageCircle } from 'lucide-react'
 import { api } from '../lib/api'
 import { Order, OrderStatus } from '../types'
-import { generateDTDCTrackingUrl, getInstagramProfileUrl, formatOrderMessage, openWhatsApp, openInstagramDM } from '../lib/instagram'
+import { generateDTDCTrackingUrl, /* getInstagramProfileUrl, */ formatOrderMessage, openWhatsApp, /* openInstagramDM */ } from '../lib/instagram'
 
 const statusConfig = {
   PENDING: {
@@ -117,11 +117,12 @@ export const OrderTrackingPage = () => {
     openWhatsApp(orderDetails)
   }
 
-  const handleContactInstagram = () => {
-    const orderDetails = getOrderDetails()
-    if (!orderDetails) return
-    openInstagramDM(orderDetails)
-  }
+  // Instagram functionality temporarily disabled
+  // const handleContactInstagram = () => {
+  //   const orderDetails = getOrderDetails()
+  //   if (!orderDetails) return
+  //   openInstagramDM(orderDetails)
+  // }
 
   const handleCopyMessage = async () => {
     try {
@@ -311,7 +312,7 @@ export const OrderTrackingPage = () => {
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
         <h3 className="font-semibold text-gray-900 mb-2">Need Help?</h3>
         <p className="text-gray-700 mb-4">
-          Have questions about your order? Contact us on WhatsApp or Instagram for quick support.
+          Have questions about your order? Contact us on WhatsApp for quick support.
         </p>
 
         {/* Contact Buttons */}
@@ -324,13 +325,14 @@ export const OrderTrackingPage = () => {
             <span>WhatsApp Support</span>
           </button>
 
-          <button
+          {/* Instagram Support - Temporarily Disabled */}
+          {/* <button
             onClick={handleContactInstagram}
             className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-all shadow-md hover:shadow-lg"
           >
             <Instagram className="w-5 h-5" />
             <span>Instagram Support</span>
-          </button>
+          </button> */}
         </div>
 
         {/* Copyable Message */}
@@ -364,7 +366,7 @@ export const OrderTrackingPage = () => {
             className="w-full px-3 py-2 border border-purple-300 rounded-lg bg-white text-sm font-mono text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
           />
           <p className="text-xs text-gray-600 mt-2">
-            💡 Copy this message to share your order details when contacting us on Instagram.
+            💡 Copy this message to share your order details when contacting us on WhatsApp.
           </p>
         </div>
       </div>

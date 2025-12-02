@@ -66,8 +66,8 @@ export interface Order {
   trackingCode?: string
   trackingUrl?: string
   adminNotes?: string
-  contactMethod?: string
-  customerInstagram?: string
+  contactMethod?: string // 'WHATSAPP' | 'INSTAGRAM' (Instagram temporarily disabled)
+  customerInstagram?: string // Deprecated - keeping for backward compatibility
   statusHistory?: StatusHistoryEntry[]
   createdAt: string
   updatedAt: string
