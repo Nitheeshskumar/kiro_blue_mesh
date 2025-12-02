@@ -25,6 +25,12 @@ import { EditProduct } from './pages/admin/EditProduct'
 import { OrderManagement } from './pages/admin/OrderManagement'
 import { UserManagement } from './pages/admin/UserManagement'
 import { AuthProvider } from './contexts/AuthContext'
+import { HalloweenProvider } from './contexts/HalloweenContext'
+import { HalloweenEffects } from './components/halloween/HalloweenEffects'
+import { HalloweenBanner } from './components/halloween/HalloweenBanner'
+import { HalloweenCursor } from './components/halloween/HalloweenCursor'
+import { HalloweenSounds } from './components/halloween/HalloweenSounds'
+import { HalloweenCharacters } from './components/halloween/HalloweenCharacters'
 import { useEffect } from 'react'
 
 function App() {
@@ -37,7 +43,12 @@ function App() {
   return (
     <ErrorBoundary>
       <ToastProvider>
-        <AuthProvider>
+        <HalloweenProvider>
+          <AuthProvider>
+            <HalloweenEffects />
+            <HalloweenCursor />
+            <HalloweenSounds />
+            <HalloweenCharacters />
           <Routes>
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
@@ -52,6 +63,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/*" element={
               <div className="min-h-screen bg-gradient-to-br from-secondary-50/30 via-white to-primary-50/30">
+                <HalloweenBanner />
                 <Navbar />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <Breadcrumb className="py-4" />
@@ -77,7 +89,8 @@ function App() {
               </div>
             } />
           </Routes>
-        </AuthProvider>
+          </AuthProvider>
+        </HalloweenProvider>
       </ToastProvider>
     </ErrorBoundary>
   )

@@ -3,6 +3,7 @@ import { ShoppingCart, User, LogOut, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useCartStore } from '../stores/cartStore'
+import { HalloweenToggle } from './halloween/HalloweenToggle'
 
 export const Navbar = () => {
   const { user, logout } = useAuth()
@@ -22,7 +23,7 @@ export const Navbar = () => {
   }
 
   return (
-    <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
+    <nav className="bg-white shadow-sm border-b sticky top-0 z-50 navbar">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Desktop Navigation */}
@@ -61,10 +62,13 @@ export const Navbar = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
+            {/* Halloween Toggle */}
+            <HalloweenToggle />
+
             {/* Cart */}
             <Link
               to="/cart"
-              className="relative p-2 text-gray-600 hover:text-primary-600 transition-colors duration-200 group"
+              className="relative p-2 text-gray-600 hover:text-primary-600 transition-colors duration-200 group halloween-hover"
             >
               <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" />
               {itemCount > 0 && (
