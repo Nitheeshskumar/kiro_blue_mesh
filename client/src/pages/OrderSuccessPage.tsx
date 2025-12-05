@@ -61,7 +61,7 @@ export const OrderSuccessPage = () => {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8 text-center">
         <h1 className="text-2xl font-bold text-gray-900">Order not found</h1>
-        <Link to="/orders" className="btn-primary mt-4">
+        <Link to="/orders" className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors mt-4">
           View All Orders
         </Link>
       </div>
@@ -73,14 +73,14 @@ export const OrderSuccessPage = () => {
       {/* Success Header */}
       <div className="text-center mb-8">
         <div className="flex justify-center mb-4">
-          <CheckCircle className="w-16 h-16 text-green-500" />
+          <CheckCircle className="w-16 h-16 text-primary-500" />
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Confirmed!</h1>
         <p className="text-gray-600">
           Thank you for your order. Your custom clothing is being prepared with care.
         </p>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
-          <p className="text-green-800">
+        <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mt-4">
+          <p className="text-primary-800">
             <strong>Order #{order.id.slice(-8)}</strong> • Total: ${order.totalAmount.toFixed(2)}
           </p>
         </div>
@@ -161,10 +161,10 @@ export const OrderSuccessPage = () => {
 
       {/* Action Buttons */}
       <div className="flex gap-4 justify-center mt-8">
-        <Link to="/orders" className="btn-primary">
+        <Link to="/orders" className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
           Track Order
         </Link>
-        <Link to="/products" className="btn-secondary">
+        <Link to="/products" className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors">
           Continue Shopping
         </Link>
       </div>

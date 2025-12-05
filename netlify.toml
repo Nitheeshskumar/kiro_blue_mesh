@@ -1,0 +1,65 @@
+[build]
+  publish = "client/dist"
+  command = "npm run install:all && npm run build:netlify"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20.12.2"
+  NPM_VERSION = "9"
+
+[dev]
+  command = "npm run dev:client"
+  port = 8888
+  targetPort = 3000
+  publish = "client/dist"
+  functions = "netlify/functions"
+  functionsPort = 9999
+
+# Required Supabase Environment Variables (set in Netlify dashboard):
+# SUPABASE_URL = "https://your-project.supabase.co"
+# SUPABASE_ANON_KEY = "your-anon-key"
+# SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key"
+# SUPABASE_DATABASE_URL = "postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres"
+# JWT_SECRET = "your-jwt-secret"
+# STRIPE_SECRET_KEY = "your-stripe-secret-key"
+
+# Function settings
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["express", "serverless-http", "bcryptjs", "jsonwebtoken", "stripe", "pg", "@supabase/supabase-js"]
+
+# API routes to Netlify Functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+
+# SPA routing - must come after API redirects
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Function headers
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"

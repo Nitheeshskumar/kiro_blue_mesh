@@ -1,0 +1,22 @@
+{
+  "enabled": true,
+  "name": "Pricing Validation Hook",
+  "description": "Validates that pricing calculations are consistent across client and server when product files or pricing logic changes",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "client/src/stores/CartStore.ts",
+      "client/src/components/ProductCard.tsx",
+      "client/src/pages/ProductsPage.tsx",
+      "netlify/functions/routes/products.ts",
+      "netlify/functions/routes/orders.ts",
+      "server/src/routes/products.ts",
+      "server/src/routes/orders.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Product files or pricing logic has been modified. Please validate that pricing calculations are consistent between the client-side (React components, CartStore) and server-side (API endpoints) implementations. Check for discrepancies in price calculations, tax handling, discount applications, and total computations. Ensure both frontend and backend produce identical pricing results for the same inputs."
+  }
+}

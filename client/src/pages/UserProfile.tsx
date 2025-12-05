@@ -106,7 +106,7 @@ export const UserProfile = () => {
           {!editing && (
             <button
               onClick={() => setEditing(true)}
-              className="btn-secondary flex items-center gap-2"
+              className="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors"
             >
               <Edit2 className="w-4 h-4" />
               Edit Profile
@@ -172,14 +172,14 @@ export const UserProfile = () => {
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={handleSaveProfile}
-                  className="btn-primary flex items-center gap-2"
+                  className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                 >
                   <Save className="w-4 h-4" />
                   Save Changes
                 </button>
                 <button
                   onClick={handleCancelEdit}
-                  className="btn-secondary flex items-center gap-2"
+                  className="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors"
                 >
                   <X className="w-4 h-4" />
                   Cancel
@@ -214,13 +214,13 @@ export const UserProfile = () => {
               </div>
             </div>
 
-            <div className="bg-green-50 p-4 rounded-lg">
+            <div className="bg-secondary-50 p-4 rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">Account Status</p>
-                  <p className="text-lg font-semibold text-green-900">Active</p>
+                  <p className="text-sm font-medium text-secondary-600">Account Status</p>
+                  <p className="text-lg font-semibold text-secondary-900">Active</p>
                 </div>
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-secondary-500 rounded-full"></div>
               </div>
             </div>
           </div>
@@ -231,7 +231,7 @@ export const UserProfile = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Security</h3>
           <button
             onClick={() => setShowPasswordModal(true)}
-            className="btn-secondary flex items-center gap-2"
+            className="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors"
           >
             <Lock className="w-4 h-4" />
             Change Password

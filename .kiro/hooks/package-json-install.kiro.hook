@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Auto Install Dependencies",
+  "description": "Automatically installs npm dependencies when package.json files are changed in the project",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "package.json",
+      "client/package.json",
+      "server/package.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The package.json file has been modified. Please run npm install in the appropriate directory to install any new or updated dependencies. Check which specific package.json was changed and run the install command in that directory."
+  }
+}

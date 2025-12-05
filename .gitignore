@@ -3,9 +3,7 @@ node_modules/
 */node_modules/
 
 # Build outputs
-dist/
 build/
-*/dist/
 */build/
 
 # Environment variables
@@ -70,7 +68,7 @@ jspm_packages/
 
 # Gatsby files
 .cache/
-public
+
 
 # Storybook build outputs
 .out
@@ -98,3 +96,5 @@ Thumbs.db
 
 # Prisma
 prisma/migrations/
+# Local Netlify folder
+.netlify

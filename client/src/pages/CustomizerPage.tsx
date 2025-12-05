@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { MessageCircle } from 'lucide-react'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useCartStore } from '../stores/cartStore'
 import { Product } from '../types'
 import { ProductPreview } from '../components/ProductPreview'
+import { PRICING, formatPrice, calculateCustomizationPrice } from '../constants/pricing'
+import ImageCarousel from '../components/ui/ImageCarousel'
 
 export const CustomizerPage = () => {
   const { productId } = useParams<{ productId: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
   const { addItem } = useCartStore()
-  
+
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedSize, setSelectedSize] = useState('')
@@ -74,9 +77,12 @@ export const CustomizerPage = () => {
 
   const calculatePrice = () => {
     if (!product) return
-    
-    let price = product.basePrice
-    if (embroideryText.trim()) price += 15
+
+    const price = calculateCustomizationPrice(
+      product.basePrice,
+      !!embroideryText.trim(),
+      false // No logo option in this component yet
+    )
     setTotalPrice(price)
   }
 
@@ -146,16 +152,63 @@ export const CustomizerPage = () => {
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Preview Section */}
         <div className="space-y-4">
-          <div className="aspect-square">
-            <ProductPreview
-              productImage={previewUrl || (product?.images[0])}
-              productName={product?.name || 'Product'}
-              size={selectedSize}
-              color={selectedColor}
-              embroidery={embroideryText.trim() || undefined}
-              className="w-full h-full"
-            />
-          </div>
+          {/* Product Images Carousel with Customization Info */}
+          {product?.images && product.images.length > 0 && (
+            <div className="aspect-square relative">
+              <ImageCarousel
+                images={product.images}
+                alt={product.name}
+                showDots={product.images.length > 1}
+                showArrows={product.images.length > 1}
+                autoPlay={false}
+                className="w-full h-full"
+              />
+              
+              {/* Customization Overlay */}
+              {(selectedSize || selectedColor || embroideryText.trim()) && (
+                <div className="absolute bottom-4 left-4 right-4 bg-black bg-opacity-75 text-white text-sm p-3 rounded-lg backdrop-blur-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">Your Customization:</span>
+                    <div className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded">
+                      Preview
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    {selectedSize && (
+                      <div>
+                        <span className="text-gray-300">Size:</span> <span className="font-medium">{selectedSize}</span>
+                      </div>
+                    )}
+                    
+                    {selectedColor && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-300">Color:</span>
+                        {product.colorType === 'fixed' ? (
+                          <span className="font-medium">{selectedColor}</span>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <div 
+                              className="w-3 h-3 rounded border border-white"
+                              style={{ backgroundColor: selectedColor }}
+                            />
+                            <span className="font-medium">{selectedColor}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {embroideryText.trim() && (
+                    <div className="mt-2 pt-2 border-t border-white border-opacity-20">
+                      <span className="text-gray-300">Embroidery:</span> 
+                      <span className="font-medium ml-1">"{embroideryText.trim()}"</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Customization Panel */}
@@ -164,7 +217,7 @@ export const CustomizerPage = () => {
             <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
             <p className="text-gray-600 mt-2">{product.description}</p>
             <div className="text-2xl font-bold text-primary-600 mt-4">
-              ${totalPrice.toFixed(2)}
+              ₹{totalPrice.toFixed(2)}
             </div>
           </div>
 
@@ -178,11 +231,10 @@ export const CustomizerPage = () => {
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
-                  className={`py-2 px-3 border rounded-lg font-medium transition-colors ${
-                    selectedSize === size
-                      ? 'border-primary-600 bg-primary-50 text-primary-600'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
+                  className={`py-2 px-3 border rounded-lg font-medium transition-colors ${selectedSize === size
+                    ? 'border-primary-600 bg-primary-50 text-primary-600'
+                    : 'border-gray-300 hover:border-gray-400'
+                    }`}
                 >
                   {size}
                 </button>
@@ -193,29 +245,61 @@ export const CustomizerPage = () => {
           {/* Color Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Color
+              {product.colorType === 'fixed' ? 'Color/Pattern' : 'Color'}
             </label>
-            <div className="grid grid-cols-6 gap-2">
-              {product.colors.map(color => (
-                <button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={`w-12 h-12 rounded-lg border-2 transition-all ${
-                    selectedColor === color
+            
+            {product.colorType === 'fixed' ? (
+              // Fixed colors - show as text/badges
+              <div className="space-y-2">
+                {product.colors.map(color => (
+                  <div
+                    key={color}
+                    className={`p-3 border-2 rounded-lg transition-all ${selectedColor === color
+                      ? 'border-primary-600 bg-primary-50'
+                      : 'border-gray-300 bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-900">{color}</span>
+                      <button
+                        onClick={() => setSelectedColor(color)}
+                        className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${selectedColor === color
+                          ? 'bg-primary-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        {selectedColor === color ? 'Selected' : 'Select'}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Colors and patterns as shown in product images
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              // Customizable colors - show as color swatches
+              <div className="grid grid-cols-6 gap-2">
+                {product.colors.map(color => (
+                  <button
+                    key={color}
+                    onClick={() => setSelectedColor(color)}
+                    className={`w-12 h-12 rounded-lg border-2 transition-all ${selectedColor === color
                       ? 'border-primary-600 scale-110'
                       : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                  style={{ backgroundColor: color }}
-                  title={color}
-                />
-              ))}
-            </div>
+                      }`}
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Embroidery */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Custom Embroidery (+$15)
+              Custom Embroidery (+{formatPrice(PRICING.EMBROIDERY_COST)})
             </label>
             <input
               type="text"
@@ -230,13 +314,25 @@ export const CustomizerPage = () => {
             </p>
           </div>
 
+          {/* WhatsApp Order Info */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <MessageCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Order via WhatsApp:</span> After checkout, you'll be redirected to WhatsApp to confirm your order and receive payment details.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Add to Cart */}
           <button
             onClick={handleAddToCart}
-            className="w-full btn-primary py-3 text-lg"
+            className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-lg transition-colors text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!selectedSize || !selectedColor}
           >
-            Add to Cart - ${totalPrice.toFixed(2)}
+            Add to Cart - {formatPrice(totalPrice)}
           </button>
         </div>
       </div>

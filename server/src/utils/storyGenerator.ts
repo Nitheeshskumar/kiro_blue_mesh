@@ -62,19 +62,19 @@ const brandLore: BrandLore = {
   ],
   productStories: {
     'shirts': [
-      'This shirt began its journey in our atelier, where master tailors',
-      'Born in the creative sanctuary of our design studio, this shirt',
-      'From the hands of passionate creators, this shirt emerged'
+      'This shirt began its journey in the Willowbrook atelier, where master tailors',
+      'Born in the creative sanctuary of our Willowbrook studio, this shirt',
+      'From the hands of passionate Willowbrook artisans, this shirt emerged'
     ],
     'hoodies': [
-      'This hoodie was born from the need for comfort and style, where artisans',
-      'In the cozy corners of our workshop, this hoodie took shape as craftspeople',
-      'This hoodie emerged from dreams of perfect warmth, where designers'
+      'This hoodie was born from Willowbrook\'s dedication to comfort and style, where artisans',
+      'In the cozy corners of our Willowbrook workshop, this hoodie took shape as craftspeople',
+      'This hoodie emerged from Willowbrook dreams of perfect warmth, where designers'
     ],
     'activewear': [
-      'This athletic piece was forged for champions, where performance meets artistry as',
-      'Born from the spirit of movement and grace, this activewear was crafted where',
-      'This performance piece emerged from the fusion of function and beauty, where'
+      'This athletic piece was forged in the Willowbrook performance lab, where function meets artistry as',
+      'Born from the Willowbrook spirit of movement and grace, this activewear was crafted where',
+      'This performance piece emerged from Willowbrook\'s fusion of function and beauty, where'
     ]
   },
   endings: [

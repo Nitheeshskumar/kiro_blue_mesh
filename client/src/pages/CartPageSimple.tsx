@@ -23,14 +23,14 @@ export const CartPageSimple = () => {
         <p className="text-gray-600 mb-8">Your cart is empty. Add some custom clothing to get started!</p>
         <button
           onClick={() => navigate('/products')}
-          className="btn-primary mr-4"
+          className="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors mr-4"
         >
           Browse Products
         </button>
         <button
           onClick={handleCheckout}
           disabled={loading}
-          className="btn-secondary"
+          className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
         >
           {loading ? 'Processing...' : 'Test Checkout'}
         </button>

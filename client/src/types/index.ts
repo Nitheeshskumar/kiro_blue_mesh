@@ -5,15 +5,28 @@ export interface User {
   role: string
 }
 
+export interface ProductCategory {
+  id: string
+  name: string
+  slug: string
+  description: string
+  icon: string
+  productCount: number
+  subcategories?: ProductCategory[]
+}
+
 export interface Product {
   id: string
   name: string
   description: string
   category: string
+  categories?: string[] // New field for multiple categories
   basePrice: number
   images: string[]
   sizes: string[]
   colors: string[]
+  hasFixedColors?: boolean // True if colors are fixed to the product design/image
+  colorType?: 'customizable' | 'fixed' // Type of color options available
 }
 
 export interface Customization {
@@ -51,6 +64,11 @@ export interface Order {
   paymentId?: string
   shippingInfo: any
   trackingCode?: string
+  trackingUrl?: string
+  adminNotes?: string
+  contactMethod?: string // 'WHATSAPP' | 'INSTAGRAM' (Instagram temporarily disabled)
+  customerInstagram?: string // Deprecated - keeping for backward compatibility
+  statusHistory?: StatusHistoryEntry[]
   createdAt: string
   updatedAt: string
   items: OrderItem[]
@@ -71,15 +89,37 @@ export interface OrderItem {
     size: string
     color: string
     previewUrl?: string
+    embroidery?: any
   }
+}
+
+export interface StatusHistoryEntry {
+  status: OrderStatus
+  timestamp: string
+  previousStatus?: OrderStatus
 }
 
 export enum OrderStatus {
   PENDING = 'PENDING',
   PAID = 'PAID',
-  PROCESSING = 'PROCESSING',
-  MANUFACTURING = 'MANUFACTURING',
   SHIPPED = 'SHIPPED',
   DELIVERED = 'DELIVERED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
+  RETURNED = 'RETURNED'
+}
+
+export interface SavedAddress {
+  id: string
+  userId: string
+  label: string
+  fullName: string
+  phone: string
+  address: string
+  city: string
+  state: string
+  zipCode: string
+  country: string
+  isDefault: boolean
+  createdAt: string
+  updatedAt: string
 }

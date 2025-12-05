@@ -1,26 +1,31 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Eye } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
 import { Order, OrderStatus } from '../types'
 
 const statusColors: Record<OrderStatus, string> = {
   [OrderStatus.PENDING]: 'bg-yellow-100 text-yellow-800',
-  [OrderStatus.PAID]: 'bg-blue-100 text-blue-800',
-  [OrderStatus.PROCESSING]: 'bg-purple-100 text-purple-800',
-  [OrderStatus.MANUFACTURING]: 'bg-orange-100 text-orange-800',
-  [OrderStatus.SHIPPED]: 'bg-green-100 text-green-800',
+  [OrderStatus.PAID]: 'bg-green-100 text-green-800',
+  [OrderStatus.SHIPPED]: 'bg-blue-100 text-blue-800',
   [OrderStatus.DELIVERED]: 'bg-green-100 text-green-800',
-  [OrderStatus.CANCELLED]: 'bg-red-100 text-red-800'
+  [OrderStatus.CANCELLED]: 'bg-red-100 text-red-800',
+  [OrderStatus.RETURNED]: 'bg-orange-100 text-orange-800'
 }
 
 export const OrdersPage = () => {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!user) return
+      if (!user) {
+        setLoading(false)
+        return
+      }
       
       try {
         const response = await api.get('/orders/user')
@@ -32,18 +37,13 @@ export const OrdersPage = () => {
       }
     }
 
-    fetchOrders()
-  }, [user])
+    if (!authLoading) {
+      fetchOrders()
+    }
+  }, [user, authLoading])
 
-  if (!user) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to view your orders</h1>
-      </div>
-    )
-  }
-
-  if (loading) {
+  // Show loading while auth is being checked
+  if (authLoading || loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="space-y-4">
@@ -58,12 +58,20 @@ export const OrdersPage = () => {
     )
   }
 
+  if (!user) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to view your orders</h1>
+      </div>
+    )
+  }
+
   if (orders.length === 0) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">No Orders Yet</h1>
         <p className="text-gray-600 mb-8">You haven't placed any orders yet.</p>
-        <a href="/products" className="btn-primary">
+        <a href="/products" className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
           Start Shopping
         </a>
       </div>
@@ -93,7 +101,7 @@ export const OrdersPage = () => {
                   {order.status.replace('_', ' ')}
                 </span>
                 <p className="text-lg font-bold text-gray-900 mt-1">
-                  ${order.totalAmount.toFixed(2)}
+                  ₹{order.totalAmount.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -109,37 +117,55 @@ export const OrdersPage = () => {
             <div className="space-y-3">
               {order.items.map(item => (
                 <div key={item.id} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden">
+                  <a
+                    href={`/products/${item.productId}`}
+                    className="block w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0"
+                  >
                     {item.customization.previewUrl ? (
                       <img
                         src={item.customization.previewUrl}
                         alt={item.product.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover hover:opacity-80 transition-opacity"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs hover:bg-gray-300 transition-colors">
                         No Preview
                       </div>
                     )}
-                  </div>
+                  </a>
                   
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">{item.product.name}</h3>
+                    <a
+                      href={`/products/${item.productId}`}
+                      className="font-medium text-gray-900 hover:text-primary-600 transition-colors"
+                    >
+                      {item.product.name}
+                    </a>
                     <p className="text-sm text-gray-600">
                       Size: {item.customization.size} • Color: {item.customization.color}
                     </p>
                     <p className="text-sm text-gray-600">
-                      Quantity: {item.quantity} × ${item.price.toFixed(2)}
+                      Quantity: {item.quantity} × ₹{item.price.toFixed(2)}
                     </p>
                   </div>
                   
                   <div className="text-right">
                     <p className="font-medium text-gray-900">
-                      ${(item.quantity * item.price).toFixed(2)}
+                      ₹{(item.quantity * item.price).toFixed(2)}
                     </p>
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-4 pt-4 border-t">
+              <button
+                onClick={() => navigate(`/order-confirmation/${order.id}`)}
+                className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
+              >
+                <Eye className="w-4 h-4" />
+                View Order Details
+              </button>
             </div>
           </div>
         ))}
