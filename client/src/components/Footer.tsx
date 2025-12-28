@@ -24,7 +24,7 @@ const Footer: React.FC = () => {
               />
               <div>
                 <h3 className="text-xl font-bold">{businessName}</h3>
-                <p className="text-gray-400 text-sm">Premium Custom Apparel</p>
+                <p className="text-gray-400 text-sm">Your comforatble clothing store</p>
               </div>
             </div>
             <p className="text-gray-400 text-sm mb-4 max-w-md">

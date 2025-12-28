@@ -16,6 +16,7 @@ const orders_1 = __importDefault(require("./routes/orders"));
 const admin_1 = __importDefault(require("./routes/admin"));
 const reviews_1 = __importDefault(require("./routes/reviews"));
 const addresses_1 = __importDefault(require("./routes/addresses"));
+const categories_1 = __importDefault(require("./routes/categories"));
 const errorHandler_1 = require("./middleware/errorHandler");
 // Create Express app
 const app = (0, express_1.default)();
@@ -77,6 +78,7 @@ app.use('/orders', orders_1.default);
 app.use('/admin', admin_1.default);
 app.use('/reviews', reviews_1.default);
 app.use('/addresses', addresses_1.default);
+app.use('/categories', categories_1.default);
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date().toISOString() });
@@ -96,7 +98,7 @@ app.use('*', (req, res) => {
         path: req.path,
         url: req.url,
         originalUrl: req.originalUrl,
-        availableRoutes: ['/auth', '/products', '/customizations', '/orders', '/admin', '/reviews', '/addresses', '/health']
+        availableRoutes: ['/auth', '/products', '/customizations', '/orders', '/admin', '/reviews', '/addresses', '/categories', '/health']
     });
 });
 // Error handling

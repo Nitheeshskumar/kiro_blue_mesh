@@ -9,13 +9,15 @@ import {
   LogOut,
   ArrowLeft,
   Menu,
-  X
+  X,
+  Tag
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Products', href: '/admin/products', icon: Package },
+  { name: 'Categories', href: '/admin/categories', icon: Tag },
   { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Users', href: '/admin/users', icon: Users },
 ]

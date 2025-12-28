@@ -11,8 +11,7 @@ const navigationItems: NavigationItem[] = [
   { id: 'hero', label: 'Our Story', href: '#hero' },
   { id: 'timeline', label: 'Journey', href: '#timeline' },
   { id: 'values', label: 'Values', href: '#values' },
-  { id: 'team', label: 'Team', href: '#team' },
-  { id: 'sustainability', label: 'Sustainability', href: '#sustainability' }
+  { id: 'team', label: 'Team', href: '#team' }
 ];
 
 export const BrandStoryNavigation: React.FC = () => {

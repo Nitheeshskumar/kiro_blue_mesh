@@ -7,7 +7,6 @@ interface TimelineProps {
 }
 
 export const Timeline: React.FC<TimelineProps> = ({ events }) => {
-  const [activeEvent, setActiveEvent] = useState<string | null>(null);
   const [visibleEvents, setVisibleEvents] = useState<Set<string>>(new Set());
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -32,10 +31,6 @@ export const Timeline: React.FC<TimelineProps> = ({ events }) => {
     return () => observer.disconnect();
   }, []);
 
-  const handleEventClick = (eventId: string) => {
-    setActiveEvent(activeEvent === eventId ? null : eventId);
-  };
-
   return (
     <div ref={timelineRef} className="relative">
       {/* Timeline Line */}
@@ -46,7 +41,6 @@ export const Timeline: React.FC<TimelineProps> = ({ events }) => {
         {events.map((event, index) => {
           const isLeft = index % 2 === 0;
           const isVisible = visibleEvents.has(event.id);
-          const isActive = activeEvent === event.id;
 
           return (
             <div
@@ -63,18 +57,13 @@ export const Timeline: React.FC<TimelineProps> = ({ events }) => {
                     event.milestone
                       ? 'bg-primary-600 shadow-lg scale-125'
                       : 'bg-gray-400'
-                  } ${isActive ? 'scale-150 shadow-xl' : ''}`}
+                  }`}
                 ></div>
               </div>
 
               {/* Content */}
               <div className={`w-full md:w-5/12 ${isLeft ? 'md:pr-8' : 'md:pl-8'}`}>
-                <div
-                  className={`bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl ${
-                    isActive ? 'ring-2 ring-primary-500 shadow-2xl' : ''
-                  }`}
-                  onClick={() => handleEventClick(event.id)}
-                >
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
                   {/* Image */}
                   <div className="aspect-video overflow-hidden">
                     <OptimizedImage
@@ -103,17 +92,9 @@ export const Timeline: React.FC<TimelineProps> = ({ events }) => {
                       {event.title}
                     </h3>
                     
-                    <p className={`text-gray-600 leading-relaxed transition-all duration-300 ${
-                      isActive ? 'max-h-none' : 'line-clamp-3'
-                    }`}>
+                    <p className="text-gray-600 leading-relaxed">
                       {event.description}
                     </p>
-
-                    {!isActive && (
-                      <button className="mt-3 text-primary-600 hover:text-primary-700 font-medium text-sm">
-                        Read more →
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>

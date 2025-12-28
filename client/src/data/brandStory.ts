@@ -2,56 +2,72 @@ import { BrandStory } from '../types/brandStory.types';
 
 export const brandStoryData: BrandStory = {
   hero: {
-    title: "Crafting Stories Through Fabric",
-    subtitle: "Since 2018, Willowbrook has been dedicated to creating premium custom clothing that celebrates individuality and craftsmanship. Every piece tells a story - yours.",
+    title: "A Journey of Dreams, Passion & Purpose",
+    subtitle: "This journey began in 2018, with a 20-year-old girl and a heart full of dreams. What started as a simple passion — designing and stitching dresses for herself — soon grew into something much bigger. Today, every piece you see here carries a story of love, patience, craftsmanship, and dreams that never gave up.",
     backgroundImage: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80"
   },
   timeline: [
     {
       id: "1",
       year: 2018,
-      title: "The Beginning",
-      description: "Founded by Banu in her home studio with a vision to make custom clothing accessible to everyone.",
+      title: "The Dream Begins",
+      description: "A 20-year-old girl with a heart full of dreams starts designing and stitching dresses for herself, sharing her creativity on Instagram.",
       image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
       milestone: true
     },
     {
       id: "2",
       year: 2019,
-      title: "First Collection Launch",
-      description: "Launched our signature cotton essentials line, focusing on comfort and sustainability.",
+      title: "First Orders & Growing Confidence",
+      description: "Friends and well-wishers begin placing orders. With every small appreciation, confidence grows stronger.",
       image: "https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
       milestone: false
     },
     {
       id: "3",
       year: 2020,
-      title: "Digital Innovation",
-      description: "Introduced 3D customization technology, allowing customers to visualize their designs in real-time.",
+      title: "Formal Education & Teaching",
+      description: "Completed Diploma in Fashion Design Technology and began working as Fashion Designing Faculty in a renowned college.",
       image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
       milestone: true
     },
     {
       id: "4",
       year: 2021,
-      title: "Sustainable Practices",
-      description: "Achieved carbon-neutral shipping and introduced our organic cotton certification program.",
+      title: "Post-Graduation & Expertise",
+      description: "Completed Post-Graduation in Fashion Design Technology, deepening knowledge while sharing expertise with students.",
       image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
       milestone: false
     },
     {
       id: "5",
       year: 2022,
-      title: "Community Growth",
-      description: "Reached 10,000 happy customers and launched our customer photo sharing program.",
+      title: "Motherhood & New Perspective",
+      description: "Life took a beautiful turn with motherhood. A career break to care for the newborn brought new clarity and purpose.",
       image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      milestone: false
+      milestone: true
     },
     {
       id: "6",
       year: 2023,
-      title: "Premium Experience",
-      description: "Launched our premium UI and enhanced customization studio with advanced measurement tools.",
+      title: "Choosing Passion Over Convention",
+      description: "Standing at a crossroads, the choice was made - follow passion over conventional career. Restarted dressmaking, creating beautiful outfits for the little one.",
+      image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      milestone: true
+    },
+    {
+      id: "7",
+      year: 2024,
+      title: "Global Recognition & Purpose",
+      description: "Orders started flowing from the city, then other states, and eventually from across the world. The realization dawned - passion had become purpose.",
+      image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      milestone: true
+    },
+    {
+      id: "8",
+      year: 2025,
+      title: "The Website is Born",
+      description: "With encouragement from a true well-wisher, this website was born. Every piece here carries a story of love, patience, craftsmanship, and dreams that never gave up.",
       image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
       milestone: true
     }
@@ -59,30 +75,30 @@ export const brandStoryData: BrandStory = {
   values: [
     {
       id: "1",
-      title: "Quality Craftsmanship",
-      description: "Every piece is meticulously crafted with attention to detail and premium materials.",
-      icon: "✨",
+      title: "Love & Passion",
+      description: "Every piece is created with immense love for fashion and an unwavering passion that has guided this journey since 2018.",
+      icon: "❤️",
       image: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     {
       id: "2",
-      title: "Sustainable Fashion",
-      description: "We're committed to environmentally responsible practices and ethical manufacturing.",
-      icon: "🌱",
+      title: "Patience & Craftsmanship",
+      description: "Each design is meticulously crafted with patience, attention to detail, and years of honed expertise in fashion design.",
+      icon: "✨",
       image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     {
       id: "3",
-      title: "Personal Expression",
-      description: "Your style is unique. Our customization tools help you express your individuality.",
-      icon: "🎨",
+      title: "Dreams That Never Give Up",
+      description: "Built on the foundation of dreams that persevered through every challenge, turning passion into purpose.",
+      icon: "🌟",
       image: "https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     {
       id: "4",
-      title: "Customer First",
-      description: "Your satisfaction drives everything we do, from design to delivery.",
-      icon: "❤️",
+      title: "Personal Touch",
+      description: "From designing for herself to creating for customers worldwide, every piece carries a personal story and connection.",
+      icon: "🎨",
       image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     }
   ],
@@ -91,73 +107,9 @@ export const brandStoryData: BrandStory = {
       id: "1",
       name: "Banu Nazir Maheen",
       role: "Founder & Creative Director",
-      bio: "With over 15 years in fashion design, Banu founded Willowbrook to democratize custom clothing. She believes everyone deserves clothing that fits perfectly and reflects their personality.",
+      bio: "The heart and soul behind Willowbrook. Starting her journey at 20 with just dreams and passion, Banu has transformed her love for fashion into a purpose that serves customers worldwide. A mother, educator, and designer who chose to follow her heart over convention.",
       image: "https://frbdhevxgofuvnrcbcvi.supabase.co/storage/v1/object/public/user-avatars/banu_brand.jpg",
       isFounder: true
-    },
-    // {
-    //   id: "2",
-    //   name: "Marcus Rodriguez",
-    //   role: "Head of Technology",
-    //   bio: "Marcus leads our innovation in 3D visualization and customization technology, making the impossible possible in digital fashion.",
-    //   image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-    //   isFounder: false
-    // },
-    // {
-    //   id: "3",
-    //   name: "Emma Thompson",
-    //   role: "Sustainability Director",
-    //   bio: "Emma ensures our commitment to environmental responsibility while maintaining the highest quality standards in our manufacturing processes.",
-    //   image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-    //   isFounder: false
-    // }
-  ],
-  sustainability: {
-    title: "Our Commitment to the Planet",
-    description: "We believe fashion should be beautiful, not just for you, but for the world. Our sustainability initiatives ensure that every piece we create contributes to a better future.",
-    commitments: [
-      {
-        id: "1",
-        title: "Carbon Neutral Shipping",
-        description: "All orders are shipped with carbon-neutral delivery methods.",
-        icon: "🚚",
-        progress: 100
-      },
-      {
-        id: "2",
-        title: "Organic Materials",
-        description: "85% of our fabrics are certified organic or sustainably sourced.",
-        icon: "🌿",
-        progress: 85
-      },
-      {
-        id: "3",
-        title: "Waste Reduction",
-        description: "Zero textile waste through our circular design process.",
-        icon: "♻️",
-        progress: 95
-      },
-      {
-        id: "4",
-        title: "Fair Trade",
-        description: "All manufacturing partners meet fair trade standards.",
-        icon: "🤝",
-        progress: 100
-      }
-    ],
-    certifications: [
-      {
-        id: "1",
-        name: "GOTS Certified",
-        description: "Global Organic Textile Standard certification for organic fibers.",
-        logo: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
-      },
-      {
-        id: "2",
-        name: "B Corp Certified",
-        description: "Certified B Corporation meeting highest standards of social and environmental performance.",
-        logo: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
-      }
-    ]
-  }
+    }
+  ]
 };

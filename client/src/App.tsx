@@ -24,6 +24,7 @@ import { AddProduct } from './pages/admin/AddProduct'
 import { EditProduct } from './pages/admin/EditProduct'
 import { OrderManagement } from './pages/admin/OrderManagement'
 import { UserManagement } from './pages/admin/UserManagement'
+import { CategoryManagement } from './pages/admin/CategoryManagement'
 import { AuthProvider } from './contexts/AuthContext'
 import { HalloweenProvider } from './contexts/HalloweenContext'
 import { HalloweenEffects } from './components/halloween/HalloweenEffects'
@@ -58,6 +59,7 @@ function App() {
               <Route path="products/edit/:productId" element={<EditProduct />} />
               <Route path="orders" element={<OrderManagement />} />
               <Route path="users" element={<UserManagement />} />
+              <Route path="categories" element={<CategoryManagement />} />
             </Route>
 
             {/* Public Routes */}

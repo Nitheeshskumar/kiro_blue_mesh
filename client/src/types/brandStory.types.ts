@@ -8,7 +8,7 @@ export interface BrandStory {
   timeline: TimelineEvent[];
   values: BrandValue[];
   team: TeamMember[];
-  sustainability: SustainabilityInfo;
+  sustainability?: SustainabilityInfo;
 }
 
 export interface TimelineEvent {

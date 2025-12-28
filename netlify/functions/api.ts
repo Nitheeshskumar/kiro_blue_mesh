@@ -12,6 +12,7 @@ import orderRoutes from './routes/orders'
 import adminRoutes from './routes/admin'
 import reviewRoutes from './routes/reviews'
 import addressRoutes from './routes/addresses'
+import categoryRoutes from './routes/categories'
 import { errorHandler } from './middleware/errorHandler'
 
 // Create Express app
@@ -80,6 +81,7 @@ app.use('/orders', orderRoutes)
 app.use('/admin', adminRoutes)
 app.use('/reviews', reviewRoutes)
 app.use('/addresses', addressRoutes)
+app.use('/categories', categoryRoutes)
 
 // Health check
 app.get('/health', (req, res) => {
@@ -102,7 +104,7 @@ app.use('*', (req, res) => {
     path: req.path,
     url: req.url,
     originalUrl: req.originalUrl,
-    availableRoutes: ['/auth', '/products', '/customizations', '/orders', '/admin', '/reviews', '/addresses', '/health']
+    availableRoutes: ['/auth', '/products', '/customizations', '/orders', '/admin', '/reviews', '/addresses', '/categories', '/health']
   })
 })
 

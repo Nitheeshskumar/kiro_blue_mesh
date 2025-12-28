@@ -485,6 +485,70 @@ class Database {
         }
         return categories;
     }
+    async createCategory(categoryData) {
+        const result = await this.query(`
+      INSERT INTO product_categories (id, name, slug, description, icon, "productCount")
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+    `, [
+            categoryData.id,
+            categoryData.name,
+            categoryData.slug,
+            categoryData.description,
+            categoryData.icon,
+            categoryData.productCount
+        ]);
+        return result.rows[0];
+    }
+    async updateCategory(id, updates) {
+        const fields = [];
+        const values = [];
+        let paramCount = 1;
+        if (updates.name !== undefined) {
+            fields.push(`name = $${paramCount}`);
+            values.push(updates.name);
+            paramCount++;
+        }
+        if (updates.slug !== undefined) {
+            fields.push(`slug = $${paramCount}`);
+            values.push(updates.slug);
+            paramCount++;
+        }
+        if (updates.description !== undefined) {
+            fields.push(`description = $${paramCount}`);
+            values.push(updates.description);
+            paramCount++;
+        }
+        if (updates.icon !== undefined) {
+            fields.push(`icon = $${paramCount}`);
+            values.push(updates.icon);
+            paramCount++;
+        }
+        if (fields.length === 0) {
+            throw new Error('No fields to update');
+        }
+        fields.push(`"updatedAt" = CURRENT_TIMESTAMP`);
+        values.push(id);
+        const query = `
+      UPDATE product_categories 
+      SET ${fields.join(', ')} 
+      WHERE id = $${paramCount}
+      RETURNING *
+    `;
+        const result = await this.query(query, values);
+        return result.rows[0];
+    }
+    async deleteCategory(id) {
+        await this.query('DELETE FROM product_categories WHERE id = $1', [id]);
+    }
+    async getCategoryProductCount(categoryId) {
+        const result = await this.query(`
+      SELECT COUNT(*) as count 
+      FROM products 
+      WHERE "isActive" = true AND ($1 = ANY(categories) OR category = $1)
+    `, [categoryId]);
+        return parseInt(result.rows[0].count);
+    }
     // Product operations
     async findProducts(where = {}) {
         let query = 'SELECT * FROM products WHERE 1=1';

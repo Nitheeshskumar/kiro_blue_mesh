@@ -1,7 +1,7 @@
 {
   "name": "willowbrook-clothing",
   "version": "1.0.0",
-  "description": "Willowbrook Clothing - Premium custom apparel platform",
+  "description": "Willowbrook Clothing - Your comforatble clothing store platform",
   "scripts": {
     "setup": "node setup.js",
     "auto-setup": "node auto-setup.js",

@@ -5,7 +5,6 @@ import {
   Timeline, 
   BrandValues, 
   TeamSection, 
-  SustainabilitySection, 
   BrandStoryNavigation 
 } from '../components/brandStory';
 import { Breadcrumb } from '../components/ui/Breadcrumb';
@@ -94,13 +93,6 @@ export const BrandStoryPage: React.FC = () => {
             </p>
           </div>
           <TeamSection team={brandStory.team} />
-        </div>
-      </section>
-
-      {/* Sustainability Section */}
-      <section id="sustainability" className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SustainabilitySection sustainability={brandStory.sustainability} />
         </div>
       </section>
       </div>

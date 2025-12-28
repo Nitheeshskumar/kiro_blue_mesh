@@ -27,7 +27,16 @@ interface ProductCategory {
   productCount: number;
 }
 
-const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL"];
+const SIZES = [
+  // Baby sizes
+  "0-3 months", "3-6 months", "6-9 months", "9-12 months", "12-18 months", "18-24 months",
+  // Toddler sizes
+  "2T", "3T", "4T", "5T",
+  // Kids sizes
+  "4", "5", "6", "7", "8", "10", "12", "14", "16",
+  // Adult sizes
+  "XS", "S", "M", "L", "XL", "XXL", "3XL"
+];
 
 const PRESET_COLORS = [
   "#000000",
@@ -802,7 +811,7 @@ export const AddProduct = () => {
             )}
           </h2>
 
-          <div className="grid grid-cols-4 md:grid-cols-7 gap-3">
+          <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-3">
             {SIZES.map((size) => (
               <button
                 key={size}
@@ -815,7 +824,7 @@ export const AddProduct = () => {
                     );
                   }
                 }}
-                className={`py-2 px-3 border rounded-lg font-medium transition-colors ${
+                className={`py-2 px-2 border rounded-lg font-medium transition-colors text-xs ${
                   formData.sizes.includes(size)
                     ? "border-blue-600 bg-blue-50 text-blue-600"
                     : hasFieldError("sizes")

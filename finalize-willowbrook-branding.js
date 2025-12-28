@@ -83,4 +83,4 @@ keyFiles.forEach(file => {
 console.log(`\n🎉 Willowbrook branding finalized!`);
 console.log(`📊 Updated ${updatedFiles} additional files`);
 console.log(`\n🏷️  Your app is now fully branded as Willowbrook Clothing`);
-console.log(`✨ Premium custom apparel platform ready!`);
+console.log(`✨ Your comforatble clothing store platform ready!`);
