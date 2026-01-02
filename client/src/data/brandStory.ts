@@ -12,7 +12,7 @@ export const brandStoryData: BrandStory = {
       year: 2018,
       title: "The Dream Begins",
       description: "A 20-year-old girl with a heart full of dreams starts designing and stitching dresses for herself, sharing her creativity on Instagram.",
-      image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      image: "/assets/images/2018.jpg",
       milestone: true
     },
     {
@@ -20,7 +20,7 @@ export const brandStoryData: BrandStory = {
       year: 2019,
       title: "First Orders & Growing Confidence",
       description: "Friends and well-wishers begin placing orders. With every small appreciation, confidence grows stronger.",
-      image: "https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      image: "/assets/images/2019.jpg",
       milestone: false
     },
     {
@@ -28,7 +28,7 @@ export const brandStoryData: BrandStory = {
       year: 2020,
       title: "Formal Education & Teaching",
       description: "Completed Diploma in Fashion Design Technology and began working as Fashion Designing Faculty in a renowned college.",
-      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      image: "/assets/images/2020.jpg",
       milestone: true
     },
     {
@@ -36,7 +36,7 @@ export const brandStoryData: BrandStory = {
       year: 2021,
       title: "Post-Graduation & Expertise",
       description: "Completed Post-Graduation in Fashion Design Technology, deepening knowledge while sharing expertise with students.",
-      image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      image: "/assets/images/2021.jpg",
       milestone: false
     },
     {
@@ -44,7 +44,7 @@ export const brandStoryData: BrandStory = {
       year: 2022,
       title: "Motherhood & New Perspective",
       description: "Life took a beautiful turn with motherhood. A career break to care for the newborn brought new clarity and purpose.",
-      image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      image: "/assets/images/2022.jpg",
       milestone: true
     },
     {
@@ -52,7 +52,7 @@ export const brandStoryData: BrandStory = {
       year: 2023,
       title: "Choosing Passion Over Convention",
       description: "Standing at a crossroads, the choice was made - follow passion over conventional career. Restarted dressmaking, creating beautiful outfits for the little one.",
-      image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      image: "/assets/images/2023.jpg",
       milestone: true
     },
     {
@@ -60,7 +60,7 @@ export const brandStoryData: BrandStory = {
       year: 2024,
       title: "Global Recognition & Purpose",
       description: "Orders started flowing from the city, then other states, and eventually from across the world. The realization dawned - passion had become purpose.",
-      image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      image: "/assets/images/2024.jpg",
       milestone: true
     },
     {
@@ -68,7 +68,7 @@ export const brandStoryData: BrandStory = {
       year: 2025,
       title: "The Website is Born",
       description: "With encouragement from a true well-wisher, this website was born. Every piece here carries a story of love, patience, craftsmanship, and dreams that never gave up.",
-      image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      image: "/assets/images/2025.jpg",
       milestone: true
     }
   ],

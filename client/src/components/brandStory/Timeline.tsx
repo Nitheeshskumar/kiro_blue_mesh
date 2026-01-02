@@ -78,7 +78,7 @@ export const Timeline: React.FC<TimelineProps> = ({ events }) => {
                   {/* Content */}
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-2xl font-bold text-primary-600">
+                      <span className="text-2xl font-bold">
                         {event.year}
                       </span>
                       {event.milestone && (

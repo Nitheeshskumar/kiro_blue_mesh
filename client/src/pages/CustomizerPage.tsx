@@ -296,23 +296,8 @@ export const CustomizerPage = () => {
             )}
           </div>
 
-          {/* Embroidery */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Custom Embroidery (+{formatPrice(PRICING.EMBROIDERY_COST)})
-            </label>
-            <input
-              type="text"
-              value={embroideryText}
-              onChange={(e) => setEmbroideryText(e.target.value)}
-              placeholder="Enter text for embroidery"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              maxLength={20}
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              {embroideryText.length}/20 characters
-            </p>
-          </div>
+      
+         
 
           {/* WhatsApp Order Info */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
