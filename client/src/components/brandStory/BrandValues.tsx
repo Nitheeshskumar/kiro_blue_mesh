@@ -62,12 +62,7 @@ export const BrandValues: React.FC<BrandValuesProps> = ({ values }) => {
 
             {/* Content */}
             <div className="relative z-10 p-6 h-80 flex flex-col justify-end text-white">
-              {/* Icon */}
-              <div className={`text-4xl mb-4 transition-transform duration-300 ${
-                isHovered ? 'scale-125' : ''
-              }`}>
-                {value.icon}
-              </div>
+             
 
               {/* Title */}
               <h3 className="text-xl font-bold mb-3 group-hover:text-primary-300 transition-colors duration-300">

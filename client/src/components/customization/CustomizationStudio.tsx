@@ -174,7 +174,7 @@ export const CustomizationStudio: React.FC<CustomizationStudioProps> = ({
                 </div>
                 {option.priceModifier > 0 && (
                   <span className="text-primary-600 font-semibold text-sm sm:text-base ml-8 sm:ml-0">
-                    +${option.priceModifier}
+                    +₹{option.priceModifier}
                   </span>
                 )}
               </div>
@@ -188,12 +188,12 @@ export const CustomizationStudio: React.FC<CustomizationStudioProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Price Summary</h3>
           <div className="text-left sm:text-right">
-            <div className="text-xl md:text-2xl font-bold text-primary-700">${totalPrice.toFixed(2)}</div>
+            <div className="text-xl md:text-2xl font-bold text-primary-700">₹{totalPrice.toFixed(2)}</div>
             {selection.totalPriceModifier !== 0 && (
               <div className="text-sm text-gray-600">
-                Base: ${product.basePrice.toFixed(2)} 
+                Base: ₹{product.basePrice.toFixed(2)} 
                 {selection.totalPriceModifier > 0 ? ' + ' : ' - '}
-                ${Math.abs(selection.totalPriceModifier).toFixed(2)}
+                ₹{Math.abs(selection.totalPriceModifier).toFixed(2)}
               </div>
             )}
           </div>

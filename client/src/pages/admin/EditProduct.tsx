@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Plus, X, Save, Trash2 } from 'lucide-react'
+import { ArrowLeft, Plus, X, Save, EyeOff, Ruler, DollarSign } from 'lucide-react'
 import { api } from '../../lib/api'
+import { SizingChart } from '../../components/SizingChart'
+import { PRICING } from '../../constants/pricing'
 
 interface ProductCategory {
   id: string
@@ -12,7 +14,14 @@ interface ProductCategory {
   productCount: number
 }
 
-const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL']
+const SIZES = [
+  // Baby sizes
+  "0-3 months", "3-6 months", "6-9 months", "9-12 months", "12-18 months", "18-24 months",
+  // Kids sizes
+  "4", "5", "6", "7", "8", "10", "12", "14", "16",
+  // Adult sizes
+  "XS", "S", "M", "L", "XL", "XXL", "3XL"
+]
 
 const PRESET_COLORS = [
   '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
@@ -33,6 +42,8 @@ interface Product {
   isActive: boolean
   hasFixedColors?: boolean
   colorType?: 'customizable' | 'fixed'
+  sizePricing?: Record<string, number>
+  colorPricing?: Record<string, number>
 }
 
 export const EditProduct = () => {
@@ -43,6 +54,7 @@ export const EditProduct = () => {
   const [product, setProduct] = useState<Product | null>(null)
   const [categories, setCategories] = useState<ProductCategory[]>([])
   const [loadingCategories, setLoadingCategories] = useState(true)
+  const [showSizingChart, setShowSizingChart] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -54,7 +66,9 @@ export const EditProduct = () => {
     colors: ['#000000'],
     isActive: true,
     colorType: 'customizable' as 'customizable' | 'fixed',
-    hasFixedColors: false
+    hasFixedColors: false,
+    sizePricing: {} as Record<string, number>,
+    colorPricing: {} as Record<string, number>,
   })
 
   useEffect(() => {
@@ -91,7 +105,9 @@ export const EditProduct = () => {
         colors: productData.colors,
         isActive: productData.isActive,
         colorType: productData.colorType || 'customizable',
-        hasFixedColors: productData.hasFixedColors || false
+        hasFixedColors: productData.hasFixedColors || false,
+        sizePricing: productData.sizePricing || {},
+        colorPricing: productData.colorPricing || {},
       })
     } catch (error) {
       console.error('Failed to fetch product:', error)
@@ -163,7 +179,9 @@ export const EditProduct = () => {
       const productData = {
         ...formData,
         basePrice: parseFloat(formData.basePrice),
-        images: formData.images.filter(img => img.trim() !== '')
+        images: formData.images.filter(img => img.trim() !== ''),
+        sizePricing: formData.sizePricing,
+        colorPricing: formData.colorType === 'customizable' ? formData.colorPricing : {},
       }
 
       await api.put(`/products/${productId}`, productData)
@@ -176,17 +194,19 @@ export const EditProduct = () => {
     }
   }
 
-  const handleDelete = async () => {
-    if (!confirm('Are you sure you want to deactivate this product? This action can be reversed later.')) {
+  const handleDeactivate = async () => {
+    if (!confirm('⚠️ DEACTIVATE PRODUCT\n\nAre you sure you want to deactivate this product?\n\nThis will:\n• Hide the product from customers\n• Preserve all product data\n• Allow you to reactivate it later\n\nYou can reactivate it anytime using the Active/Inactive toggle.')) {
       return
     }
 
     try {
       await api.delete(`/products/${productId}`)
-      navigate('/admin/products')
+      alert('Product has been deactivated successfully.')
+      // Update the form data to reflect the change
+      setFormData(prev => ({ ...prev, isActive: false }))
     } catch (error) {
-      console.error('Failed to delete product:', error)
-      alert('Failed to delete product. Please try again.')
+      console.error('Failed to deactivate product:', error)
+      alert('Failed to deactivate product. Please try again.')
     }
   }
 
@@ -247,13 +267,15 @@ export const EditProduct = () => {
             </label>
           </div>
           
-          <button
-            onClick={handleDelete}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
-          >
-            <Trash2 className="w-4 h-4" />
-            Deactivate
-          </button>
+          {/* {formData.isActive && (
+            <button
+              onClick={handleDeactivate}
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2 font-medium border-2 border-orange-600 hover:border-orange-700 transition-all"
+            >
+              <EyeOff className="w-4 h-4" />
+              Deactivate Product
+            </button>
+          )} */}
         </div>
       </div>
 
@@ -375,7 +397,17 @@ export const EditProduct = () => {
 
         {/* Sizes */}
         <div className="bg-white p-6 rounded-lg shadow-md border">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Available Sizes</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Available Sizes</h2>
+            <button
+              type="button"
+              onClick={() => setShowSizingChart(true)}
+              className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors"
+            >
+              <Ruler className="w-4 h-4" />
+              <span>Size Chart</span>
+            </button>
+          </div>
           
           <div className="grid grid-cols-4 md:grid-cols-7 gap-3">
             {SIZES.map(size => (
@@ -531,6 +563,108 @@ export const EditProduct = () => {
           )}
         </div>
 
+        {/* Size Pricing */}
+        <div className="bg-white p-6 rounded-lg shadow-md border">
+          <div className="flex items-center gap-2 mb-4">
+            <DollarSign className="w-5 h-5 text-gray-600" />
+            <h2 className="text-xl font-semibold text-gray-900">Size Pricing Modifiers</h2>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">
+            Set additional charges for different sizes. Leave at 0 for no extra cost.
+          </p>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {formData.sizes.map((size) => (
+              <div key={size} className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  {size}
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.sizePricing[size] || 0}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0
+                      handleInputChange('sizePricing', {
+                        ...formData.sizePricing,
+                        [size]: value
+                      })
+                    }}
+                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="0"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  Default: ₹{PRICING.DEFAULT_SIZE_PRICING[size] || 0}
+                </p>
+              </div>
+            ))}
+          </div>
+          
+          {formData.sizes.length === 0 && (
+            <p className="text-sm text-gray-500 italic">
+              Select sizes above to configure pricing modifiers
+            </p>
+          )}
+        </div>
+
+        {/* Color Pricing */}
+        {formData.colorType === 'customizable' && (
+          <div className="bg-white p-6 rounded-lg shadow-md border">
+            <div className="flex items-center gap-2 mb-4">
+              <DollarSign className="w-5 h-5 text-gray-600" />
+              <h2 className="text-xl font-semibold text-gray-900">Color Pricing Modifiers</h2>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">
+              Set additional charges for different colors. Leave at 0 for no extra cost.
+            </p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {formData.colors.map((color) => (
+                <div key={color} className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <div
+                      className="w-4 h-4 rounded border border-gray-300"
+                      style={{ backgroundColor: color }}
+                    />
+                    {color}
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={formData.colorPricing[color] || 0}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0
+                        handleInputChange('colorPricing', {
+                          ...formData.colorPricing,
+                          [color]: value
+                        })
+                      }}
+                      className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="0"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Default: ₹{PRICING.DEFAULT_COLOR_PRICING[color] || 0}
+                  </p>
+                </div>
+              ))}
+            </div>
+            
+            {formData.colors.length === 0 && (
+              <p className="text-sm text-gray-500 italic">
+                Select colors above to configure pricing modifiers
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Submit */}
         <div className="flex justify-end gap-4">
           <button
@@ -550,6 +684,14 @@ export const EditProduct = () => {
           </button>
         </div>
       </form>
+
+      {/* Sizing Chart Modal */}
+      <SizingChart
+        isOpen={showSizingChart}
+        onClose={() => setShowSizingChart(false)}
+        availableSizes={formData.sizes}
+        selectedSizes={[]} // No specific selection in admin, just showing available sizes
+      />
     </div>
   )
 }

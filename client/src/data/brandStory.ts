@@ -41,7 +41,7 @@ export const brandStoryData: BrandStory = {
     },
     {
       id: "5",
-      year: 2022,
+      year: 2023,
       title: "Motherhood & New Perspective",
       description: "Life took a beautiful turn with motherhood. A career break to care for the newborn brought new clarity and purpose.",
       image: "/assets/images/2022.jpg",
@@ -108,7 +108,7 @@ export const brandStoryData: BrandStory = {
       name: "Banu Nazir Maheen",
       role: "Founder & Creative Director",
       bio: "The heart and soul behind Willowbrook. Starting her journey at 20 with just dreams and passion, Banu has transformed her love for fashion into a purpose that serves customers worldwide. A mother, educator, and designer who chose to follow her heart over convention.",
-      image: "https://frbdhevxgofuvnrcbcvi.supabase.co/storage/v1/object/public/user-avatars/banu_brand.jpg",
+      image: "/assets/images/founder.jpg",
       isFounder: true
     }
   ]

@@ -2,10 +2,11 @@ import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import { getDatabase } from '../lib/database'
 import { PRICING } from '../lib/pricing'
+import { authenticateToken, requireAdmin } from '../middleware/auth'
 
 const router = Router()
 
-// Helper function to verify JWT token
+// Helper function to verify JWT token (for non-admin routes)
 const verifyToken = async (authHeader: string | undefined) => {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new Error('No token provided')
@@ -125,13 +126,8 @@ router.get('/:id', async (req, res) => {
 })
 
 // Update order status (admin only)
-router.put('/:id/status', async (req, res) => {
+router.put('/:id/status', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const user = await verifyToken(req.headers.authorization)
-    if (user.role !== 'ADMIN') {
-      return res.status(403).json({ error: 'Admin access required' })
-    }
-
     const { id } = req.params
     const { status, trackingCode } = req.body
 

@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { MessageCircle } from 'lucide-react'
+import { MessageCircle, Ruler } from 'lucide-react'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useCartStore } from '../stores/cartStore'
 import { Product } from '../types'
 import { ProductPreview } from '../components/ProductPreview'
-import { PRICING, formatPrice, calculateCustomizationPrice } from '../constants/pricing'
+import { PRICING, formatPrice, calculateProductPrice } from '../constants/pricing'
 import ImageCarousel from '../components/ui/ImageCarousel'
+import { SizingChart } from '../components/SizingChart'
+import { filterProductTSizes } from '../utils/sizeUtils'
 
 export const CustomizerPage = () => {
   const { productId } = useParams<{ productId: string }>()
@@ -22,14 +24,19 @@ export const CustomizerPage = () => {
   const [embroideryText, setEmbroideryText] = useState('')
   const [previewUrl, setPreviewUrl] = useState('')
   const [totalPrice, setTotalPrice] = useState(0)
+  const [showSizingChart, setShowSizingChart] = useState(false)
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await api.get(`/products/${productId}`)
         const productData = response.data
-        setProduct(productData)
-        setSelectedSize(productData.sizes[0] || '')
+        
+        // Filter out T sizes for Indian market
+        const updatedProductData = filterProductTSizes(productData)
+        
+        setProduct(updatedProductData)
+        setSelectedSize(updatedProductData.sizes[0] || '')
         setSelectedColor(productData.colors[0] || '#000000')
         setTotalPrice(productData.basePrice)
       } catch (error) {
@@ -78,8 +85,12 @@ export const CustomizerPage = () => {
   const calculatePrice = () => {
     if (!product) return
 
-    const price = calculateCustomizationPrice(
+    const price = calculateProductPrice(
       product.basePrice,
+      selectedSize,
+      selectedColor,
+      product.sizePricing,
+      product.colorPricing,
       !!embroideryText.trim(),
       false // No logo option in this component yet
     )
@@ -223,9 +234,19 @@ export const CustomizerPage = () => {
 
           {/* Size Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Size
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Size
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowSizingChart(true)}
+                className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded transition-colors"
+              >
+                <Ruler className="w-3 h-3" />
+                <span>Size Chart</span>
+              </button>
+            </div>
             <div className="grid grid-cols-4 gap-2">
               {product.sizes.map(size => (
                 <button
@@ -321,6 +342,14 @@ export const CustomizerPage = () => {
           </button>
         </div>
       </div>
+
+      {/* Sizing Chart Modal */}
+      <SizingChart
+        isOpen={showSizingChart}
+        onClose={() => setShowSizingChart(false)}
+        availableSizes={product?.sizes || []}
+        selectedSizes={selectedSize ? [selectedSize] : []} // Only the currently selected size
+      />
     </div>
   )
 }

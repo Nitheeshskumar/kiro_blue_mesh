@@ -63,7 +63,7 @@ export const Navbar = () => {
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
             {/* Halloween Toggle */}
-            <HalloweenToggle />
+            {/* <HalloweenToggle /> */}
 
             {/* Cart */}
             <Link

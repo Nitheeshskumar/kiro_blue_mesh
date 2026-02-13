@@ -46,6 +46,9 @@ export interface Product {
   // Fixed colors support
   hasFixedColors?: boolean // True if colors are fixed to the product design/image
   colorType?: 'customizable' | 'fixed' // Type of color options available
+  // Size and color pricing variations
+  sizePricing?: Record<string, number> // Size name to price modifier mapping
+  colorPricing?: Record<string, number> // Color code/name to price modifier mapping
 }
 
 export interface Customization {
@@ -260,6 +263,8 @@ export class Database {
           "threeDModelUrl" VARCHAR(500),
           "materialInfo" JSONB,
           "careInstructions" TEXT[],
+          "sizePricing" JSONB DEFAULT '{}',
+          "colorPricing" JSONB DEFAULT '{}',
           "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -632,6 +637,20 @@ export class Database {
     return result.rows
   }
 
+  async deleteUser(id: string): Promise<boolean> {
+    try {
+      // Delete related data first (customizations, then user)
+      await this.query('DELETE FROM customizations WHERE "userId" = $1', [id])
+      
+      // Delete the user
+      const result = await this.query('DELETE FROM users WHERE id = $1', [id])
+      return result.rowCount > 0
+    } catch (error) {
+      console.error('Delete user error:', error)
+      throw error
+    }
+  }
+
   // Category operations
   async findCategories(): Promise<ProductCategory[]> {
     const result = await this.query('SELECT * FROM product_categories ORDER BY name')
@@ -806,10 +825,10 @@ export class Database {
   async createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
     const id = generateId()
     const result = await this.query(`
-      INSERT INTO products (id, name, description, category, categories, "basePrice", images, sizes, colors, "isActive", "hasFixedColors", "colorType", "createdAt", "updatedAt")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO products (id, name, description, category, categories, "basePrice", images, sizes, colors, "isActive", "hasFixedColors", "colorType", "sizePricing", "colorPricing", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
-    `, [id, data.name, data.description, data.category, data.categories || [], data.basePrice, data.images, data.sizes, data.colors, data.isActive, data.hasFixedColors || false, data.colorType || 'customizable'])
+    `, [id, data.name, data.description, data.category, data.categories || [], data.basePrice, data.images, data.sizes, data.colors, data.isActive, data.hasFixedColors || false, data.colorType || 'customizable', JSON.stringify(data.sizePricing || {}), JSON.stringify(data.colorPricing || {})])
     return result.rows[0]
   }
 

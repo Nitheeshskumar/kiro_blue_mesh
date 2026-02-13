@@ -46,10 +46,10 @@ function App() {
       <ToastProvider>
         <HalloweenProvider>
           <AuthProvider>
-            <HalloweenEffects />
+            {/* <HalloweenEffects />
             <HalloweenCursor />
             <HalloweenSounds />
-            <HalloweenCharacters />
+            <HalloweenCharacters /> */}
           <Routes>
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
@@ -65,7 +65,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/*" element={
               <div className="min-h-screen bg-gradient-to-br from-secondary-50/30 via-white to-primary-50/30">
-                <HalloweenBanner />
+                {/* <HalloweenBanner /> */}
                 <Navbar />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <Breadcrumb className="py-4" />

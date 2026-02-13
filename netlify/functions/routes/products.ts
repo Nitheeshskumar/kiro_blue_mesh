@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import jwt from 'jsonwebtoken'
 import { getDatabase } from '../lib/database'
+import { authenticateToken, requireAdmin } from '../middleware/auth'
 
 const router = Router()
 
@@ -175,24 +175,6 @@ const sampleCategories = [
   }
 ]
 
-// Helper function to verify JWT token
-const verifyToken = async (authHeader: string | undefined) => {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new Error('No token provided')
-  }
-
-  const token = authHeader.split(' ')[1]
-  const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
-
-  const db = await getDatabase()
-  const user = await db.findUserById(decoded.userId)
-  if (!user) {
-    throw new Error('Invalid token')
-  }
-
-  return user
-}
-
 // Get all products
 router.get('/', async (req, res) => {
   try {
@@ -316,14 +298,9 @@ router.get('/:id', async (req, res) => {
 })
 
 // Create product (admin only)
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const user = await verifyToken(req.headers.authorization)
-    if (user.role !== 'ADMIN') {
-      return res.status(403).json({ error: 'Admin access required' })
-    }
-
-    const { name, description, category, categories, basePrice, images, sizes, colors, colorType, hasFixedColors } = req.body
+    const { name, description, category, categories, basePrice, images, sizes, colors, colorType, hasFixedColors, sizePricing, colorPricing } = req.body
 
     if (!name || !category || !basePrice) {
       return res.status(400).json({ error: 'Name, category, and basePrice are required' })
@@ -341,6 +318,8 @@ router.post('/', async (req, res) => {
       colors: colors || [],
       colorType: colorType || 'customizable',
       hasFixedColors: hasFixedColors || false,
+      sizePricing: sizePricing || {},
+      colorPricing: colorPricing || {},
       isActive: true
     })
 
@@ -352,15 +331,10 @@ router.post('/', async (req, res) => {
 })
 
 // Update product (admin only)
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const user = await verifyToken(req.headers.authorization)
-    if (user.role !== 'ADMIN') {
-      return res.status(403).json({ error: 'Admin access required' })
-    }
-
     const { id } = req.params
-    const { name, description, category, categories, basePrice, images, sizes, colors, isActive, colorType, hasFixedColors } = req.body
+    const { name, description, category, categories, basePrice, images, sizes, colors, isActive, colorType, hasFixedColors, sizePricing, colorPricing } = req.body
 
     const db = await getDatabase()
     const product = await db.updateProduct(id, {
@@ -374,6 +348,8 @@ router.put('/:id', async (req, res) => {
       ...(colors && { colors }),
       ...(colorType && { colorType }),
       ...(hasFixedColors !== undefined && { hasFixedColors }),
+      ...(sizePricing !== undefined && { sizePricing }),
+      ...(colorPricing !== undefined && { colorPricing }),
       ...(isActive !== undefined && { isActive })
     })
 
@@ -389,13 +365,8 @@ router.put('/:id', async (req, res) => {
 })
 
 // Delete product (admin only)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const user = await verifyToken(req.headers.authorization)
-    if (user.role !== 'ADMIN') {
-      return res.status(403).json({ error: 'Admin access required' })
-    }
-
     const { id } = req.params
     const db = await getDatabase()
     const product = await db.updateProduct(id, { isActive: false })

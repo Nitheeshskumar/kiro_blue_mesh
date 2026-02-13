@@ -304,9 +304,21 @@ export const createCustomization = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Product not found' })
     }
     
-    // Calculate total price using centralized pricing logic
+    // Calculate total price using enhanced pricing logic
     const { PRICING } = await import('../lib/pricing')
     let totalPrice = product.basePrice
+    
+    // Add size pricing modifier
+    if (size && product.sizePricing) {
+      const sizeModifier = product.sizePricing[size] || 0
+      totalPrice += sizeModifier
+    }
+    
+    // Add color pricing modifier  
+    if (color && product.colorPricing) {
+      const colorModifier = product.colorPricing[color] || 0
+      totalPrice += colorModifier
+    }
     
     // Add embroidery cost if provided
     if (embroidery && embroidery.trim()) {
@@ -331,7 +343,14 @@ export const createCustomization = async (req: Request, res: Response) => {
       sleeveId: undefined,
       customMeasurements: undefined,
       customOptions: undefined,
-      priceBreakdown: undefined
+      priceBreakdown: {
+        basePrice: product.basePrice,
+        sizeModifier: (size && product.sizePricing) ? (product.sizePricing[size] || 0) : 0,
+        colorModifier: (color && product.colorPricing) ? (product.colorPricing[color] || 0) : 0,
+        embroideryModifier: (embroidery && embroidery.trim()) ? PRICING.EMBROIDERY_COST : 0,
+        logoModifier: logoUrl ? PRICING.LOGO_COST : 0,
+        totalPrice
+      }
     })
     
     res.status(201).json(customization)

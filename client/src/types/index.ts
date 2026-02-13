@@ -27,6 +27,8 @@ export interface Product {
   colors: string[]
   hasFixedColors?: boolean // True if colors are fixed to the product design/image
   colorType?: 'customizable' | 'fixed' // Type of color options available
+  sizePricing?: Record<string, number> // Size name to price modifier mapping
+  colorPricing?: Record<string, number> // Color code/name to price modifier mapping
 }
 
 export interface Customization {

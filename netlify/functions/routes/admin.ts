@@ -1,43 +1,15 @@
 import { Router } from 'express'
-import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
 import { getDatabase } from '../lib/database'
+import { authenticateToken, requireAdmin } from '../middleware/auth'
 
 const router = Router()
 
-// Helper function to verify JWT token
-const verifyToken = async (authHeader: string | undefined) => {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new Error('No token provided')
-  }
-
-  const token = authHeader.split(' ')[1]
-  const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
-
-  const db = await getDatabase()
-  const user = await db.findUserById(decoded.userId)
-  if (!user) {
-    throw new Error('Invalid token')
-  }
-
-  return user
-}
-
-// Middleware to check admin role
-const requireAdmin = async (req: any, res: any, next: any) => {
-  try {
-    const user = await verifyToken(req.headers.authorization)
-    if (user.role !== 'ADMIN') {
-      return res.status(403).json({ error: 'Admin access required' })
-    }
-    req.user = user
-    next()
-  } catch (error) {
-    res.status(401).json({ error: 'Unauthorized' })
-  }
-}
+// Apply admin authentication to all routes
+router.use(authenticateToken, requireAdmin)
 
 // Get admin stats
-router.get('/stats', requireAdmin, async (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
     const db = await getDatabase()
     const [totalProducts, totalOrders, totalUsers, totalRevenue] = await Promise.all([
@@ -105,7 +77,7 @@ router.get('/stats', requireAdmin, async (req, res) => {
 })
 
 // Get all orders (admin)
-router.get('/orders', requireAdmin, async (req, res) => {
+router.get('/orders', async (req, res) => {
   try {
     const { page = 1, limit = 20, status } = req.query
     const skip = (Number(page) - 1) * Number(limit)
@@ -166,7 +138,7 @@ router.get('/orders', requireAdmin, async (req, res) => {
 })
 
 // Get all users (admin)
-router.get('/users', requireAdmin, async (req, res) => {
+router.get('/users', async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query
     const skip = (Number(page) - 1) * Number(limit)
@@ -209,7 +181,7 @@ router.get('/users', requireAdmin, async (req, res) => {
 })
 
 // Get all products (admin)
-router.get('/products', requireAdmin, async (req, res) => {
+router.get('/products', async (req, res) => {
   try {
     const { page = 1, limit = 20, category } = req.query
     const skip = (Number(page) - 1) * Number(limit)
@@ -252,8 +224,58 @@ router.get('/products', requireAdmin, async (req, res) => {
   }
 })
 
+// Create admin user
+router.post('/users', async (req, res) => {
+  try {
+    const { email, name, password, role = 'ADMIN' } = req.body
+
+    // Validation
+    if (!email || !name || !password) {
+      return res.status(400).json({ error: 'Email, name, and password are required' })
+    }
+
+    if (!['CUSTOMER', 'ADMIN'].includes(role)) {
+      return res.status(400).json({ error: 'Invalid role' })
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' })
+    }
+
+    // Password validation
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long' })
+    }
+
+    const db = await getDatabase()
+    
+    // Check if user already exists
+    const existingUser = await db.findUserByEmail(email)
+    if (existingUser) {
+      return res.status(409).json({ error: 'User with this email already exists' })
+    }
+
+    // Create user
+    const hashedPassword = await bcrypt.hash(password, 12)
+    const user = await db.createUser({
+      email: email.toLowerCase().trim(),
+      name: name.trim(),
+      password: hashedPassword,
+      role
+    })
+
+    const { password: _, ...userWithoutPassword } = user
+    res.status(201).json(userWithoutPassword)
+  } catch (error) {
+    console.error('Create user error:', error)
+    res.status(500).json({ error: 'Failed to create user' })
+  }
+})
+
 // Update user role
-router.put('/users/:id/role', requireAdmin, async (req, res) => {
+router.put('/users/:id/role', async (req, res) => {
   try {
     const { id } = req.params
     const { role } = req.body
@@ -276,8 +298,46 @@ router.put('/users/:id/role', requireAdmin, async (req, res) => {
   }
 })
 
+// Delete user
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const db = await getDatabase()
+    
+    // Check if user exists
+    const user = await db.findUserById(id)
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    // Prevent deleting the current admin user
+    if (req.user.id === id) {
+      return res.status(400).json({ error: 'Cannot delete your own account' })
+    }
+
+    // Check if user has orders
+    const orderCount = await db.countOrders()
+    const userOrders = await db.findOrders({ userId: id })
+    const userOrderCount = userOrders?.length || 0
+    
+    if (userOrderCount > 0) {
+      return res.status(400).json({ 
+        error: `Cannot delete user: They have ${userOrderCount} order(s). Consider deactivating instead.` 
+      })
+    }
+
+    // Delete user
+    await db.deleteUser(id)
+    
+    res.json({ message: 'User deleted successfully' })
+  } catch (error) {
+    console.error('Delete user error:', error)
+    res.status(500).json({ error: 'Failed to delete user' })
+  }
+})
+
 // Create product (admin)
-router.post('/products', requireAdmin, async (req, res) => {
+router.post('/products', async (req, res) => {
   try {
     const { name, description, category, basePrice, images, sizes, colors } = req.body
 
@@ -305,7 +365,7 @@ router.post('/products', requireAdmin, async (req, res) => {
 })
 
 // Update product (admin)
-router.put('/products/:id', requireAdmin, async (req, res) => {
+router.put('/products/:id', async (req, res) => {
   try {
     const { id } = req.params
     const { name, description, category, basePrice, images, sizes, colors, isActive } = req.body
@@ -334,7 +394,7 @@ router.put('/products/:id', requireAdmin, async (req, res) => {
 })
 
 // Delete product (admin)
-router.delete('/products/:id', requireAdmin, async (req, res) => {
+router.delete('/products/:id', async (req, res) => {
   try {
     const { id } = req.params
     const db = await getDatabase()
@@ -352,7 +412,7 @@ router.delete('/products/:id', requireAdmin, async (req, res) => {
 })
 
 // Get recent activity
-router.get('/activity', requireAdmin, async (req, res) => {
+router.get('/activity', async (req, res) => {
   try {
     const db = await getDatabase()
     const [recentOrders, recentUsers, recentCustomizations] = await Promise.all([
@@ -402,7 +462,7 @@ router.get('/activity', requireAdmin, async (req, res) => {
 })
 
 // Category management routes
-router.get('/categories', requireAdmin, async (req, res) => {
+router.get('/categories', async (req, res) => {
   try {
     const db = await getDatabase()
     const categories = await db.getCategoriesWithProductCounts()
@@ -413,7 +473,7 @@ router.get('/categories', requireAdmin, async (req, res) => {
   }
 })
 
-router.post('/categories', requireAdmin, async (req, res) => {
+router.post('/categories', async (req, res) => {
   try {
     const { name, description, icon } = req.body
 
@@ -454,7 +514,7 @@ router.post('/categories', requireAdmin, async (req, res) => {
     }
 
     // Generate unique ID
-    const id = `cat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const id = `cat_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
 
     // Create category
     const category = await db.createCategory({
@@ -473,7 +533,7 @@ router.post('/categories', requireAdmin, async (req, res) => {
   }
 })
 
-router.put('/categories/:id', requireAdmin, async (req, res) => {
+router.put('/categories/:id', async (req, res) => {
   try {
     const { id } = req.params
     const { name, description, icon } = req.body
@@ -535,7 +595,7 @@ router.put('/categories/:id', requireAdmin, async (req, res) => {
   }
 })
 
-router.delete('/categories/:id', requireAdmin, async (req, res) => {
+router.delete('/categories/:id', async (req, res) => {
   try {
     const { id } = req.params
     const db = await getDatabase()
