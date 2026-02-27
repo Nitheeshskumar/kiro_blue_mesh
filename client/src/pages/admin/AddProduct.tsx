@@ -40,6 +40,7 @@ const SIZES = [
   "12-18 months",
   "18-24 months",
   // Kids sizes
+  "3",
   "4",
   "5",
   "6",

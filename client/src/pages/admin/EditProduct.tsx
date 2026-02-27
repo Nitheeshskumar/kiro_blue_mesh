@@ -18,7 +18,7 @@ const SIZES = [
   // Baby sizes
   "0-3 months", "3-6 months", "6-9 months", "9-12 months", "12-18 months", "18-24 months",
   // Kids sizes
-  "4", "5", "6", "7", "8", "10", "12", "14", "16",
+  "3", "4", "5", "6", "7", "8", "10", "12", "14", "16",
   // Adult sizes
   "XS", "S", "M", "L", "XL", "XXL", "3XL"
 ]
