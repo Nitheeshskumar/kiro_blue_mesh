@@ -23,11 +23,12 @@ export const HalloweenProvider: React.FC<HalloweenProviderProps> = ({ children }
   const [isHalloweenMode, setIsHalloweenMode] = useState(() => {
     // Check if Halloween mode is enabled in localStorage
     const saved = localStorage.getItem('halloween-mode');
-    return saved ? JSON.parse(saved) : true; // Default to true for Halloween season
+   return false;
+    // return saved ? JSON.parse(saved) : true; // Default to true for Halloween season
   });
 
   useEffect(() => {
-    localStorage.setItem('halloween-mode', JSON.stringify(isHalloweenMode));
+    // localStorage.setItem('halloween-mode', JSON.stringify(isHalloweenMode));
     
     // Add/remove Halloween class to body
     if (isHalloweenMode) {
