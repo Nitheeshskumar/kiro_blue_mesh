@@ -1,4 +1,4 @@
-import { Handler } from '@netlify/functions';
+import { Handler, HandlerResponse } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.SUPABASE_URL!;
@@ -10,7 +10,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async (event): Promise<HandlerResponse> => {
   // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -19,7 +19,7 @@ export const handler: Handler = async (event) => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Methods': 'POST, OPTIONS'
-      },
+      } as Record<string, string>,
       body: ''
     };
   }
@@ -29,8 +29,9 @@ export const handler: Handler = async (event) => {
     return {
       statusCode: 405,
       headers: {
-        'Access-Control-Allow-Origin': '*'
-      },
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      } as Record<string, string>,
       body: JSON.stringify({ error: 'Method not allowed' })
     };
   }
@@ -42,8 +43,9 @@ export const handler: Handler = async (event) => {
       return {
         statusCode: 400,
         headers: {
-          'Access-Control-Allow-Origin': '*'
-        },
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        } as Record<string, string>,
         body: JSON.stringify({ 
           error: 'Missing required parameters: bucket, filename, contentType' 
         })
@@ -56,8 +58,9 @@ export const handler: Handler = async (event) => {
       return {
         statusCode: 400,
         headers: {
-          'Access-Control-Allow-Origin': '*'
-        },
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        } as Record<string, string>,
         body: JSON.stringify({ error: 'Invalid bucket name' })
       };
     }
@@ -68,8 +71,9 @@ export const handler: Handler = async (event) => {
       return {
         statusCode: 400,
         headers: {
-          'Access-Control-Allow-Origin': '*'
-        },
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        } as Record<string, string>,
         body: JSON.stringify({ error: 'Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed.' })
       };
     }
@@ -90,8 +94,9 @@ export const handler: Handler = async (event) => {
       return {
         statusCode: 400,
         headers: {
-          'Access-Control-Allow-Origin': '*'
-        },
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        } as Record<string, string>,
         body: JSON.stringify({ error: 'File size must be less than 7MB' })
       };
     }
@@ -115,8 +120,9 @@ export const handler: Handler = async (event) => {
       return {
         statusCode: 500,
         headers: {
-          'Access-Control-Allow-Origin': '*'
-        },
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        } as Record<string, string>,
         body: JSON.stringify({ error: `Upload failed: ${error.message}` })
       };
     }
@@ -141,7 +147,7 @@ export const handler: Handler = async (event) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json'
-      },
+      } as Record<string, string>,
       body: JSON.stringify(result)
     };
 
@@ -150,8 +156,9 @@ export const handler: Handler = async (event) => {
     return {
       statusCode: 500,
       headers: {
-        'Access-Control-Allow-Origin': '*'
-      },
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      } as Record<string, string>,
       body: JSON.stringify({ 
         error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error'

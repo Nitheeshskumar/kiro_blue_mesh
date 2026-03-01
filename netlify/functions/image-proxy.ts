@@ -1,6 +1,6 @@
-import { Handler } from '@netlify/functions';
+import { Handler, HandlerResponse } from '@netlify/functions';
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async (event): Promise<HandlerResponse> => {
   // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -9,7 +9,7 @@ export const handler: Handler = async (event) => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Methods': 'GET, OPTIONS'
-      },
+      } as Record<string, string>,
       body: ''
     };
   }
@@ -23,7 +23,7 @@ export const handler: Handler = async (event) => {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
-        },
+        } as Record<string, string>,
         body: JSON.stringify({ error: 'URL parameter is required' })
       };
     }
@@ -35,7 +35,7 @@ export const handler: Handler = async (event) => {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
-        },
+        } as Record<string, string>,
         body: JSON.stringify({ error: 'Invalid URL - must be a Supabase storage URL' })
       };
     }
@@ -50,7 +50,7 @@ export const handler: Handler = async (event) => {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
-        },
+        } as Record<string, string>,
         body: JSON.stringify({ 
           error: `Failed to fetch image: ${response.status} ${response.statusText}`,
           originalUrl: url
@@ -86,7 +86,7 @@ export const handler: Handler = async (event) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json'
-      },
+      } as Record<string, string>,
       body: JSON.stringify({ 
         error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error'
