@@ -10,6 +10,7 @@ import {
   Search
 } from 'lucide-react'
 import { api } from '../../lib/api'
+import { getProxiedImageUrl } from '../../lib/imageUtils';
 
 interface Product {
   id: string
@@ -163,7 +164,7 @@ export const ProductManagement = () => {
                         {product.images.length > 0 ? (
                           <img
                             className="h-12 w-12 rounded-lg object-cover"
-                            src={product.images[0]}
+                            src={getProxiedImageUrl(product.images[0])}
                             alt={product.name}
                           />
                         ) : (

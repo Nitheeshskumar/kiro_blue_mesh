@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Plus, X, Save, EyeOff, Ruler, DollarSign } from 'lucide-react'
+import { ArrowLeft, Plus, X, Save, Ruler, DollarSign } from 'lucide-react'
 import { api } from '../../lib/api'
 import { SizingChart } from '../../components/SizingChart'
 import { PRICING } from '../../constants/pricing'

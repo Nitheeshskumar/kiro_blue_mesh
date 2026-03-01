@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { Palette, Shirt, Zap, ChevronLeft, ChevronRight } from "lucide-react";
+import { Shirt, ChevronLeft, ChevronRight } from "lucide-react";
 import { useHalloween } from "../contexts/HalloweenContext";
 import { HalloweenText } from "../components/halloween/HalloweenText";
 import { HalloweenButton } from "../components/halloween/HalloweenButton";
 import { useState, useEffect } from "react";
 import { productApi } from "../lib/api";
 import type { Product } from "../types";
+import { getProxiedImageUrl } from '../lib/imageUtils';
 
 export const HomePage = () => {
   const { isHalloweenMode } = useHalloween();
@@ -162,7 +163,7 @@ export const HomePage = () => {
                     <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden mb-4 shadow-lg group-hover:shadow-xl transition-all duration-300 border-4 border-white group-hover:border-pink-200">
                       {product.images && product.images.length > 0 ? (
                         <img
-                          src={product.images[0]}
+                          src={getProxiedImageUrl(product.images[0])}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />

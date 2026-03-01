@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Proxy Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-image {
+            max-width: 300px;
+            max-height: 300px;
+            border: 2px solid #ccc;
+            margin: 10px 0;
+        }
+        .url-display {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🖼️ Image Proxy Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Direct Supabase URL</h2>
+        <div class="url-display" id="direct-url">Loading...</div>
+        <img id="direct-image" class="test-image" alt="Direct Supabase Image">
+        <div id="direct-status" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Proxied URL</h2>
+        <div class="url-display" id="proxy-url">Loading...</div>
+        <img id="proxy-image" class="test-image" alt="Proxied Image">
+        <div id="proxy-status" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Proxied URL (Cache Busted)</h2>
+        <div class="url-display" id="cache-bust-url">Loading...</div>
+        <img id="cache-bust-image" class="test-image" alt="Cache Busted Proxied Image">
+        <div id="cache-bust-status" class="status"></div>
+    </div>
+
+    <script>
+        const originalUrl = 'https://frbdhevxgofuvnrcbcvi.supabase.co/storage/v1/object/public/product-images/products/1772382019138-5dxjhlt1jq3.PNG';
+        const proxyUrl = `/.netlify/functions/image-proxy?url=${encodeURIComponent(originalUrl)}`;
+        const cacheBustUrl = `/.netlify/functions/image-proxy?url=${encodeURIComponent(originalUrl)}&t=${Date.now()}`;
+
+        // Display URLs
+        document.getElementById('direct-url').textContent = originalUrl;
+        document.getElementById('proxy-url').textContent = proxyUrl;
+        document.getElementById('cache-bust-url').textContent = cacheBustUrl;
+
+        // Test direct image
+        const directImg = document.getElementById('direct-image');
+        const directStatus = document.getElementById('direct-status');
+        
+        directImg.onload = () => {
+            directStatus.textContent = '✅ Direct image loaded successfully';
+            directStatus.className = 'status success';
+        };
+        directImg.onerror = () => {
+            directStatus.textContent = '❌ Direct image failed to load (ISP blocking?)';
+            directStatus.className = 'status error';
+        };
+        directImg.src = originalUrl;
+
+        // Test proxy image
+        const proxyImg = document.getElementById('proxy-image');
+        const proxyStatus = document.getElementById('proxy-status');
+        
+        proxyImg.onload = () => {
+            proxyStatus.textContent = '✅ Proxied image loaded successfully';
+            proxyStatus.className = 'status success';
+        };
+        proxyImg.onerror = () => {
+            proxyStatus.textContent = '❌ Proxied image failed to load';
+            proxyStatus.className = 'status error';
+        };
+        proxyImg.src = proxyUrl;
+
+        // Test cache-busted proxy image
+        const cacheBustImg = document.getElementById('cache-bust-image');
+        const cacheBustStatus = document.getElementById('cache-bust-status');
+        
+        cacheBustImg.onload = () => {
+            cacheBustStatus.textContent = '✅ Cache-busted proxied image loaded successfully';
+            cacheBustStatus.className = 'status success';
+        };
+        cacheBustImg.onerror = () => {
+            cacheBustStatus.textContent = '❌ Cache-busted proxied image failed to load';
+            cacheBustStatus.className = 'status error';
+        };
+        cacheBustImg.src = cacheBustUrl;
+
+        // Add network monitoring
+        console.log('🔍 Check Network tab in DevTools to see actual HTTP responses');
+        console.log('Direct URL:', originalUrl);
+        console.log('Proxy URL:', proxyUrl);
+        console.log('Cache-bust URL:', cacheBustUrl);
+    </script>
+</body>
+</html>

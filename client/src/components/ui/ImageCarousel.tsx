@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getProxiedImageUrl } from '../../lib/imageUtils';
 
 interface ImageCarouselProps {
   images: string[];
@@ -74,7 +75,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
     return (
       <div className={`relative aspect-square overflow-hidden rounded-lg bg-gray-100 ${className}`}>
         <img
-          src={images[0]}
+          src={getProxiedImageUrl(images[0])}
           alt={alt}
           className="w-full h-full object-cover"
           loading="lazy"
@@ -88,7 +89,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
       {/* Main Image */}
       <div className="relative w-full h-full">
         <img
-          src={images[currentIndex]}
+          src={getProxiedImageUrl(images[currentIndex])}
           alt={`${alt} - Image ${currentIndex + 1}`}
           className="w-full h-full object-cover transition-opacity duration-300"
           loading="lazy"

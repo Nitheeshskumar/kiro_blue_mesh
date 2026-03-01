@@ -16,9 +16,14 @@ import {
   type SupabaseUploadResult,
 } from "../../components/SupabaseUploadWidget";
 import {
+  ProxyUploadWidget,
+  type ProxyUploadResult,
+} from "../../components/ProxyUploadWidget";
+import {
   STORAGE_BUCKETS,
   validateProductImage,
 } from "../../lib/supabaseStorage";
+import { getProxiedImageUrl } from "../../lib/imageUtils";
 import { SizingChart } from "../../components/SizingChart";
 import { PRICING } from "../../constants/pricing";
 
@@ -181,7 +186,7 @@ export const AddProduct = () => {
     }
   };
 
-  const handleImageUpload = (results: SupabaseUploadResult[]) => {
+  const handleImageUpload = (results: ProxyUploadResult[]) => {
     const newImages: ProductImage[] = results.map((result) => ({
       id: `upload-${Date.now()}-${Math.random()}`,
       url: result.publicUrl,
@@ -718,10 +723,10 @@ export const AddProduct = () => {
             <h3 className="text-sm font-medium text-gray-700 mb-3">
               Upload Images
             </h3>
-            <SupabaseUploadWidget
+            <ProxyUploadWidget
               onUpload={handleImageUpload}
               onError={handleUploadError}
-              bucket={STORAGE_BUCKETS.PRODUCT_IMAGES}
+              bucket="product-images"
               path="products"
               maxFiles={10}
               maxSizeMB={7}
@@ -738,7 +743,7 @@ export const AddProduct = () => {
                   PNG, JPG, WebP up to 7MB each
                 </p>
               </div>
-            </SupabaseUploadWidget>
+            </ProxyUploadWidget>
           </div>
 
           {/* Current Images */}
@@ -753,7 +758,7 @@ export const AddProduct = () => {
                     <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                       {image.url ? (
                         <img
-                          src={image.url}
+                          src={getProxiedImageUrl(image.url)}
                           alt="Product"
                           className="w-full h-full object-cover"
                           onError={(e) => {

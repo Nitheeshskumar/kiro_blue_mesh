@@ -1,0 +1,272 @@
+import React, { useRef, useState } from 'react';
+import { Camera, X, Upload, AlertCircle } from 'lucide-react';
+import { 
+  uploadMultipleFilesViaProxy, 
+  validateProductImage, 
+  type ProxyUploadResult 
+} from '../lib/uploadProxy';
+import { getProxiedImageUrl } from '../lib/imageUtils';
+
+// Re-export the type for convenience
+export type { ProxyUploadResult } from '../lib/uploadProxy';
+
+interface ProxyUploadWidgetProps {
+  onUpload: (results: ProxyUploadResult[]) => void;
+  onError?: (error: string) => void;
+  disabled?: boolean;
+  maxFiles?: number;
+  bucket?: string;
+  path?: string;
+  children?: React.ReactNode;
+  maxSizeMB?: number;
+  validateFile?: (file: File) => { valid: boolean; error?: string };
+}
+
+export const ProxyUploadWidget: React.FC<ProxyUploadWidgetProps> = ({
+  onUpload,
+  onError,
+  disabled = false,
+  maxFiles = 5,
+  bucket = 'product-images',
+  path,
+  children,
+  maxSizeMB = 7,
+  validateFile: customValidateFile
+}) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const fileArray = Array.from(files).slice(0, maxFiles);
+    
+    // Validate all files first
+    const validationErrors: string[] = [];
+    const validFiles: File[] = [];
+
+    fileArray.forEach((file, index) => {
+      const validation = customValidateFile 
+        ? customValidateFile(file)
+        : validateProductImage(file);
+      if (validation.valid) {
+        validFiles.push(file);
+      } else {
+        validationErrors.push(`${file.name}: ${validation.error}`);
+      }
+    });
+
+    if (validationErrors.length > 0) {
+      onError?.(`File validation failed: ${validationErrors.join(', ')}`);
+      return;
+    }
+
+    if (validFiles.length === 0) {
+      onError?.('No valid files selected');
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      console.log(`Starting proxy upload of ${validFiles.length} files...`);
+      
+      const results = await uploadMultipleFilesViaProxy(
+        validFiles, 
+        bucket, 
+        path,
+        (completed, total) => {
+          console.log(`Upload progress: ${completed}/${total} files completed`);
+        }
+      );
+      
+      if (results.length > 0) {
+        console.log(`✅ Successfully uploaded ${results.length} files via proxy`);
+        onUpload(results);
+      } else {
+        onError?.('No files were uploaded successfully');
+      }
+    } catch (error) {
+      console.error('Proxy upload error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+      
+      // Provide more specific error messages
+      if (errorMessage.includes('timeout')) {
+        onError?.('Upload timed out. Please check your internet connection and try again.');
+      } else if (errorMessage.includes('413') || errorMessage.includes('too large')) {
+        onError?.('File too large. Please use images smaller than 7MB.');
+      } else if (errorMessage.includes('400')) {
+        onError?.('Invalid file format. Please use JPEG, PNG, WebP, or GIF images.');
+      } else if (errorMessage.includes('500')) {
+        onError?.('Server error during upload. Please try again.');
+      } else {
+        onError?.(`Upload failed: ${errorMessage}`);
+      }
+    } finally {
+      setUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleFiles(event.target.files);
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragActive(false);
+    
+    if (disabled || uploading) return;
+    
+    handleFiles(event.dataTransfer.files);
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (!disabled && !uploading) {
+      setDragActive(true);
+    }
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragActive(false);
+  };
+
+  const openFileDialog = () => {
+    if (!disabled && !uploading && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  if (children) {
+    return (
+      <div
+        onClick={openFileDialog}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        className={`cursor-pointer ${disabled || uploading ? 'cursor-not-allowed opacity-50' : ''}`}
+      >
+        {children}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+          onChange={handleFileSelect}
+          className="hidden"
+          disabled={disabled || uploading}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full">
+      <div
+        onClick={openFileDialog}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        className={`
+          relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer
+          ${dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
+          ${disabled || uploading ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-50'}
+        `}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+          onChange={handleFileSelect}
+          className="hidden"
+          disabled={disabled || uploading}
+        />
+        
+        <div className="flex flex-col items-center gap-3">
+          {uploading ? (
+            <>
+              <Upload className="w-8 h-8 text-blue-500 animate-pulse" />
+              <div className="text-sm text-gray-600">
+                <div>Uploading images via proxy...</div>
+                <div className="text-xs text-gray-500 mt-1">Please wait</div>
+              </div>
+            </>
+          ) : (
+            <>
+              <Camera className="w-8 h-8 text-gray-400" />
+              <div className="text-sm text-gray-600">
+                <div className="font-medium">Click to upload or drag and drop</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  JPEG, PNG, WebP, GIF up to {maxSizeMB}MB (max {maxFiles} files)
+                </div>
+                <div className="text-xs text-blue-600 mt-1">
+                  ✓ ISP-compatible upload
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {dragActive && (
+          <div className="absolute inset-0 bg-blue-50 bg-opacity-50 rounded-lg flex items-center justify-center">
+            <div className="text-blue-600 font-medium">Drop files here</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Component for displaying uploaded images with remove functionality
+interface UploadedImageProps {
+  image: ProxyUploadResult;
+  onRemove: () => void;
+  className?: string;
+}
+
+export const UploadedImage: React.FC<UploadedImageProps> = ({
+  image,
+  onRemove,
+  className = ''
+}) => {
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <div className={`relative group ${className}`}>
+      {imageError ? (
+        <div className="w-full h-24 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+          <AlertCircle className="w-6 h-6 text-gray-400" />
+        </div>
+      ) : (
+        <img
+          src={getProxiedImageUrl(image.publicUrl)}
+          alt={image.originalFilename}
+          className="w-full h-24 object-cover rounded-lg border border-gray-200"
+          onError={() => setImageError(true)}
+        />
+      )}
+      
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+      >
+        <X className="w-3 h-3" />
+      </button>
+      
+      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="truncate">{image.originalFilename}</div>
+        {image.width && image.height && (
+          <div>{image.width}×{image.height}</div>
+        )}
+      </div>
+    </div>
+  );
+};

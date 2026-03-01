@@ -4,6 +4,7 @@ import { Package, Truck, CheckCircle, XCircle, Clock, /* Instagram, */ ExternalL
 import { api } from '../lib/api'
 import { Order, OrderStatus } from '../types'
 import { generateDTDCTrackingUrl, /* getInstagramProfileUrl, */ formatOrderMessage, openWhatsApp, /* openInstagramDM */ } from '../lib/instagram'
+import { getProxiedImageUrl } from '../lib/imageUtils';
 
 const statusConfig = {
   PENDING: {
@@ -259,7 +260,7 @@ export const OrderTrackingPage = () => {
                 className="block w-24 h-24 flex-shrink-0"
               >
                 <img
-                  src={item.product.images[0]}
+                  src={getProxiedImageUrl(item.product.images[0])}
                   alt={item.product.name}
                   className="w-full h-full object-cover rounded hover:opacity-80 transition-opacity cursor-pointer"
                 />

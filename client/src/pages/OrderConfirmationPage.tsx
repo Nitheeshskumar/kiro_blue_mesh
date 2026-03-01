@@ -4,6 +4,7 @@ import { CheckCircle, /* Instagram, */ Package, MapPin, Copy, Check, MessageCirc
 import { api } from '../lib/api'
 import { Order } from '../types'
 import { /* openInstagramDM, */ openWhatsApp, formatOrderMessage } from '../lib/instagram'
+import { getProxiedImageUrl } from '../lib/imageUtils';
 
 export const OrderConfirmationPage = () => {
   const { orderId } = useParams<{ orderId: string }>()
@@ -238,7 +239,7 @@ export const OrderConfirmationPage = () => {
                 className="block w-20 h-20 flex-shrink-0"
               >
                 <img
-                  src={item.product.images[0]}
+                  src={getProxiedImageUrl(item.product.images[0])}
                   alt={item.product.name}
                   className="w-full h-full object-cover rounded hover:opacity-80 transition-opacity cursor-pointer"
                 />

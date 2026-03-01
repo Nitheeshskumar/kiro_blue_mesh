@@ -5,9 +5,9 @@ import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useCartStore } from '../stores/cartStore'
 import { Product } from '../types'
-import { ProductPreview } from '../components/ProductPreview'
-import { PRICING, formatPrice, calculateProductPrice } from '../constants/pricing'
+import { formatPrice, calculateProductPrice, PRICING } from '../constants/pricing'
 import ImageCarousel from '../components/ui/ImageCarousel'
+import { getProxiedImageUrl } from '../lib/imageUtils'
 import { SizingChart } from '../components/SizingChart'
 import { filterProductTSizes } from '../utils/sizeUtils'
 
@@ -63,7 +63,7 @@ export const CustomizerPage = () => {
     try {
       // Use the actual product image as preview, or generate one if needed
       if (product && product.images.length > 0) {
-        setPreviewUrl(product.images[0])
+        setPreviewUrl(getProxiedImageUrl(product.images[0]))
       } else {
         const response = await api.post('/customizations/preview', {
           productId,
@@ -77,7 +77,7 @@ export const CustomizerPage = () => {
       console.error('Failed to generate preview:', error)
       // Fallback to product image if available
       if (product && product.images.length > 0) {
-        setPreviewUrl(product.images[0])
+        setPreviewUrl(getProxiedImageUrl(product.images[0]))
       }
     }
   }
@@ -317,8 +317,30 @@ export const CustomizerPage = () => {
             )}
           </div>
 
-      
-         
+          {/* Embroidery Customization */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Custom Embroidery (Optional)
+            </label>
+            <input
+              type="text"
+              value={embroideryText}
+              onChange={(e) => setEmbroideryText(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              placeholder="Enter text for embroidery (e.g., Name, Message)"
+              maxLength={50}
+            />
+            <div className="flex items-center justify-between mt-1">
+              <p className="text-xs text-gray-500">
+                {embroideryText.length}/50 characters
+              </p>
+              {embroideryText.trim() && (
+                <p className="text-xs text-primary-600 font-medium">
+                  +₹{PRICING.EMBROIDERY_COST.toFixed(0)} for embroidery
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* WhatsApp Order Info */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">

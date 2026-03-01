@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { api } from '../../lib/api'
 import { generateDTDCTrackingUrl } from '../../lib/instagram'
+import { getProxiedImageUrl } from '../../lib/imageUtils';
 
 interface Order {
   id: string
@@ -445,7 +446,7 @@ export const OrderManagement = () => {
                           {order.items.map(item => (
                             <div key={item.id} className="flex gap-4 pb-4 border-b last:border-b-0">
                               <img
-                                src={item.product.images[0]}
+                                src={getProxiedImageUrl(item.product.images[0])}
                                 alt={item.product.name}
                                 className="w-20 h-20 object-cover rounded"
                               />
