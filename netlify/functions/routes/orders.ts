@@ -44,24 +44,62 @@ router.post('/', async (req, res) => {
 
     // Validate items and calculate total
     for (const item of items) {
-      const customization = await db.findCustomizationById(item.customizationId)
-      if (!customization) {
-        return res.status(404).json({ error: `Customization ${item.customizationId} not found` })
-      }
+      if (item.isTemporary) {
+        // Handle temporary items (from anonymous cart)
+        if (!item.productId || !item.customizationData || !item.price) {
+          return res.status(400).json({ error: 'Invalid temporary item data' })
+        }
 
-      if (customization.userId !== user.id) {
-        return res.status(403).json({ error: 'Cannot order customization that belongs to another user' })
-      }
+        // Validate product exists
+        const product = await db.findProductById(item.productId)
+        if (!product) {
+          return res.status(404).json({ error: `Product ${item.productId} not found` })
+        }
 
-      const quantity = parseInt(item.quantity) || 1
-      totalAmount += customization.totalPrice * quantity
-      
-      orderItemsData.push({
-        productId: customization.productId,
-        customizationId: item.customizationId,
-        quantity,
-        price: customization.totalPrice
-      })
+        // Create customization on-the-fly for this order
+        const customization = await db.createCustomization({
+          userId: user.id,
+          productId: item.productId,
+          size: item.customizationData.size,
+          color: item.customizationData.color,
+          embroidery: item.customizationData.embroidery,
+          totalPrice: item.price
+        })
+
+        const quantity = parseInt(item.quantity) || 1
+        totalAmount += item.price * quantity
+        
+        orderItemsData.push({
+          productId: item.productId,
+          customizationId: customization.id,
+          quantity,
+          price: item.price
+        })
+      } else {
+        // Handle existing customizations
+        if (!item.customizationId) {
+          return res.status(400).json({ error: 'Customization ID is required for non-temporary items' })
+        }
+
+        const customization = await db.findCustomizationById(item.customizationId)
+        if (!customization) {
+          return res.status(404).json({ error: `Customization ${item.customizationId} not found` })
+        }
+
+        if (customization.userId !== user.id) {
+          return res.status(403).json({ error: 'Cannot order customization that belongs to another user' })
+        }
+
+        const quantity = parseInt(item.quantity) || 1
+        totalAmount += customization.totalPrice * quantity
+        
+        orderItemsData.push({
+          productId: customization.productId,
+          customizationId: item.customizationId,
+          quantity,
+          price: customization.totalPrice
+        })
+      }
     }
 
     // Add shipping cost (consistent with frontend)

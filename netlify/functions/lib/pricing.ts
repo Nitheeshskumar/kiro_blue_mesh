@@ -7,10 +7,10 @@ export const PRICING = {
   // Customization add-ons
   EMBROIDERY_COST: 1245.00, // ₹1,245 (15 USD * 83)
   LOGO_COST: 830.00, // ₹830 (10 USD * 83)
-  
+
   // Shipping
-  STANDARD_SHIPPING: 829.00, // ₹829 (9.99 USD * 83)
-  
+  STANDARD_SHIPPING: 90.00, // ₹90 flat rate
+
   // Tax rates (GST in India)
   TAX_RATE: 0.18, // 18% GST
 

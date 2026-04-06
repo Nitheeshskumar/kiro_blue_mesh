@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
@@ -21,7 +22,18 @@ export const LoginPage = () => {
 
     try {
       await login(formData.email, formData.password);
-      navigate("/");
+      
+      // Check for autoCheckout parameter
+      const autoCheckout = searchParams.get('autoCheckout');
+      const returnTo = searchParams.get('returnTo') || '/';
+      
+      if (autoCheckout === 'true') {
+        // Go directly to checkout page
+        navigate('/cart?autoCheckout=true');
+      } else {
+        // Normal redirect
+        navigate(returnTo);
+      }
     } catch (err: any) {
       setError(err.response?.data?.error || "Login failed");
     } finally {
@@ -111,7 +123,7 @@ export const LoginPage = () => {
             <span className="text-sm text-gray-600">
               Don't have an account?{" "}
               <Link
-                to="/register"
+                to={`/register${searchParams.get('returnTo') ? `?returnTo=${encodeURIComponent(searchParams.get('returnTo')!)}` : ''}`}
                 className="font-medium text-primary-600 hover:text-primary-500"
               >
                 Sign up

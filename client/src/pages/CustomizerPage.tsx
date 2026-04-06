@@ -98,38 +98,29 @@ export const CustomizerPage = () => {
   }
 
   const handleAddToCart = async () => {
+    // Always add to cart first (localStorage)
+    const tempCustomizationId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    
+    // Add to cart regardless of login status
+    addItem({
+      productId: product!.id,
+      productName: product!.name,
+      customizationId: tempCustomizationId,
+      size: selectedSize,
+      color: selectedColor,
+      price: totalPrice,
+      quantity: 1,
+      previewUrl,
+      embroidery: embroideryText.trim() || undefined,
+      isTemporary: !user // Mark as temporary if user not logged in
+    })
+
     if (!user) {
-      navigate('/login')
-      return
-    }
-
-    try {
-      // Create customization
-      const customizationResponse = await api.post('/customizations', {
-        productId,
-        size: selectedSize,
-        color: selectedColor,
-        embroidery: embroideryText.trim() || null
-      })
-
-      const customization = customizationResponse.data
-
-      // Add to cart
-      addItem({
-        productId: product!.id,
-        productName: product!.name,
-        customizationId: customization.id,
-        size: selectedSize,
-        color: selectedColor,
-        price: totalPrice,
-        quantity: 1,
-        previewUrl,
-        embroidery: embroideryText.trim() || undefined
-      })
-
+      // Redirect to login, then to checkout
+      navigate('/login?returnTo=/cart&autoCheckout=true')
+    } else {
+      // Go to cart for logged-in users
       navigate('/cart')
-    } catch (error) {
-      console.error('Failed to add to cart:', error)
     }
   }
 

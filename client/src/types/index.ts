@@ -56,6 +56,7 @@ export interface CartItem {
   quantity: number
   previewUrl?: string
   embroidery?: string
+  isTemporary?: boolean // Flag for anonymous/temporary items
 }
 
 export interface Order {

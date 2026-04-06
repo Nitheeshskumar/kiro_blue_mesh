@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Trash2, Plus, Minus, MapPin, X, MessageCircle } from "lucide-react";
 import { useCartStore } from "../stores/cartStore";
 import { useAuth } from "../contexts/AuthContext";
@@ -181,6 +181,7 @@ const validateShippingInfo = (info: ShippingInfo): ValidationError[] => {
 
 export const CartPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { items, updateQuantity, removeItem, clearCart, getTotalPrice } =
     useCartStore();
@@ -203,6 +204,20 @@ export const CartPage = () => {
     country: "India",
   });
   const [itemStories, setItemStories] = useState<Record<string, string>>({});
+
+  // Check if we should auto-scroll to checkout section
+  useEffect(() => {
+    const autoCheckout = searchParams.get('autoCheckout');
+    if (autoCheckout === 'true' && user) {
+      // Scroll to shipping form
+      setTimeout(() => {
+        const shippingSection = document.getElementById('shipping-form');
+        if (shippingSection) {
+          shippingSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [searchParams, user]);
 
   // Fetch saved addresses and stories
   useEffect(() => {
@@ -366,7 +381,7 @@ export const CartPage = () => {
 
   const handleCheckout = async () => {
     if (!user) {
-      navigate("/login");
+      navigate("/login?returnTo=/cart");
       return;
     }
 
@@ -390,10 +405,29 @@ export const CartPage = () => {
 
     setLoading(true);
     try {
-      const orderItems = items.map((item) => ({
-        customizationId: item.customizationId,
-        quantity: item.quantity,
-      }));
+      // Prepare order items - send raw data for temporary items, customizationId for existing ones
+      const orderItems = items.map((item) => {
+        if (item.isTemporary) {
+          // Send raw customization data for temporary items
+          return {
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price,
+            customizationData: {
+              size: item.size,
+              color: item.color,
+              embroidery: item.embroidery || null,
+            },
+            isTemporary: true,
+          };
+        } else {
+          // Send existing customization ID
+          return {
+            customizationId: item.customizationId,
+            quantity: item.quantity,
+          };
+        }
+      });
 
       // Clean phone number before sending
       const cleanedShippingInfo = {
@@ -416,7 +450,11 @@ export const CartPage = () => {
       navigate(`/order-confirmation/${order.id}`);
     } catch (error) {
       console.error("Checkout failed:", error);
-      alert("Checkout failed. Please try again.");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Checkout failed. Please try again.";
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -577,7 +615,7 @@ export const CartPage = () => {
           )}
 
           {/* Shipping Info */}
-          <div className="card p-4">
+          <div id="shipping-form" className="card p-4">
             <h2 className="text-lg font-semibold mb-4">Shipping Information</h2>
 
             {/* Saved Addresses */}
