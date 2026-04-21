@@ -84,12 +84,12 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Contact</h4>
             <ul className="space-y-3">
-              <li className="flex items-center space-x-2 text-gray-400 text-sm">
+              {/* <li className="flex items-center space-x-2 text-gray-400 text-sm">
                 <Mail size={16} />
                 <a href={`mailto:${adminEmail}`} className="hover:text-white transition-colors">
                   {adminEmail}
                 </a>
-              </li>
+              </li> */}
               <li className="flex items-center space-x-2 text-gray-400 text-sm">
                 <MessageCircle size={16} />
                 <a 
