@@ -34,6 +34,11 @@
   to = "/.netlify/functions/api/:splat"
   status = 200
 
+# Sitemap route
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
+  status = 200
 
 # SPA routing - must come after API redirects
 [[redirects]]
@@ -63,3 +68,8 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+
+# Edge Functions for dynamic social sharing previews
+[[edge_functions]]
+  path = "/products/*"
+  function = "og-tags"

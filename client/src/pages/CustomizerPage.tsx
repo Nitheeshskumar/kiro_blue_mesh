@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { MessageCircle, Ruler } from 'lucide-react'
+import { MessageCircle, Ruler, Share2 } from 'lucide-react'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useCartStore } from '../stores/cartStore'
@@ -10,6 +10,7 @@ import ImageCarousel from '../components/ui/ImageCarousel'
 import { getProxiedImageUrl } from '../lib/imageUtils'
 import { SizingChart } from '../components/SizingChart'
 import { filterProductTSizes } from '../utils/sizeUtils'
+import { SEO } from '../components/SEO'
 
 export const CustomizerPage = () => {
   const { productId } = useParams<{ productId: string }>()
@@ -124,6 +125,23 @@ export const CustomizerPage = () => {
     }
   }
 
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product?.name || 'Willowbrook Clothing',
+          text: product?.description || 'Check out this customizable outfit!',
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.error('Share failed:', err);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!'); // Simple fallback
+    }
+  }
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -151,6 +169,13 @@ export const CustomizerPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {product && (
+        <SEO 
+          title={`${product.name} | Willowbrook Customizer`} 
+          description={product.description} 
+          url={window.location.href}
+        />
+      )}
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Preview Section */}
         <div className="space-y-4">
@@ -215,10 +240,21 @@ export const CustomizerPage = () => {
 
         {/* Customization Panel */}
         <div className="space-y-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
+              <p className="text-gray-600 mt-2">{product.description}</p>
+            </div>
+            <button 
+              onClick={handleShare}
+              className="p-2 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors flex-shrink-0"
+              title="Share product"
+            >
+              <Share2 className="w-6 h-6" />
+            </button>
+          </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-            <p className="text-gray-600 mt-2">{product.description}</p>
-            <div className="text-2xl font-bold text-primary-600 mt-4">
+            <div className="text-2xl font-bold text-primary-600">
               ₹{totalPrice.toFixed(2)}
             </div>
           </div>

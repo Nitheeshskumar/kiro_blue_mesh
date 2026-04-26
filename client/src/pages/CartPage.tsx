@@ -8,6 +8,7 @@ import { OrderStory } from "../components/OrderStory";
 import { ProductPreview } from "../components/ProductPreview";
 import { PRICING, formatPrice } from "../constants/pricing";
 import { SavedAddress } from "../types";
+import { SEO } from "../components/SEO";
 
 interface ValidationError {
   field: string;
@@ -481,6 +482,7 @@ export const CartPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      <SEO title="Your Cart | Willowbrook Clothing" description="Review your custom clothing selections before checkout." />
       <h1 className="text-2xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
 
       <div className="grid lg:grid-cols-3 gap-8">

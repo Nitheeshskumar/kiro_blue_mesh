@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { productApi } from "../lib/api";
 import type { Product } from "../types";
 import { getProxiedImageUrl } from '../lib/imageUtils';
+import { SEO } from '../components/SEO';
 
 export const HomePage = () => {
   const { isHalloweenMode } = useHalloween();
@@ -46,6 +47,10 @@ export const HomePage = () => {
 
   return (
     <div className="min-h-screen">
+      <SEO 
+        title="Willowbrook Clothing - Premium Mom & Baby Collections" 
+        description="Craft beautiful personalized clothing for you and your little one." 
+      />
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden min-h-[80vh] flex items-center">
         {/* Background Image */}

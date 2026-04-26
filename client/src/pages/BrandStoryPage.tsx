@@ -11,6 +11,7 @@ import { Breadcrumb } from '../components/ui/Breadcrumb';
 import { PageTransition } from '../components/ui/PageTransition';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { ErrorMessage } from '../components/ui/ErrorMessage';
+import { SEO } from '../components/SEO';
 
 export const BrandStoryPage: React.FC = () => {
   const { brandStory, loading, error, refetch } = useBrandStory();
@@ -36,6 +37,10 @@ export const BrandStoryPage: React.FC = () => {
 
   return (
     <PageTransition>
+      <SEO 
+        title="Our Story | Willowbrook Clothing" 
+        description="Discover the journey and values behind Willowbrook Clothing's premium custom outfits." 
+      />
       <div className="min-h-screen bg-white">
         {/* Breadcrumb Navigation */}
         <div className="bg-gray-50 border-b">
