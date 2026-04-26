@@ -8,8 +8,14 @@ export default async (request: Request, context: Context) => {
   const isProductPage = pathParts[1] === 'products';
   const productId = pathParts[2];
   
-  // Get the next HTTP response in the chain (the index.html from React)
-  const response = await context.next();
+  // Get the next HTTP response in the chain
+  let response = await context.next();
+
+  // If the static file doesn't exist (SPA route fallback), fetch index.html
+  if (response.status === 404) {
+    response = await context.rewrite("/index.html");
+  }
+
   let html = await response.text();
 
   if (isProductPage && productId) {
