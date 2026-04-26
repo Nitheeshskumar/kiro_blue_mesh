@@ -1,0 +1,4 @@
+# Netlify redirects file for SPA routing (guaranteed execution)
+/api/*  /.netlify/functions/api/:splat  200
+/sitemap.xml  /.netlify/functions/sitemap  200
+/*  /index.html  200

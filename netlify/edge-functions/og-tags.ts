@@ -13,7 +13,7 @@ export default async (request: Request, context: Context) => {
 
   // If the static file doesn't exist (SPA route fallback), fetch index.html
   if (response.status === 404) {
-    response = await context.rewrite("/index.html");
+    response = await fetch(new URL("/index.html", request.url));
   }
 
   let html = await response.text();
