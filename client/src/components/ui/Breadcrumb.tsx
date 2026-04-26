@@ -21,8 +21,18 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className = '' })
     const breadcrumbs: BreadcrumbItem[] = [{ label: 'Home', path: '/' }];
     
     let currentPath = '';
-    pathSegments.forEach((segment) => {
+    pathSegments.forEach((segment, index) => {
       currentPath += `/${segment}`;
+      
+      const prevSegment = index > 0 ? pathSegments[index - 1] : '';
+      
+      // Skip ID segments (product IDs, order IDs, etc.)
+      if (
+        (prevSegment === 'products' && segment !== 'new' && segment !== 'edit') ||
+        ['order-success', 'order-confirmation', 'order-tracking', 'edit'].includes(prevSegment)
+      ) {
+        return;
+      }
       
       // Convert segment to readable label
       let label = segment.charAt(0).toUpperCase() + segment.slice(1);
