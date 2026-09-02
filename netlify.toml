@@ -74,4 +74,4 @@
 # Edge Functions for dynamic social sharing previews
 [[edge_functions]]
   path = "/products/*"
-  function = "og-tags"
+  function = "og-tags"
