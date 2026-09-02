@@ -60,6 +60,20 @@ export const CustomizerPage = () => {
     }
   }, [product, selectedSize, selectedColor, embroideryText])
 
+  // Listen for WebMCP agent customization events
+  useEffect(() => {
+    const onWebMCPUpdate = (e: any) => {
+      const d = e.detail
+      if (d && (d.productId === productId || !productId)) {
+        if (d.size) setSelectedSize(d.size)
+        if (d.color) setSelectedColor(d.color)
+        if (d.embroideryText !== undefined) setEmbroideryText(d.embroideryText)
+      }
+    }
+    window.addEventListener('webmcp:customizer-updated', onWebMCPUpdate)
+    return () => window.removeEventListener('webmcp:customizer-updated', onWebMCPUpdate)
+  }, [productId])
+
   const generatePreview = async () => {
     try {
       // Use the actual product image as preview, or generate one if needed
